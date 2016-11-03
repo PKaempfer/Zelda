@@ -1,3 +1,3 @@
-# Zelda
+# The Zelda Genome Assembler
 
 This work is still in progress and not ready to use. Please wait...
