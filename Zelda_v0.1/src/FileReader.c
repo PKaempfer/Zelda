@@ -31,189 +31,189 @@ int graphSize;
 char **readList;
 int numreads = 0;
 
-void hash_chain_len_histogram(UT_hash_table *tbl){
-	printf("Histogram\n");
-	unsigned i, bkt_hist[CHAIN_MAX+1];
-	double pct = 100.0/tbl->num_buckets;
-	memset(bkt_hist,0,sizeof(bkt_hist));
-	for(i=0; i < tbl->num_buckets; i++) {
-		unsigned count = tbl->buckets[i].count;
-		if (count == 0) bkt_hist[CHAIN_0]++;
-		else if (count < 5) bkt_hist[CHAIN_5]++;
-		else if (count < 10) bkt_hist[CHAIN_10]++;
-		else if (count < 20) bkt_hist[CHAIN_20]++;
-		else if (count < 100) bkt_hist[CHAIN_100]++;
-		else bkt_hist[CHAIN_MAX]++;
-	}
-	fprintf(stderr, "Buckets with 0 items: %.1f%%\n", bkt_hist[CHAIN_0 ]*pct);
-	fprintf(stderr, "Buckets with < 5 items: %.1f%%\n", bkt_hist[CHAIN_5 ]*pct);
-	fprintf(stderr, "Buckets with < 10 items: %.1f%%\n", bkt_hist[CHAIN_10]*pct);
-	fprintf(stderr, "Buckets with < 20 items: %.1f%%\n", bkt_hist[CHAIN_20]*pct);
-	fprintf(stderr, "Buckets with < 100 items: %.1f%%\n", bkt_hist[CHAIN_100]*pct);
-	fprintf(stderr, "Buckets with > 100 items: %.1f%%\n", bkt_hist[CHAIN_MAX]*pct);
-}
+//void hash_chain_len_histogram(UT_hash_table *tbl){
+//	printf("Histogram\n");
+//	unsigned i, bkt_hist[CHAIN_MAX+1];
+//	double pct = 100.0/tbl->num_buckets;
+//	memset(bkt_hist,0,sizeof(bkt_hist));
+//	for(i=0; i < tbl->num_buckets; i++) {
+//		unsigned count = tbl->buckets[i].count;
+//		if (count == 0) bkt_hist[CHAIN_0]++;
+//		else if (count < 5) bkt_hist[CHAIN_5]++;
+//		else if (count < 10) bkt_hist[CHAIN_10]++;
+//		else if (count < 20) bkt_hist[CHAIN_20]++;
+//		else if (count < 100) bkt_hist[CHAIN_100]++;
+//		else bkt_hist[CHAIN_MAX]++;
+//	}
+//	fprintf(stderr, "Buckets with 0 items: %.1f%%\n", bkt_hist[CHAIN_0 ]*pct);
+//	fprintf(stderr, "Buckets with < 5 items: %.1f%%\n", bkt_hist[CHAIN_5 ]*pct);
+//	fprintf(stderr, "Buckets with < 10 items: %.1f%%\n", bkt_hist[CHAIN_10]*pct);
+//	fprintf(stderr, "Buckets with < 20 items: %.1f%%\n", bkt_hist[CHAIN_20]*pct);
+//	fprintf(stderr, "Buckets with < 100 items: %.1f%%\n", bkt_hist[CHAIN_100]*pct);
+//	fprintf(stderr, "Buckets with > 100 items: %.1f%%\n", bkt_hist[CHAIN_MAX]*pct);
+//}
 
 
 
-void setLink(char* kmer, int readNum, int end){
-	struct readLink *s;
-	readID *temps;
-	static KmerBitBuffer temp;
-	static KmerBitBuffer revtemp;
-
-	temp = toBuffer(kmer);
-	revtemp = revKmer(temp);
-	if(revtemp < temp) temp = revtemp;
-	HASH_FIND(hhb, links, &temp, sizeof(KmerBitBuffer),s);
-	if(s==NULL){
-		s = (struct readLink*)malloc(sizeof(struct readLink));
-		s->kmer = temp;
-		s->read = (readID*)malloc(sizeof(readID)*17);
-		s->read[0] = setID(readNum, end);
-		s->read[1] = 0;
-		HASH_ADD(hhb, links, kmer, sizeof(KmerBitBuffer), s);
-	}
-	else{
-		int i=1;
-		while(s->read[i]!=0){
-			i++;
-		}
-		s->read[i] = setID(readNum,end);
-		if(i%16==0){
-//			printf("Realloc readLink: %i\n",i);
-			temps = (readID*)realloc(s->read,sizeof(readID)*(i+17));
-			s->read = temps;
-//			printf("Realloc SetRead\n");
-//			s->read[i+1] = 0;
-//			printf("Realloc readLinkAFTER\n");
-		}
-//		else{
-//			if(i>=16) printf("i: %i\n",i);
-		s->read[i+1] = 0;
+//void setLink(char* kmer, int readNum, int end){
+//	struct readLink *s;
+//	readID *temps;
+//	static KmerBitBuffer temp;
+//	static KmerBitBuffer revtemp;
+//
+//	temp = toBuffer(kmer);
+//	revtemp = revKmer(temp);
+//	if(revtemp < temp) temp = revtemp;
+//	HASH_FIND(hhb, links, &temp, sizeof(KmerBitBuffer),s);
+//	if(s==NULL){
+//		s = (struct readLink*)malloc(sizeof(struct readLink));
+//		s->kmer = temp;
+//		s->read = (readID*)malloc(sizeof(readID)*17);
+//		s->read[0] = setID(readNum, end);
+//		s->read[1] = 0;
+//		HASH_ADD(hhb, links, kmer, sizeof(KmerBitBuffer), s);
+//	}
+//	else{
+//		int i=1;
+//		while(s->read[i]!=0){
+//			i++;
 //		}
-	}
-}
+//		s->read[i] = setID(readNum,end);
+//		if(i%16==0){
+////			printf("Realloc readLink: %i\n",i);
+//			temps = (readID*)realloc(s->read,sizeof(readID)*(i+17));
+//			s->read = temps;
+////			printf("Realloc SetRead\n");
+////			s->read[i+1] = 0;
+////			printf("Realloc readLinkAFTER\n");
+//		}
+////		else{
+////			if(i>=16) printf("i: %i\n",i);
+//		s->read[i+1] = 0;
+////		}
+//	}
+//}
 
-void iterLink(){
-    struct readLink *s;
-    s = (struct readLink*)malloc(sizeof(struct readLink));
-    int i;
-    int j=0;
-    int begin=0;
-    int end = 0;
-    for(s=links; s != NULL; s=(struct readLink*)(s->hhb.next)) {
-    	i=0;
-    	while(s->read[i]!=0){
-    		if(__builtin_clz(s->read[i])){
-    			begin++;
-    		}
-    		else{
-    			end ++;
-    		}
-    		i++;
-    		j++;
-    	}
-    }
-    printf("num in LinkList: %i\n",j);
-    printf("Beg in LinkList: %i\n",begin);
-    printf("End in LinkList: %i\n",end);
-}
-
-void createKmers(char* read, int readNum){
-//	static clock_t times,timee=0,timeh=0;
-#ifdef UT_HASH
-	struct hashTable *s;
-#elif JELLY
-//	printf("Use JellyFisch\n");
-	char kmer[nK];
-	char out[nK];
-	KmerBitBuffer out_bit;
-	size_t key;
-	int inserted = 10;
-#else
-
-#endif
-
-	static int len;
-	static KmerBitBuffer temp;
-	static KmerBitBuffer revtemp;
-	static char* buffer;
-	if(strchr(read,'N')){
-//		printf("Read contains Gaps\n");
-		return;
-	}
-	len = strlen(read);
-	if(len > maxRlen) maxRlen = len;
-	buffer = read+(len-nK);
-	len-=nK;
-	if(len<0) return;
-//	printf("setLink (end): %s\n",buffer);
-	setLink(buffer,readNum,1);
-	while(len!=-1){
-		*(buffer+nK)='\0';
-//		times = clock();
-		temp = toBuffer(buffer);
-		revtemp = revKmer(temp);
-		if(revtemp < temp) temp = revtemp;
-#ifdef UT_HASH
-		HASH_FIND( hhb ,kmere, &temp, sizeof(KmerBitBuffer), s);
-		if(s==NULL){
-			s = (struct hashTable*)malloc(sizeof(struct hashTable));
-			s->kmer = temp;
-			s->trans = 0;
-			s->index = 0;
-			HASH_ADD(hhb, kmere, kmer, sizeof(KmerBitBuffer), s);
-		}
-#elif JELLY
-//		strcpy(kmer,toSeq(temp));
-//		printf("Insert kmer: %s\n",kmer);
-		hpos = jelly_hash_find(&jhash, &temp, 2, &inserted);
-//		hpos = jelly_hash_find(&jhash, &temp, 0, &inserted);
-		if(hpos == JHASH_NULL){
-			printf("Resize Hash Table\n");
-			printf("Entry not found!\n");
-			bitnum++;
-			jelly_hash_alloc(&jhash, bitnum, 20, 2*nK);
-			hpos = jelly_hash_find(&jhash, &temp, 2, &inserted);
-			if(hpos == JHASH_NULL){
-				printf("Entry not found!\n");
-			}
-		}
-		else{
-//			jelly_hash_get_key(&jhash, hpos, &out_bit); // get value for `key`
-//			printf("Found value at position x: %s\n", toSeq(out_bit));
-		}
-#else
-		insertKmer(&temp);
-#endif
-
-		len--;
-		buffer--;
-	}
-//	printf("setLink (start): %s\n",read);
-	setLink(read,readNum,0);
-//	if(readNum%100000==0) printf("Time for Kmer processing: %.3f sec -> HASH: %.3f sec\n",(float)timee/CLOCKS_PER_SEC,((float)timeh/CLOCKS_PER_SEC)-(float)timee/CLOCKS_PER_SEC);
-}
-
-void cleanGraph(){
-    struct hashTable *s, *t;
-    s = (struct hashTable*)malloc(sizeof(struct hashTable));
-    HASH_ITER(hhb, kmere, s, t){
-    	HASH_DELETE(hhb, kmere, s);
-    	free(s);
-    }
-    free(t);
-    free(kmere);
-
-//    struct readLink *u,*v;
-//    u = (struct readLink*)malloc(sizeof(struct readLink));
-//    HASH_ITER(hhb,links,u,v){
-//    	free(u->read);
-//    	free(u);
+//void iterLink(){
+//    struct readLink *s;
+//    s = (struct readLink*)malloc(sizeof(struct readLink));
+//    int i;
+//    int j=0;
+//    int begin=0;
+//    int end = 0;
+//    for(s=links; s != NULL; s=(struct readLink*)(s->hhb.next)) {
+//    	i=0;
+//    	while(s->read[i]!=0){
+//    		if(__builtin_clz(s->read[i])){
+//    			begin++;
+//    		}
+//    		else{
+//    			end ++;
+//    		}
+//    		i++;
+//    		j++;
+//    	}
 //    }
-//    free(v);
-//    free(links);
-}
+//    printf("num in LinkList: %i\n",j);
+//    printf("Beg in LinkList: %i\n",begin);
+//    printf("End in LinkList: %i\n",end);
+//}
+
+//void createKmers(char* read, int readNum){
+////	static clock_t times,timee=0,timeh=0;
+//#ifdef UT_HASH
+//	struct hashTable *s;
+//#elif JELLY
+////	printf("Use JellyFisch\n");
+//	char kmer[nK];
+//	char out[nK];
+//	KmerBitBuffer out_bit;
+//	size_t key;
+//	int inserted = 10;
+//#else
+//
+//#endif
+//
+//	static int len;
+//	static KmerBitBuffer temp;
+//	static KmerBitBuffer revtemp;
+//	static char* buffer;
+//	if(strchr(read,'N')){
+////		printf("Read contains Gaps\n");
+//		return;
+//	}
+//	len = strlen(read);
+//	if(len > maxRlen) maxRlen = len;
+//	buffer = read+(len-nK);
+//	len-=nK;
+//	if(len<0) return;
+////	printf("setLink (end): %s\n",buffer);
+//	setLink(buffer,readNum,1);
+//	while(len!=-1){
+//		*(buffer+nK)='\0';
+////		times = clock();
+//		temp = toBuffer(buffer);
+//		revtemp = revKmer(temp);
+//		if(revtemp < temp) temp = revtemp;
+//#ifdef UT_HASH
+//		HASH_FIND( hhb ,kmere, &temp, sizeof(KmerBitBuffer), s);
+//		if(s==NULL){
+//			s = (struct hashTable*)malloc(sizeof(struct hashTable));
+//			s->kmer = temp;
+//			s->trans = 0;
+//			s->index = 0;
+//			HASH_ADD(hhb, kmere, kmer, sizeof(KmerBitBuffer), s);
+//		}
+//#elif JELLY
+////		strcpy(kmer,toSeq(temp));
+////		printf("Insert kmer: %s\n",kmer);
+//		hpos = jelly_hash_find(&jhash, &temp, 2, &inserted);
+////		hpos = jelly_hash_find(&jhash, &temp, 0, &inserted);
+//		if(hpos == JHASH_NULL){
+//			printf("Resize Hash Table\n");
+//			printf("Entry not found!\n");
+//			bitnum++;
+//			jelly_hash_alloc(&jhash, bitnum, 20, 2*nK);
+//			hpos = jelly_hash_find(&jhash, &temp, 2, &inserted);
+//			if(hpos == JHASH_NULL){
+//				printf("Entry not found!\n");
+//			}
+//		}
+//		else{
+////			jelly_hash_get_key(&jhash, hpos, &out_bit); // get value for `key`
+////			printf("Found value at position x: %s\n", toSeq(out_bit));
+//		}
+//#else
+//		insertKmer(&temp);
+//#endif
+//
+//		len--;
+//		buffer--;
+//	}
+////	printf("setLink (start): %s\n",read);
+//	setLink(read,readNum,0);
+////	if(readNum%100000==0) printf("Time for Kmer processing: %.3f sec -> HASH: %.3f sec\n",(float)timee/CLOCKS_PER_SEC,((float)timeh/CLOCKS_PER_SEC)-(float)timee/CLOCKS_PER_SEC);
+//}
+
+//void cleanGraph(){
+//    struct hashTable *s, *t;
+//    s = (struct hashTable*)malloc(sizeof(struct hashTable));
+//    HASH_ITER(hhb, kmere, s, t){
+//    	HASH_DELETE(hhb, kmere, s);
+//    	free(s);
+//    }
+//    free(t);
+//    free(kmere);
+//
+////    struct readLink *u,*v;
+////    u = (struct readLink*)malloc(sizeof(struct readLink));
+////    HASH_ITER(hhb,links,u,v){
+////    	free(u->read);
+////    	free(u);
+////    }
+////    free(v);
+////    free(links);
+//}
 
 void printUsage(){
 	puts("Usage:");
@@ -302,266 +302,266 @@ struct readFiles* readCMDline(int argc, char *argv[], struct readFiles *files){
 	return files;
 }
 
-int readFile(struct readFiles* files){
-	// read fasta, fastq or list of files!!!
-	int i;
-	int readNum=1;
-	int readl, readr;
-	char* format = (char*)malloc(sizeof(char)*50);
-
-#ifdef JELLY
-	jelly_hash_alloc(&jhash, bitnum, 20, 2*nK);
-#else
-	createHashTable();
-#endif
-
-
-	if(files->libNum == 0) return 0;
-
-	for(i=0;i<files->libNum;i++){
-		// PE or MP
-		if(files[i].rightReads){
-			printf("Read Paired-End Library\n");
-			printf("InsertSize: %i\n",files->insertSize);
-			files[i].startId = readNum;
-			// read left reads
-			readl = readNum;
-			readr = readNum+1;
-			format = strrchr(files[i].leftReads,'.')+1;
-			printf("InFile: %s\nFile format: %s\n",files[i].leftReads,format);
-			if(strcmp(format,"fasta") == 0 || strcmp(format,"fa") == 0){
-				readFastA(files[i].leftReads,readl,2);
-			}
-			else if(strcmp(format,"fastq") == 0 || strcmp(format,"fq") == 0){
-				readFastQ(files[i].leftReads,readl,2);
-			}
-			else{
-				printf("Neither fasta nor fastq. EXIT\n");
-				return 0;
-			}
-			// read right reads
-			format = strrchr(files[i].rightReads,'.')+1;
-			printf("InFile: %s\nFile format: %s\n",files[i].rightReads,format);
-			if(strcmp(format,"fasta") == 0 || strcmp(format,"fa") == 0){
-				readNum = readFastA(files[i].rightReads,readr,2) + 1;
-			}
-			else if(strcmp(format,"fastq") == 0 || strcmp(format,"fq") == 0){
-				readNum = readFastQ(files[i].rightReads,readr,2) + 1;
-			}
-			else{
-				printf("Neither fasta nor fastq. EXIT\n");
-				return 0;
-			}
-		}
-		// SE
-		else{
-			format = strrchr(files[i].leftReads,'.')+1;
-			printf("InFile: %s\nFile format: %s\n",files[i].leftReads,format);
-			if(strcmp(format,"fasta") == 0 || strcmp(format,"fa") == 0){
-				readNum = readFastA(files[i].leftReads,readNum,1) + 1;
-			}
-			else if(strcmp(format,"fastq") == 0 || strcmp(format,"fq") == 0){
-				readNum = readFastQ(files[i].leftReads,readNum,1) + 1;
-			}
-			else{
-				printf("Neither fasta nor fastq. Exit !!!\n");
-				return 0;
-			}
-		}
-		files[i].endId = readNum - 1;
-	}
-
-	numreads = readNum - 1;
-
-#ifdef UT_HASH
-	unsigned key_count = HASH_CNT(hhb,kmere);
-	fprintf(stderr,"Number of unique k-mers: %i from %u reads\n", key_count, readNum);
-	graphSize = key_count+1;
-	hash_chain_len_histogram(kmere->hhb.tbl);
-#elif JELLY
-	FILE* jellystat = fopen("jelly.stat","w");
-	jelly_hash_print_stats(&jhash,jellystat);
-	fclose(jellystat);
-#else
-	printf("Myhash:\n");
-	hashStats();
-	graphSize = itemNum+1;
-	printf("GraphSize:%i\n",graphSize);
-#endif
-	return 1;
-}
+//int readFile(struct readFiles* files){
+//	// read fasta, fastq or list of files!!!
+//	int i;
+//	int readNum=1;
+//	int readl, readr;
+//	char* format = (char*)malloc(sizeof(char)*50);
+//
+//#ifdef JELLY
+//	jelly_hash_alloc(&jhash, bitnum, 20, 2*nK);
+//#else
+//	createHashTable();
+//#endif
+//
+//
+//	if(files->libNum == 0) return 0;
+//
+//	for(i=0;i<files->libNum;i++){
+//		// PE or MP
+//		if(files[i].rightReads){
+//			printf("Read Paired-End Library\n");
+//			printf("InsertSize: %i\n",files->insertSize);
+//			files[i].startId = readNum;
+//			// read left reads
+//			readl = readNum;
+//			readr = readNum+1;
+//			format = strrchr(files[i].leftReads,'.')+1;
+//			printf("InFile: %s\nFile format: %s\n",files[i].leftReads,format);
+//			if(strcmp(format,"fasta") == 0 || strcmp(format,"fa") == 0){
+//				readFastA(files[i].leftReads,readl,2);
+//			}
+//			else if(strcmp(format,"fastq") == 0 || strcmp(format,"fq") == 0){
+//				readFastQ(files[i].leftReads,readl,2);
+//			}
+//			else{
+//				printf("Neither fasta nor fastq. EXIT\n");
+//				return 0;
+//			}
+//			// read right reads
+//			format = strrchr(files[i].rightReads,'.')+1;
+//			printf("InFile: %s\nFile format: %s\n",files[i].rightReads,format);
+//			if(strcmp(format,"fasta") == 0 || strcmp(format,"fa") == 0){
+//				readNum = readFastA(files[i].rightReads,readr,2) + 1;
+//			}
+//			else if(strcmp(format,"fastq") == 0 || strcmp(format,"fq") == 0){
+//				readNum = readFastQ(files[i].rightReads,readr,2) + 1;
+//			}
+//			else{
+//				printf("Neither fasta nor fastq. EXIT\n");
+//				return 0;
+//			}
+//		}
+//		// SE
+//		else{
+//			format = strrchr(files[i].leftReads,'.')+1;
+//			printf("InFile: %s\nFile format: %s\n",files[i].leftReads,format);
+//			if(strcmp(format,"fasta") == 0 || strcmp(format,"fa") == 0){
+//				readNum = readFastA(files[i].leftReads,readNum,1) + 1;
+//			}
+//			else if(strcmp(format,"fastq") == 0 || strcmp(format,"fq") == 0){
+//				readNum = readFastQ(files[i].leftReads,readNum,1) + 1;
+//			}
+//			else{
+//				printf("Neither fasta nor fastq. Exit !!!\n");
+//				return 0;
+//			}
+//		}
+//		files[i].endId = readNum - 1;
+//	}
+//
+//	numreads = readNum - 1;
+//
+//#ifdef UT_HASH
+//	unsigned key_count = HASH_CNT(hhb,kmere);
+//	fprintf(stderr,"Number of unique k-mers: %i from %u reads\n", key_count, readNum);
+//	graphSize = key_count+1;
+//	hash_chain_len_histogram(kmere->hhb.tbl);
+//#elif JELLY
+//	FILE* jellystat = fopen("jelly.stat","w");
+//	jelly_hash_print_stats(&jhash,jellystat);
+//	fclose(jellystat);
+//#else
+//	printf("Myhash:\n");
+//	hashStats();
+//	graphSize = itemNum+1;
+//	printf("GraphSize:%i\n",graphSize);
+//#endif
+//	return 1;
+//}
 
 #define BUFFER_SIZE (4 * 1024 * 1024)
 
-int readFastA(char* inFile, int readNum, int jump){
-//	printf("hashTableSize: %i (hashHandle: %i)\n",(int)sizeof(struct hashTable),sizeof(UT_hash_handle));
-	char filebuffer[BUFFER_SIZE]; // 4 MB buffer
-	int start;
-	long filesize;
-	long cursize=0;
-	int i,j,n;
-	int first = 0;
-
-	FILE *fasta;
-	if((fasta = fopen(inFile,"r")) == NULL){
-		printf("%s can't be opend\n",inFile);
-		exit(EXIT_FAILURE);
-	}
-
-	fseek (fasta , 0 , SEEK_END);
-	filesize = ftell(fasta);
-	rewind(fasta);
-	printf("Filesize: %li\n",filesize);
-
-	char *buffer1, *buffer2;
-	char *read = (char*)malloc(100000);
-	if (readLenList == NULL) readLenList = (int*)malloc(sizeof(int)*readListSize);
-	if (readStartList == NULL) readStartList = (int*)malloc(sizeof(int)*readListSize);
-	//	readList = (char**)malloc(sizeof(char*)*readListSize);
-
-//	char **readListTemp;
-	int* readLenListTemp;
-	buffer1 = filebuffer;
-
-	while((n = fread(filebuffer,sizeof(char),BUFFER_SIZE,fasta))){
-		buffer2 = filebuffer;
-		for(i=0;i<n;i++){
-			if(filebuffer[i] == '\n'){
-				filebuffer[i] = '\0';
-				if((*buffer2)=='>'){
-					if(first){
-						if(readNum >= readListSize-10){
-							readLenListTemp = (int*)realloc(readLenList,sizeof(int)*(readListSize*2));
-							readLenList = readLenListTemp;
-							readLenListTemp = (int*)realloc(readStartList,sizeof(int)*(readListSize*2));
-							readListSize*=2;
-							readStartList = readLenListTemp;
-						}
-						readLenList[readNum] = strlen(read)-nK;
-						readStartList[readNum] = start;
-						if(readLenList[readNum] < 0) continue;
-
-						if(!((readNum/jump)%10000)){
-							printf("Processed reads: %i\r",readNum/jump);
-							fflush(stdout);
-						}
-						createKmers(read, readNum);
-					}
-					for(j=1;j<1000;j++){
-						if (buffer2[j]=='(') break;
-					}
-					sscanf(&buffer2[j],"(Strand %*c Offset %i--%*i)",&start);
-					read[0]='\0';
-					if(first) readNum+=jump;
-					else first=1;
-				}
-				else{
-					strcat(read,buffer2);
-				}
-				buffer2 = &filebuffer[i] + 1;
-				if(n-i<50000 && n > 50000){
-					cursize += i;
-					fseek(fasta, -(n-i), SEEK_CUR);
-					break;
-				}
-			}
-		}
-	}
-
-	readLenList[readNum] = strlen(read)-nK;
-	readStartList[readNum] = start;
-	createKmers(read, readNum);
-	printf("\n");
-	fflush(stdout);
-	printf("Processed reads: %i\n",readNum);
-
-	free(read);
-	fclose(fasta);
-	return readNum;
-}
-
-
-int readFastQ(char* inFile, int readNum, int jump){
-	char filebuffer[BUFFER_SIZE]; // 4 MB buffer
-	int start;
-	long filesize;
-	long cursize=0;
-	int i,j,n;
-	int first = 0;
-
-	FILE *fasta;
-	if((fasta = fopen(inFile,"r")) == NULL){
-		printf("%s can't be opend\n",inFile);
-		exit(EXIT_FAILURE);
-	}
-
-	fseek (fasta , 0 , SEEK_END);
-	filesize = ftell(fasta);
-	rewind(fasta);
-	printf("Filesize: %li\n",filesize);
-
-	char *buffer1, *buffer2;
-	char *read = (char*)malloc(70000);
-	if (readLenList == NULL) readLenList = (int*)malloc(sizeof(int)*readListSize);
-	if (readStartList == NULL) readStartList = (int*)malloc(sizeof(int)*readListSize);
-	//	readList = (char**)malloc(sizeof(char*)*readListSize);
-
-//	char **readListTemp;
-	int* readLenListTemp;
-	buffer1 = filebuffer;
+//int readFastA(char* inFile, int readNum, int jump){
+////	printf("hashTableSize: %i (hashHandle: %i)\n",(int)sizeof(struct hashTable),sizeof(UT_hash_handle));
+//	char filebuffer[BUFFER_SIZE]; // 4 MB buffer
+//	int start;
+//	long filesize;
+//	long cursize=0;
+//	int i,j,n;
+//	int first = 0;
+//
+//	FILE *fasta;
+//	if((fasta = fopen(inFile,"r")) == NULL){
+//		printf("%s can't be opend\n",inFile);
+//		exit(EXIT_FAILURE);
+//	}
+//
+//	fseek (fasta , 0 , SEEK_END);
+//	filesize = ftell(fasta);
+//	rewind(fasta);
+//	printf("Filesize: %li\n",filesize);
+//
+//	char *buffer1, *buffer2;
+//	char *read = (char*)malloc(100000);
+//	if (readLenList == NULL) readLenList = (int*)malloc(sizeof(int)*readListSize);
+//	if (readStartList == NULL) readStartList = (int*)malloc(sizeof(int)*readListSize);
+//	//	readList = (char**)malloc(sizeof(char*)*readListSize);
+//
+////	char **readListTemp;
+//	int* readLenListTemp;
+//	buffer1 = filebuffer;
+//
+//	while((n = fread(filebuffer,sizeof(char),BUFFER_SIZE,fasta))){
+//		buffer2 = filebuffer;
+//		for(i=0;i<n;i++){
+//			if(filebuffer[i] == '\n'){
+//				filebuffer[i] = '\0';
+//				if((*buffer2)=='>'){
+//					if(first){
+//						if(readNum >= readListSize-10){
+//							readLenListTemp = (int*)realloc(readLenList,sizeof(int)*(readListSize*2));
+//							readLenList = readLenListTemp;
+//							readLenListTemp = (int*)realloc(readStartList,sizeof(int)*(readListSize*2));
+//							readListSize*=2;
+//							readStartList = readLenListTemp;
+//						}
+//						readLenList[readNum] = strlen(read)-nK;
+//						readStartList[readNum] = start;
+//						if(readLenList[readNum] < 0) continue;
+//
+//						if(!((readNum/jump)%10000)){
+//							printf("Processed reads: %i\r",readNum/jump);
+//							fflush(stdout);
+//						}
+//						createKmers(read, readNum);
+//					}
+//					for(j=1;j<1000;j++){
+//						if (buffer2[j]=='(') break;
+//					}
+//					sscanf(&buffer2[j],"(Strand %*c Offset %i--%*i)",&start);
+//					read[0]='\0';
+//					if(first) readNum+=jump;
+//					else first=1;
+//				}
+//				else{
+//					strcat(read,buffer2);
+//				}
+//				buffer2 = &filebuffer[i] + 1;
+//				if(n-i<50000 && n > 50000){
+//					cursize += i;
+//					fseek(fasta, -(n-i), SEEK_CUR);
+//					break;
+//				}
+//			}
+//		}
+//	}
+//
+//	readLenList[readNum] = strlen(read)-nK;
+//	readStartList[readNum] = start;
+//	createKmers(read, readNum);
+//	printf("\n");
+//	fflush(stdout);
+//	printf("Processed reads: %i\n",readNum);
+//
+//	free(read);
+//	fclose(fasta);
+//	return readNum;
+//}
 
 
-	while((n = fread(filebuffer,sizeof(char),BUFFER_SIZE,fasta))){
-		buffer2 = filebuffer;
-		for(i=0;i<n;i++){
-			if(filebuffer[i] == '\n'){
-				filebuffer[i] = '\0';
-				if((*buffer2)=='@'){
-					if(first){
-						if(readNum >= readListSize-10){
-							readLenListTemp = (int*)realloc(readLenList,sizeof(int)*(readListSize*2));
-							readLenList = readLenListTemp;
-							readLenListTemp = (int*)realloc(readStartList,sizeof(int)*(readListSize*2));
-							readListSize*=2;
-							readStartList = readLenListTemp;
-						}
-						if(!((readNum/jump)%10000)){
-							printf("Processed reads: %i\r",readNum/jump);
-							fflush(stdout);
-						}
-//						printf("Read: %s\n",read);
-						readLenList[readNum] = strlen(read)-nK;
-						readStartList[readNum] = start;
-						first=1;
-						if(readLenList[readNum] > 0) createKmers(read, readNum);
-					}
-					for(j=1;j<1000;j++){
-						if (buffer2[j]=='(') break;
-					}
-					sscanf(&buffer2[j],"(Strand %*c Offset %i--%*i)",&start);
-					read[0]='\0';
-					if(first) readNum+=jump;
-					else first=1;
-				}
-				else if((*buffer2)=='+'){
-//					printf("buffer2: %s\n",buffer2);
-					first = 2;
-				}
-				else if(first == 1){
-					strcat(read,buffer2);
-//					printf("CatRead: %s\n",read);
-				}
-				buffer2 = &filebuffer[i] + 1;
-				if(n-i<1000 && n > 1000){
-					cursize += i;
-					fseek(fasta, -(n-i), SEEK_CUR);
-					break;
-				}
-			}
-		}
-	}
-	return readNum-jump;
-}
+//int readFastQ(char* inFile, int readNum, int jump){
+//	char filebuffer[BUFFER_SIZE]; // 4 MB buffer
+//	int start;
+//	long filesize;
+//	long cursize=0;
+//	int i,j,n;
+//	int first = 0;
+//
+//	FILE *fasta;
+//	if((fasta = fopen(inFile,"r")) == NULL){
+//		printf("%s can't be opend\n",inFile);
+//		exit(EXIT_FAILURE);
+//	}
+//
+//	fseek (fasta , 0 , SEEK_END);
+//	filesize = ftell(fasta);
+//	rewind(fasta);
+//	printf("Filesize: %li\n",filesize);
+//
+//	char *buffer1, *buffer2;
+//	char *read = (char*)malloc(70000);
+//	if (readLenList == NULL) readLenList = (int*)malloc(sizeof(int)*readListSize);
+//	if (readStartList == NULL) readStartList = (int*)malloc(sizeof(int)*readListSize);
+//	//	readList = (char**)malloc(sizeof(char*)*readListSize);
+//
+////	char **readListTemp;
+//	int* readLenListTemp;
+//	buffer1 = filebuffer;
+//
+//
+//	while((n = fread(filebuffer,sizeof(char),BUFFER_SIZE,fasta))){
+//		buffer2 = filebuffer;
+//		for(i=0;i<n;i++){
+//			if(filebuffer[i] == '\n'){
+//				filebuffer[i] = '\0';
+//				if((*buffer2)=='@'){
+//					if(first){
+//						if(readNum >= readListSize-10){
+//							readLenListTemp = (int*)realloc(readLenList,sizeof(int)*(readListSize*2));
+//							readLenList = readLenListTemp;
+//							readLenListTemp = (int*)realloc(readStartList,sizeof(int)*(readListSize*2));
+//							readListSize*=2;
+//							readStartList = readLenListTemp;
+//						}
+//						if(!((readNum/jump)%10000)){
+//							printf("Processed reads: %i\r",readNum/jump);
+//							fflush(stdout);
+//						}
+////						printf("Read: %s\n",read);
+//						readLenList[readNum] = strlen(read)-nK;
+//						readStartList[readNum] = start;
+//						first=1;
+//						if(readLenList[readNum] > 0) createKmers(read, readNum);
+//					}
+//					for(j=1;j<1000;j++){
+//						if (buffer2[j]=='(') break;
+//					}
+//					sscanf(&buffer2[j],"(Strand %*c Offset %i--%*i)",&start);
+//					read[0]='\0';
+//					if(first) readNum+=jump;
+//					else first=1;
+//				}
+//				else if((*buffer2)=='+'){
+////					printf("buffer2: %s\n",buffer2);
+//					first = 2;
+//				}
+//				else if(first == 1){
+//					strcat(read,buffer2);
+////					printf("CatRead: %s\n",read);
+//				}
+//				buffer2 = &filebuffer[i] + 1;
+//				if(n-i<1000 && n > 1000){
+//					cursize += i;
+//					fseek(fasta, -(n-i), SEEK_CUR);
+//					break;
+//				}
+//			}
+//		}
+//	}
+//	return readNum-jump;
+//}
 
 volatile int readID_global = 1;
 
@@ -672,7 +672,7 @@ void* mt_fileReaderDB(void* block){
 		new_mutex = old_mutex;
 		old_mutex = __sync_val_compare_and_swap(&fin_mutex,new_mutex,new_mutex+1);
 	} while(old_mutex != new_mutex);
-	if(fin_mutex>=0 )printf("Thread finished job and reports Finished-Status\n");
+	printf("Thread finished job and reports Finished-Status\n");
 
 	fclose(fasta);
 	free(readsequence);

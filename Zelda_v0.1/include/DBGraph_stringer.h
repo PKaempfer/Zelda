@@ -21,10 +21,6 @@
 #define PROPER    3   					/* None of the other states                                 */
 #define JUNCTION  4   					/* After reduction, node has an in or out degree != 1       */
 
-static const char *arrowdir[2]={"normal","inv"};
-
-static char status_char[] = { 'W', 'C', 'S', 'P', 'J' };
-
 struct node{							// Only used in struct partGraph, equivalent to Kannte
 	int ID;								// Node-ID
 	int layer;							// Number of edges to go to come to this node (0->1->2->3->4)

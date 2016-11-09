@@ -9,14 +9,16 @@
  *  			 	architecture supported atomic CAS isntruction
  */
 
-#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+#include <pthread.h>
 #include <time.h>
 #include "math.h"
 #include "kmerHash_oa.h"
 #include "kmerHash.h"
 #include "FileReader.h"
-#include <pthread.h>
 
 #define TRUE 1
 #define FALSE 0
@@ -67,12 +69,12 @@ void freeHashTable_oa(){
 		readEnd = dbHash_oa[i].ends;
 		while(readEnd){
 			dbHash_oa[i].ends = readEnd->next;
-			free(readEnd);
+			free((void*)readEnd);
 			readEnd = dbHash_oa[i].ends;
 		}
 	}
 	printf("Free ReadEnd Pointer finished\n");
-	free(dbHash_oa);
+	free((void*)dbHash_oa);
 }
 
 volatile struct hashkmer_oa* resizeHashTable(){

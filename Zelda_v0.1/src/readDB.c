@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "readDB.h"
 #include "FileReader.h"
 #include "kmer.h"
@@ -20,6 +21,8 @@ int readTotNum = 0;
 int maxreadTotNum = 16 * 1024;
 int maxReadLen = 0;
 struct reads* readsList;
+
+static const char* peOri[3]={"FR","RF","FF"};
 
 /**
  * MakeDB creates a database of all libraries under consideration in a single database. For this the reads are stored in DB in their final Bit-representation.
@@ -335,7 +338,7 @@ char* decompressRead(char* compRead, int len){
 	int i = 0 ,j = 0,k = ((len+3)/4)-1;
 	char* read = (char*)malloc(len+1);
 	if(len==0) return NULL;
-	char current ;
+	char current = 0;
 
 	for(;i<len;i++){
 		if(j%4==0){
@@ -351,7 +354,7 @@ char* decompressRead(char* compRead, int len){
 
 void decompressReadSt(char* compRead, char* read, int len){
 	int i = 0 ,j = 0,k = ((len+3)/4)-1;
-	char current ;
+	char current = 0;
 
 	for(;i<len;i++){
 		if(j%4==0){

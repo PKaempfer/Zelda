@@ -5,11 +5,13 @@
  *      Author: kaempfpp
  */
 
-#include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "kmer.h"
 #include "kmerHash.h"
 #include "FileReader.h"
+#include <stdint.h>
 #include "math.h"
 
 void **dbHashg = NULL;

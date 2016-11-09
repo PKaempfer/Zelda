@@ -13,20 +13,22 @@
 // Max length of spur to collapse
 #define MAXSPURLEN nK
 
-void collapseEdges_strong(int i, int dest,int ori, int up,int* nodeList, int nodenum){
+void collapseEdges_strong(int i, int dest, int up,int* nodeList, int nodenum){
 	// First step -> Copy read information of the spur edge to the sibling edge
 	// a is true --> b is spur
 	// up -> nodes have a common parent; !up -> nodes have a common child
 	struct ReadNode *anode, *abefnode,*bnode,*temp,*temp2;
-	int alen,blen,abdiff;
-	struct KannteNode *kannte,*befkannte;
+	int alen,blen;
+//	int abdiff;
+	struct KannteNode *kannte;
+//	struct KannteNode *befkannte;
 
 //	anode = redGraph->array[dest].headread;
 	abefnode = NULL;
 	bnode = redGraph->array[i].headread;
 	alen = redGraph->array[dest].len;
 	blen = redGraph->array[i].len;
-	int templenb = blen;
+//	int templenb = blen;
 	int j;
 
 //	printf("ReadList of Ori %i (len: %i)\n",i,blen);
@@ -129,19 +131,19 @@ void collapseEdges_strong(int i, int dest,int ori, int up,int* nodeList, int nod
 //	printf("\nFIN\n\n");
 }
 
-static inline int* setDestList(int i, int dest, int ilen, int destlen, struct edge* shared, int up, int* list, int* listlen, int* maxlen){
+static inline int* setDestList(int i, int dest, int ilen, int destlen, struct edge* shared, int up, int* list, int* listlen){
 	int templena = ilen-destlen;
-	int oldlen;
 	int tempdest;
 	int num = 0;
+	char verbose = 0;
 	struct edge* tempedge;
 	if(up){
 		tempedge = redGraph->array[dest].head;
-//		printf("Collapse upSpur: %i (Parent: %i) over more than on node: %i",i,shared->dest,dest);
+		if(verbose) printf("Collapse upSpur: %i (Parent: %i) over more than on node: %i",i,shared->dest,dest);
 	}
 	else{
 		tempedge = redGraph->array[dest].tail;
-//		printf("Collapse downSpur: %i (Parent: %i) over more than on node: %i",i,shared->dest,dest);
+		if(verbose) printf("Collapse downSpur: %i (Parent: %i) over more than on node: %i",i,shared->dest,dest);
 	}
 
 	list[num++] = dest;
@@ -157,16 +159,16 @@ static inline int* setDestList(int i, int dest, int ilen, int destlen, struct ed
 		destlen = redGraph->array[tempdest].len;
 		num++;
 		templena -= destlen;
-//		printf(" --> %i",tempdest);
+		if(verbose) printf(" --> %i",tempdest);
 		if(up)	tempedge = redGraph->array[tempdest].head;
 		else tempedge = redGraph->array[tempdest].tail;
 	}
 	if(templena<=0){
-//		printf("\n");
+		if(verbose) printf("\n");
 		(*listlen) = num/2;
 	}
 	else{
-//		printf(" --> FAIL\n");
+		if(verbose) printf(" --> FAIL\n");
 		(*listlen) = -1;
 	}
 	return list;
@@ -213,8 +215,8 @@ void reduceRedGraph_strong(){
 	int i;
 	int num, dest;
 	int lena=0, lenb=0;
-	int templena;
-	int tempdest;
+//	int templena;
+//	int tempdest;
 	struct edge *downedge;
 	struct edge *upedge;
 	struct edge *tempedge;
@@ -251,10 +253,10 @@ void reduceRedGraph_strong(){
 	//					collapseEdges(i,dest,upedge->dest,1);
 					}
 					else{
-						destNodeList = setDestList(i,dest,lena,lenb,upedge,0,destNodeList,&destNodeNum,&destNodeMaxNum);
+						destNodeList = setDestList(i,dest,lena,lenb,upedge,0,destNodeList,&destNodeNum);
 						if(destNodeNum != -1) {
 //							printf("Nodes: %i\n",destNodeNum);
-							collapseEdges_strong(i,dest,upedge->dest,1,destNodeList,destNodeNum);
+							collapseEdges_strong(i,dest,1,destNodeList,destNodeNum);
 							deleteSpur(i,1);
 //							exit(1);
 						}
@@ -308,10 +310,10 @@ void reduceRedGraph_strong(){
 					}
 					else{
 						destNodeNum = 0;
-						destNodeList = setDestList(i,dest,lena,lenb,downedge,1,destNodeList,&destNodeNum,&destNodeMaxNum);
+						destNodeList = setDestList(i,dest,lena,lenb,downedge,1,destNodeList,&destNodeNum);
 						if(destNodeNum != -1) {
 //							printf("Nodes: %i\n",destNodeNum);
-							collapseEdges_strong(i,dest,downedge->dest,0,destNodeList,destNodeNum);
+							collapseEdges_strong(i,dest,0,destNodeList,destNodeNum);
 							deleteSpur(i,0);
 //							exit(1);
 						}

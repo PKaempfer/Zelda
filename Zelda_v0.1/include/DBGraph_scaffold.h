@@ -87,7 +87,7 @@ struct scaffold_set{
 	int nummax;
 };
 
-struct scaffold_set* contigs_init(struct myovlList* G, struct reads* reads);
+struct scaffold_set* contigs_init(struct myovlList* G); // , struct reads* reads
 
 void initScaff(struct myovlList* G, struct reads* reads);
 

@@ -9,7 +9,7 @@
 #define DBGRAPH_H_
 
 #include "kmer.h"
-#include "uthash.h"
+//#include "uthash.h"
 //#include "DBGraph_reduced.h"
 //#include "DBGraph_error.h"
 
@@ -23,7 +23,7 @@ extern uint32_t tabindex;
 struct Reads{							// Reads with connection to the Kannten; part of the ReadNodes
 	struct KannteNode *headkannte;		// Pointer to Kannten the reads are contained
 	int ID;								// Read ID and hash-key in the order the reads came in during the file reading
-	UT_hash_handle hhb;					// hash handle variable
+//  UT_hash_handle hhb;					// hash handle variable
 };
 
 struct ReadNode{						// Start- or endpoint of a read; part and listed by the Kannte
@@ -71,7 +71,7 @@ struct tempHash{						// For real time-check if unreduced junction is already in
 	int oldID;							// ID of the initial DeBruijn graph; the hash value
 	int numIDs;							// ID of the new reduced Graph
 	int* newID; 						// all new edges starting in this old node
-	UT_hash_handle hhb;					// hash handle variable
+//	UT_hash_handle hhb;					// hash handle variable
 };
 
 struct AdjListNode{

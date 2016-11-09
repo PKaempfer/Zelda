@@ -11,7 +11,7 @@
 
 #include "DBGraph_stringer.h"
 #include "readDB.h"
-#include "../poaV2/poa.h"
+//#include "../poaV2/poa.h"
 
 #define GAP_PENALTY  -1
 
@@ -91,7 +91,7 @@ struct Sequence {/** */
 	char* sequence;					/** Title of the contig*/
 	char* name;						/** Name of Contig */
 	int nsource_seq;				/** Number of sequences in representing this PO graph */
-	LPOSourceInfo_T *source_seq;	/** */
+//	LPOSourceInfo_T *source_seq;	/** */
 };
 
 struct POG{

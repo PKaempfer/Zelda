@@ -9,7 +9,7 @@
 #define KMER_H_
 
 #include <stdint.h>
-#include "uthash.h"
+//#include "uthash.h"
 #include <math.h>
 
 #ifndef NULL
@@ -84,13 +84,13 @@ struct hashTable {
 	KmerBitBuffer kmer;
 	char trans;
 	int index;  // If minus the direction has changed, take further the children instead of parents and vice versa
-	UT_hash_handle hhb;
+//	UT_hash_handle hhb;
 };
 
 struct readLink{
 	KmerBitBuffer kmer;
 	readID *read;
-	UT_hash_handle hhb;
+//	UT_hash_handle hhb;
 };
 
 struct kmerList{

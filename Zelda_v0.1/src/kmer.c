@@ -100,46 +100,46 @@ char getTransBaseDown(KmerBitBuffer *kmer, int dir){
 }
 
 // can used only once for each vertex, else problems with indexing the nodes
-struct hashTable* hasChild(KmerBitBuffer *kmer, char base, char *dir){
-	struct hashTable *s;
-	static KmerBitBuffer temp;
-	static KmerBitBuffer revtemp;
-	temp = (*kmer) << 2;
-	temp &= ~(((KmerBitBuffer)3) << (2*nK));
-	temp |= (KmerBitBuffer)base;
-	revtemp=revKmer(temp);
-	if(revtemp<temp){
-		temp = revtemp;
-		(*dir) *= -1;
-	}
-	HASH_FIND(hhb,kmere,&temp,sizeof(KmerBitBuffer),s);
-	if(s){
-		return s;
-	}
-	else{
-		return NULL;
-	}
-}
-
-struct hashTable* hasParent(KmerBitBuffer *kmer, char base, char *dir){
-	struct hashTable *s;
-	static KmerBitBuffer temp;
-	static KmerBitBuffer revtemp;
-	temp = (*kmer) >> 2;
-	temp |= ((KmerBitBuffer)base << ((nK-1)*2));
-	revtemp=revKmer(temp);
-	if(revtemp<temp){
-		temp = revtemp;
-		(*dir) *= -1;
-	}
-	HASH_FIND(hhb,kmere,&temp,sizeof(KmerBitBuffer),s);
-	if(s){
-		return s;
-	}
-	else{
-		return NULL;
-	}
-}
+//struct hashTable* hasChild(KmerBitBuffer *kmer, char base, char *dir){
+//	struct hashTable *s;
+//	static KmerBitBuffer temp;
+//	static KmerBitBuffer revtemp;
+//	temp = (*kmer) << 2;
+//	temp &= ~(((KmerBitBuffer)3) << (2*nK));
+//	temp |= (KmerBitBuffer)base;
+//	revtemp=revKmer(temp);
+//	if(revtemp<temp){
+//		temp = revtemp;
+//		(*dir) *= -1;
+//	}
+//	HASH_FIND(hhb,kmere,&temp,sizeof(KmerBitBuffer),s);
+//	if(s){
+//		return s;
+//	}
+//	else{
+//		return NULL;
+//	}
+//}
+//
+//struct hashTable* hasParent(KmerBitBuffer *kmer, char base, char *dir){
+//	struct hashTable *s;
+//	static KmerBitBuffer temp;
+//	static KmerBitBuffer revtemp;
+//	temp = (*kmer) >> 2;
+//	temp |= ((KmerBitBuffer)base << ((nK-1)*2));
+//	revtemp=revKmer(temp);
+//	if(revtemp<temp){
+//		temp = revtemp;
+//		(*dir) *= -1;
+//	}
+//	HASH_FIND(hhb,kmere,&temp,sizeof(KmerBitBuffer),s);
+//	if(s){
+//		return s;
+//	}
+//	else{
+//		return NULL;
+//	}
+//}
 
 // can used only once for each vertex, else problems with indexing the nodes
 struct hashkmer* hasChild_2(KmerBitBuffer *kmer, char base, char *dir){

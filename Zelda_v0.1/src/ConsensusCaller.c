@@ -7,13 +7,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+#include <string.h>
 #include "ConsensusCaller.h"
 #include "DBGraph_scaffold.h"
 //#include "DBGraph_stringer.h"
 #include "readDB.h"
 #include "DBGraph.h"
-#include <time.h>
-//#include "../poaV2/poa.h"
+
 
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
@@ -28,6 +29,7 @@
 #define MIN_SCAFF_LEN 100
 #define MATRIX_MAX_BR 20
 
+static char status_char[] = { 'W', 'C', 'S', 'P', 'J' };
 struct timespec ts_start;
 struct timespec ts_finish;
 long sumMatrix = 0;
@@ -114,7 +116,7 @@ void buildBackBone3(struct myovlList* G, struct reads* reads){
     int dir;
     int bdir;
     int overhang;
-    int nextoverhang;
+    int nextoverhang = 0;
     int multidir;
 
     for(i=1; i < G->V; i++){
@@ -452,44 +454,44 @@ struct contigList* realBackbone2(struct myovlList* G, struct reads* reads){
     return cList;
 }
 
-LPOLetter_T* LPOnodes  		=  NULL;   	// LPOLetter_T array -> First malloc in make_poa
-uint32_t     usedNodes 		=     0;	// Current number of elements in LPOLetter_T array
-uint32_t     maxNodes  		= 10000;	// Initial max size of LPOLetter_T array
-uint32_t 	 contigNum 		=     0;	// Number of contigs
-uint32_t 	 max_contigNum 	=   100;	// Max number of contigs before resize the struct (Sequence_T)
-
-void poa_initBackbone(Sequence_T* contig, struct reads* read, char* seq){
-	int i;
-	uint32_t currentID = usedNodes;
-	uint32_t leftID = currentID;
-
-	contig->length = strlen(seq);
-	contig->nsource_seq = 1;
-	contig->letter = &LPOnodes[currentID];
-
-	LPOLetter_T* current = contig->letter;
-	currentID++;
-
-	LPOLetter_T* left = current;
-	current = &LPOnodes[currentID];
-
-	for(i=0;i<contig->length;i++){
-		current->letter = seq[i];
-		current->source.ipos = i;
-		current->source.iseq = read->ID;
-		current->source.more = NULL;
-
-		current->left.ipos = leftID;
-		current->left.more = NULL;
-		left->right.ipos = currentID;
-		left->right.more = NULL;
-
-		left = current;
-		leftID = currentID;
-		currentID++;
-		current = &LPOnodes[currentID];
-	}
-}
+//LPOLetter_T* LPOnodes  		=  NULL;   	// LPOLetter_T array -> First malloc in make_poa
+//uint32_t     usedNodes 		=     0;	// Current number of elements in LPOLetter_T array
+//uint32_t     maxNodes  		= 10000;	// Initial max size of LPOLetter_T array
+//uint32_t 	 contigNum 		=     0;	// Number of contigs
+//uint32_t 	 max_contigNum 	=   100;	// Max number of contigs before resize the struct (Sequence_T)
+//
+//void poa_initBackbone(Sequence_T* contig, struct reads* read, char* seq){
+//	int i;
+//	uint32_t currentID = usedNodes;
+//	uint32_t leftID = currentID;
+//
+//	contig->length = strlen(seq);
+//	contig->nsource_seq = 1;
+//	contig->letter = &LPOnodes[currentID];
+//
+//	LPOLetter_T* current = contig->letter;
+//	currentID++;
+//
+//	LPOLetter_T* left = current;
+//	current = &LPOnodes[currentID];
+//
+//	for(i=0;i<contig->length;i++){
+//		current->letter = seq[i];
+//		current->source.ipos = i;
+//		current->source.iseq = read->ID;
+//		current->source.more = NULL;
+//
+//		current->left.ipos = leftID;
+//		current->left.more = NULL;
+//		left->right.ipos = currentID;
+//		left->right.more = NULL;
+//
+//		left = current;
+//		leftID = currentID;
+//		currentID++;
+//		current = &LPOnodes[currentID];
+//	}
+//}
 
 struct Letter_T* Letters     =      NULL;
 uint32_t          numNodes    =         0;	// Current number of elements in LPOLetter_T array
@@ -642,7 +644,7 @@ void poa_catBackbone(struct Sequence* contig, struct myovlList *G, struct reads*
 	contig->readright = numNodes-1;
 
 	current = &Letters[contig->readleft];
-	struct LetterEdge* edge;
+	struct LetterEdge* edge = NULL;
 	for(i=0;i<left_ovh;i++){
 		edge = current->right;
 		if(edge){
@@ -1511,7 +1513,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	}
 	else{
 		printf("Checkpoint: Init Contig Correction\n");
-		aS = contigs_init(G,reads);
+		aS = contigs_init(G); // ,reads
 	}
     scaffold_stats(aS);
 

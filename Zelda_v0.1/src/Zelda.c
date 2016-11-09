@@ -12,6 +12,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <unistd.h>
 #include <time.h>
 #include <math.h>
 #include "kmer.h"
@@ -26,9 +27,6 @@
 #include "DBGraph_scaffold.h"
 #include "readDB.h"
 #include "ConsensusCaller.h"
-
-//#define BUFFER_SIZE (4 * 1024 * 1024)
-
 
 int main(int argc, char* argv[]) {
 	char findotdump = 1;

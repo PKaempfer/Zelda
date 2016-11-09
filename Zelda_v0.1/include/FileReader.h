@@ -26,8 +26,6 @@
 #define	 RR 2	// 	<---   <--- (reverse - reverse)
 // FF =^ RR
 
-static const char* peOri[3]={"FR","RF","FF"};
-
 
 extern struct hashTable *kmere;
 extern struct readLink *links;
@@ -67,7 +65,7 @@ int readFastA(char* inFile, int readNum, int jump);
 
 int readFastQ(char* inFile, int readNum, int jump);
 
-void createKmers(char* read, int readNum);// ,struct hashTable *kmere);
+//void createKmers(char* read, int readNum);// ,struct hashTable *kmere);
 
 void cleanGraph();
 

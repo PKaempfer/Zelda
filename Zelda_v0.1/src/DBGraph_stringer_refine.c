@@ -10,17 +10,20 @@
 #include "DBGraph_stringer.h"
 #include "DBGraph.h"
 
-// Macros defining functions
-// Interesting: Creates a max function for the given type
-#define GENERIC_MAX(type) \
-	type type##_max(type x, type y) \
-	{	\
-	return x > y ? x : y;  \
-	}
+//// Macros defining functions
+//// Interesting: Creates a max function for the given type
+//#define GENERIC_MAX(type) \
+//	type type##_max(type x, type y) \
+//	{	\
+//	return x > y ? x : y;  \
+//	}
+//
+//// Creates the function:
+//// float float_max(float x, float y) {return x > y ? x : y;}
+//GENERIC_MAX(float)
 
-// Creates the function:
-// float float_max(float x, float y) {return x > y ? x : y;}
-GENERIC_MAX(float)
+static char status_char[] = { 'W', 'C', 'S', 'P', 'J' };
+static const char *arrowdir[2]={"normal","inv"};
 
 void countRemainingNodes(){
 	int i;

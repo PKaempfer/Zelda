@@ -8,12 +8,17 @@
  ============================================================================
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "DBGraph_scaffold.h"
 #include "readDB.h"
-#include <stdio.h>
 
 /** Macro defines minimum length of paths to consider in scaffolding (should be zero I guess)*/
 #define MIN_CONTIG_LEN 0
+
+static const char* peOri[3]={"FR","RF","FF"};
+static char status_char[] = { 'W', 'C', 'S', 'P', 'J' };
 
 /** List of all paths */
 struct path* paths = NULL;
@@ -284,7 +289,7 @@ void initScaff(struct myovlList* G, struct reads* reads){
  * @param reads
  * @return
  */
-struct scaffold_set* contigs_init(struct myovlList* G, struct reads* reads){
+struct scaffold_set* contigs_init(struct myovlList* G){ //, struct reads* reads
 	int i;
 
     struct scaffold_set* aS = (struct scaffold_set*)malloc(sizeof(struct scaffold_set));
@@ -1825,7 +1830,7 @@ void printPath(struct myovlList* G, struct reads* reads, int pathID){
 //	return 0;
 //}
 
-void setVirtualBridge(struct myovlList* G, int r1ID, int r1path, int r2path, char r1right, char r2right, int dist){
+void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right, char r2right, int dist){
 //	printf("Set Virtual Bridge\n");
 	struct pathEdge* pathedgeR1;
 	struct pathEdge* pathedgeR2;
@@ -1995,7 +2000,7 @@ void setVirtualBridge(struct myovlList* G, int r1ID, int r1path, int r2path, cha
 
 void buildBridge(struct myovlList* G, struct readFiles lib, struct reads* reads, int r1ID, char spurs, int r1path, int r2path, int oriPE){
 	// Look which side is spur? Try all of bit type is 0
-	int i;
+//	int i;
 	int dist = 0;
 	int hitnum = 0;
 	struct pc_anno* r1anno = (struct pc_anno*)reads[r1ID].annotation;
@@ -2012,7 +2017,7 @@ void buildBridge(struct myovlList* G, struct readFiles lib, struct reads* reads,
 			if(dist < lib.maxInsert && ((oriPE == 0 && r1dir && r2dir) || (oriPE == 1 && !r1dir && !r2dir) || (oriPE == 2 && (r1dir != r2dir)))){
 				printf("Set virtual Bridge\n");
 				printf("Found Bridge over R1Left: %i R2Left: %i (Paths: %i : %i)\n",r1anno->lJunctionDist,r2anno->lJunctionDist,r1path,r2path);
-				setVirtualBridge(G,r1ID,r1path,r2path,0,0,dist);
+				setVirtualBridge(G,r1path,r2path,0,0,dist);
 				hitnum++;
 			}
 		}
@@ -2025,7 +2030,7 @@ void buildBridge(struct myovlList* G, struct readFiles lib, struct reads* reads,
 			if(dist < lib.maxInsert && ((oriPE == 0 && r1dir && r2dir) || (oriPE == 1 && !r1dir && !r2dir) || (oriPE == 2 && (r1dir != r2dir)))){
 				printf("Set virtual Bridge\n");
 				printf("Found Bridge over R1Left: %i R2Right: %i (Paths: %i : %i)\n",r1anno->lJunctionDist,r2anno->rJunctionDist,r1path,r2path);
-				setVirtualBridge(G,r1ID,r1path,r2path,0,1,dist);
+				setVirtualBridge(G,r1path,r2path,0,1,dist);
 				hitnum++;
 			}
 		}
@@ -2040,7 +2045,7 @@ void buildBridge(struct myovlList* G, struct readFiles lib, struct reads* reads,
 			if(dist < lib.maxInsert && ((oriPE == 0 && r1dir && r2dir) || (oriPE == 1 && !r1dir && !r2dir) || (oriPE == 2 && (r1dir != r2dir)))){
 				printf("Set virtual Bridge\n");
 				printf("Found Bridge over R1Right: %i R2Left: %i (Paths: %i : %i)\n",r1anno->rJunctionDist,r2anno->lJunctionDist,r1path,r2path);
-				setVirtualBridge(G,r1ID,r1path,r2path,1,0,dist);
+				setVirtualBridge(G,r1path,r2path,1,0,dist);
 				hitnum++;
 			}
 		}
@@ -2053,7 +2058,7 @@ void buildBridge(struct myovlList* G, struct readFiles lib, struct reads* reads,
 			if(dist < lib.maxInsert && ((oriPE == 0 && r1dir && r2dir) || (oriPE == 1 && !r1dir && !r2dir) || (oriPE == 2 && (r1dir != r2dir)))){
 				printf("Set virtual Bridge\n");
 				printf("Found Bridge over R1Right: %i R2Right: %i (Paths: %i : %i)\n",r1anno->rJunctionDist,r2anno->rJunctionDist,r1path,r2path);
-				setVirtualBridge(G,r1ID,r1path,r2path,1,1,dist);
+				setVirtualBridge(G,r1path,r2path,1,1,dist);
 				hitnum++;
 			}
 		}
@@ -2105,9 +2110,9 @@ void readTouring(struct myovlList* G, struct readFiles* files, struct reads* rea
 
 	// PE relation info
 	int pathR1, pathR2;
-	int compR1, compR2;
-	int ldistR1, ldistR2;
-	int rdistR1, rdistR2;
+	int compR1 = -1, compR2 = -1;
+	int ldistR1 = -1, ldistR2 = -1;
+	int rdistR1 = -1, rdistR2 = -1;
 
 	// Concordance Stats
 	int insert;
@@ -2121,10 +2126,10 @@ void readTouring(struct myovlList* G, struct readFiles* files, struct reads* rea
 	int* insert_array;
 
 	// Read Annotation
-	struct j_anno* j_annoR1;
-	struct j_anno* j_annoR2;
-	struct pc_anno* pc_annoR1;
-	struct pc_anno* pc_annoR2;
+	struct j_anno* j_annoR1 = NULL;
+	struct j_anno* j_annoR2 = NULL;
+	struct pc_anno* pc_annoR1 = NULL;
+	struct pc_anno* pc_annoR2 = NULL;
 
 	int minIns;
 	int maxIns;

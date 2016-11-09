@@ -9,8 +9,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "DBGraph.h"
-#include "uthash.h"
-#include "../PKmiscLib/include/misc_hash.h"
+#include "FileReader.h"
+//#include "uthash.h"
+#include "misc_hash.h"
 
 int cNodeId;
 struct redGraph* redGraph;
@@ -23,7 +24,8 @@ void collapseEdges(int i, int dest,int ori, int up){
 	// up -> nodes have a common parent; !up -> nodes have a common child
 	struct ReadNode *anode, *abefnode,*bnode,*temp;
 	int alen,blen,abdiff;
-	struct KannteNode *kannte,*befkannte;
+	struct KannteNode *kannte;
+//	struct KannteNode *befkannte;
 
 	anode = redGraph->array[dest].headread;
 	abefnode = NULL;
@@ -463,11 +465,12 @@ int verticalReduction(){
 int scaffoldRedGraph(){
 	printf("CHECKPOINT: Scaffold RedGraph\n");
 	struct edge *edge, *edgehead;
-	struct ReadNode *readNode, *readdestNode;
+	struct ReadNode *readNode;
+	struct ReadNode *readdestNode = NULL;
 	struct KannteNode *kannte;
 //	struct Reads *read;
 	int i,j;
-	int dest; // A free node in the graph, can be used for node duplication
+	int dest = 0; // A free node in the graph, can be used for node duplication
 	int ori;  // Repeat node, which should be duplicated
 
 	for(i=1;i<=redGraph->V;i++){
@@ -512,6 +515,10 @@ int scaffoldRedGraph(){
 						if(!redGraph->array[dest].headread){
 							redGraph->array[dest].headread = newreadNode;
 							readdestNode = newreadNode;
+						}
+						else if(!readdestNode){
+							printf("No readdestNode in DBGraph_reduced.c\n");
+							exit(1);
 						}
 						else{
 							readdestNode->next = newreadNode;
@@ -926,291 +933,291 @@ void printRedDot(char *fileName){
 	printf("Wrote dot file: %s\n",fileName);
 }
 
-///* 	Called by travToRedOvl
-//	Transfers the graph from the error corrected original deBruijn graph,
-//	represented by adjacency list in reduced one.
-//	Traversal follows the path till it reaches a vertex with an in- or outgree unequal to one
-//	Than it stops and creates a new reduces edge (Kannte) and give it an new index if it doesn't already exists */
+/////* 	Called by travToRedOvl
+////	Transfers the graph from the error corrected original deBruijn graph,
+////	represented by adjacency list in reduced one.
+////	Traversal follows the path till it reaches a vertex with an in- or outgree unequal to one
+////	Than it stops and creates a new reduces edge (Kannte) and give it an new index if it doesn't already exists */
+////
+//void collectInternalNodes(int i,int Knoten){
+//	int j,outdegree;
+//int goahead = 0;
+//	int depth = 1;
+//	struct AdjListNode *parent,*child;
+//	struct Kannte *s = &redGraph->array[Knoten];
+//	struct tempHash *p;
 //
-void collectInternalNodes(int i,int Knoten){
-	int j,outdegree;
-int goahead = 0;
-	int depth = 1;
-	struct AdjListNode *parent,*child;
-	struct Kannte *s = &redGraph->array[Knoten];
-	struct tempHash *p;
+//	struct LinkListNode *link;
+//	struct Reads *read;
+//	struct KannteNode *kanntennode;
+//	int key,dir;
+//
+//	do{
+//		goahead = 0;
+//		parent = graph->array[i].head;
+//		child = graph->array[i].tail;
+//
+//		if(((parent && !parent->next) && (child && !child->next)) || !parent){
+//			link = graph->array[i].Link;
+//			while(link){
+//				if(__builtin_clz(link->ID)){	// start
+//					key = link->ID;
+//					dir = 0;
+//				}
+//				else{							// end
+//					key = link->ID & DEL_READ_END;
+//					dir = 1;
+//				}
+//				HASH_FIND(hhb,allReads,&key,sizeof(int),read);
+//				if(!read){
+//					read = (struct Reads*)malloc(sizeof(struct Reads));
+//					read->ID = key;
+//					read->headkannte = NULL;
+//					HASH_ADD(hhb,allReads,ID,sizeof(int),read);
+//				}
+//
+//				kanntennode = (struct KannteNode*)malloc(sizeof(struct KannteNode));
+//				kanntennode->dest = Knoten;
+//				kanntennode->pos = depth;
+//				kanntennode->next = read->headkannte;
+//				read->headkannte = kanntennode;
+//
+//				struct ReadNode *readnode = (struct ReadNode*)malloc(sizeof(struct ReadNode));
+//				kanntennode->ReadNode = readnode;
+//				readnode->dir = dir;
+//				readnode->pos = depth;
+//				readnode->flag = 0;
+//				readnode->read = read;
+//				readnode->next = redGraph->array[Knoten].headread;
+//				redGraph->array[Knoten].headread = readnode;
+//
+//				link = link->next;
+//			}
+//
+//			if((parent && !parent->next) && (child && !child->next)){
+//				depth++;
+//				i = parent->dest;
+//				goahead=1;
+//			}
+//		}
+//	} while(goahead);
+//	s->len = depth;
+//
+//	// connect the new node to the parents and the parents to the new node
+////		printf("P: %i\n",i);
+//	HASH_FIND( hhb ,temp, &i, sizeof(int), p);
+//	if(p){
+//		for(j=0;j<p->numIDs;j++){
+//			struct edge* newedge = (struct edge*)malloc(sizeof(struct edge));
+//			newedge->dest = Knoten;
+//			newedge->next = redGraph->array[p->newID[j]].tail;
+//			redGraph->array[p->newID[j]].tail = newedge;
+//
+//			newedge = (struct edge*)malloc(sizeof(struct edge));
+//			newedge->dest = p->newID[j];
+//			newedge->next = s->head;
+//			s->head = newedge;
+//		}
+//	}
+//	else{
+//		outdegree = outDegree(i);
+//		if(outdegree){
+//			p = (struct tempHash*)malloc(sizeof(struct tempHash));
+//			p->oldID = i;
+//			p->numIDs = outdegree;
+//			p->newID = (int*)malloc(sizeof(int)*(outdegree+1));
+//			for(j=0;j<outdegree;j++){
+////				redGraph->array[cNodeId] = (struct Knoten*)malloc(sizeof(struct Knoten));
+//				p->newID[j] = cNodeId++;
+//			}
+//			HASH_ADD(hhb,temp,oldID,sizeof(int),p);
+//			for(j=0;j<p->numIDs;j++){
+//				struct edge* newedge = (struct edge*)malloc(sizeof(struct edge));
+//				newedge->dest = Knoten;
+//				newedge->next = redGraph->array[p->newID[j]].tail;
+//				redGraph->array[p->newID[j]].tail = newedge;
+//
+//				newedge = (struct edge*)malloc(sizeof(struct edge));
+//				newedge->dest = p->newID[j];
+//				newedge->next = s->head;
+//				s->head = newedge;
+//			}
+//		}
+//	}
+//		// whats next, create next (empty) edges, save them
+//}
 
-	struct LinkListNode *link;
-	struct Reads *read;
-	struct KannteNode *kanntennode;
-	int key,dir;
+///* 	Traverse once through the original, corrected graph and searches for junctions.
+//	If one is found, it creates a new reduces edge and calls collectInternalNodes
+//	till the path is not reducible anymore. */
+//
+//void travToRedOVL(){
+//	int i,j,outdegree;
+//	cNodeId = 0;
+//
+//	// create redGraph
+//	redGraph = (struct redGraph*)malloc(sizeof(struct redGraph));
+//	redGraph->array = (struct Kannte*)malloc(sizeof(struct Kannte)*(graph->V/10));
+//	redGraph->vFlag = (char*)malloc(sizeof(char)*(graph->V/10));
+//	struct Kannte *newArray;
+//	struct KannteNode *kanntennode;
+//	struct LinkListNode *link;
+//	struct Reads *read;
+//	int key,dir;
+//	char *newFlags;
+//	redGraph->V = (graph->V)/10;
+//	for(j=0;j<redGraph->V;j++){
+//		redGraph->array[j].len = 0;
+//		redGraph->array[j].head = NULL;
+//		redGraph->array[j].tail = NULL;
+//		redGraph->array[j].headread = NULL;
+//		redGraph->array[j].maxpos = -1;
+//		redGraph->array[j].minpos = -1;
+//		redGraph->vFlag[j]=0;
+//	}
+//
+//
+//	struct tempHash *s;
+//	struct AdjListNode *chnode,*panode;
+//	for(i=1; i<graph->V; i++){
+//		chnode = graph->array[i].tail;
+//		panode = graph->array[i].head;
+//		if((chnode && !chnode->next) && (panode && !panode->next)){
+//			// in and out == 1
+//			// internal node, catched by collectInternalNodes
+//			continue;
+//		}
+//		else if(!panode){											// out = 0
+//			// parent-dead-end (upstream)
+//			continue;
+//		}
+//		else{
+//			// Junction or child-dead-end
+////			printf("Junction at: %i\n",i);
+//			HASH_FIND( hhb ,temp, &i, sizeof(int), s);
+//			if(s==NULL){	// New junction, not inndexed yet
+//				outdegree = outDegree(i);
+//				if(outdegree){
+//					s = (struct tempHash*)malloc(sizeof(struct tempHash));
+//					s->oldID = i;
+//					s->numIDs = outdegree;
+//					s->newID = (int*)malloc(sizeof(int)*(outdegree+1));
+//					for(j=0;j<outdegree;j++){
+//						s->newID[j] = cNodeId++;
+//					}
+//					HASH_ADD(hhb,temp,oldID,sizeof(int),s);
+//					for(j=0;j<s->numIDs;j++){
+//						link = graph->array[i].Link;
+//						while(link){
+//							if(__builtin_clz(link->ID)){	// start
+//								key = link->ID;
+//								dir = 0;
+//							}
+//							else{							// end
+//								key = link->ID & DEL_READ_END;
+//								dir = 1;
+//							}
+//							HASH_FIND(hhb,allReads,&key,sizeof(int),read);
+//							if(!read){
+//								read = (struct Reads*)malloc(sizeof(struct Reads));
+//								read->ID = key;
+//								read->headkannte = NULL;
+//								HASH_ADD(hhb,allReads,ID,sizeof(int),read);
+//							}
+//							kanntennode = (struct KannteNode*)malloc(sizeof(struct KannteNode));
+//							kanntennode->dest = s->newID[j];
+//							kanntennode->pos = 0;
+//							kanntennode->next = read->headkannte;
+//							read->headkannte = kanntennode;
+//
+//							struct ReadNode *readnode = (struct ReadNode*)malloc(sizeof(struct ReadNode));
+//							kanntennode->ReadNode = readnode;
+//							readnode->dir = dir;
+//							readnode->pos = 0;
+//							readnode->flag = 0;
+//							readnode->read = read;
+//							readnode->next = redGraph->array[s->newID[j]].headread;
+//							redGraph->array[s->newID[j]].headread = readnode;
+//
+//							link = link->next;
+//
+//						}
+//
+//						// Collect information of the first node
+////						printf("Start internal node collection at node: %i\n",i);
+//						collectInternalNodes(panode->dest,s->newID[j]);
+//						panode = panode->next;
+//					}
+//				}
+//			}
+//			else{ // Junction is already indexed
+//				for(j=0;j<s->numIDs;j++){
+//					link = graph->array[i].Link;
+//					while(link){
+//						if(__builtin_clz(link->ID)){	// start
+//							key = link->ID;
+//							dir = 0;
+//						}
+//						else{							// end
+//							key = link->ID & DEL_READ_END;
+//							dir = 1;
+//						}
+//						HASH_FIND(hhb,allReads,&key,sizeof(int),read);
+//						if(!read){
+//							read = (struct Reads*)malloc(sizeof(struct Reads));
+//							read->ID = key;
+//							read->headkannte = NULL;
+//							HASH_ADD(hhb,allReads,ID,sizeof(int),read);
+//						}
+//						kanntennode = (struct KannteNode*)malloc(sizeof(struct KannteNode));
+//						kanntennode->dest = s->newID[j];
+//						kanntennode->pos = 0;
+//						kanntennode->next = read->headkannte;
+//						read->headkannte = kanntennode;
+//
+//						struct ReadNode *readnode = (struct ReadNode*)malloc(sizeof(struct ReadNode));
+//						kanntennode->ReadNode = readnode;
+//						readnode->dir = dir;
+//						readnode->pos = 0;
+//						readnode->flag = 0;
+//						readnode->read = read;
+//						readnode->next = redGraph->array[s->newID[j]].headread;
+//						redGraph->array[s->newID[j]].headread = readnode;
+//
+//						link = link->next;
+//					}
+//					// Collect information of the first node
+////					printf("Start internal node collection at node: %i\n",i);
+//					collectInternalNodes(panode->dest,s->newID[j]);
+//					panode = panode->next;
+//				}
+//			}
+//		}
+//
+//		if(cNodeId > redGraph->V-10){ // Resize reduced graph (Size depends hardly by k-size and the percentage of error)
+//			printf("Reallac redGraph Size (old: %i)\n",redGraph->V);
+//			newArray = (struct Kannte*)realloc(redGraph->array,(sizeof(struct Kannte))*(2*redGraph->V));
+//			newFlags = (char*)realloc(redGraph->vFlag,sizeof(char)*(2*redGraph->V));
+//			redGraph->array = newArray;
+//			redGraph->vFlag = newFlags;
+//			for(j=redGraph->V;j<(redGraph->V*2);j++){
+//				redGraph->array[j].len = 0;
+//				redGraph->array[j].head = NULL;
+//				redGraph->array[j].tail = NULL;
+//				redGraph->array[j].headread = NULL;
+//				redGraph->vFlag[j]=0;
+//			}
+//			redGraph->V*=2;
+//		}
+//	}
+//	redGraph->V = cNodeId;
+//	printf("End Graph-contraction. Remaining Nodes: %i\n",redGraph->V);
+//
+//	// Delete and free the non-reduced Graph
+//
+//}
 
-	do{
-		goahead = 0;
-		parent = graph->array[i].head;
-		child = graph->array[i].tail;
-
-		if(((parent && !parent->next) && (child && !child->next)) || !parent){
-			link = graph->array[i].Link;
-			while(link){
-				if(__builtin_clz(link->ID)){	// start
-					key = link->ID;
-					dir = 0;
-				}
-				else{							// end
-					key = link->ID & DEL_READ_END;
-					dir = 1;
-				}
-				HASH_FIND(hhb,allReads,&key,sizeof(int),read);
-				if(!read){
-					read = (struct Reads*)malloc(sizeof(struct Reads));
-					read->ID = key;
-					read->headkannte = NULL;
-					HASH_ADD(hhb,allReads,ID,sizeof(int),read);
-				}
-
-				kanntennode = (struct KannteNode*)malloc(sizeof(struct KannteNode));
-				kanntennode->dest = Knoten;
-				kanntennode->pos = depth;
-				kanntennode->next = read->headkannte;
-				read->headkannte = kanntennode;
-
-				struct ReadNode *readnode = (struct ReadNode*)malloc(sizeof(struct ReadNode));
-				kanntennode->ReadNode = readnode;
-				readnode->dir = dir;
-				readnode->pos = depth;
-				readnode->flag = 0;
-				readnode->read = read;
-				readnode->next = redGraph->array[Knoten].headread;
-				redGraph->array[Knoten].headread = readnode;
-
-				link = link->next;
-			}
-
-			if((parent && !parent->next) && (child && !child->next)){
-				depth++;
-				i = parent->dest;
-				goahead=1;
-			}
-		}
-	} while(goahead);
-	s->len = depth;
-
-	// connect the new node to the parents and the parents to the new node
-//		printf("P: %i\n",i);
-	HASH_FIND( hhb ,temp, &i, sizeof(int), p);
-	if(p){
-		for(j=0;j<p->numIDs;j++){
-			struct edge* newedge = (struct edge*)malloc(sizeof(struct edge));
-			newedge->dest = Knoten;
-			newedge->next = redGraph->array[p->newID[j]].tail;
-			redGraph->array[p->newID[j]].tail = newedge;
-
-			newedge = (struct edge*)malloc(sizeof(struct edge));
-			newedge->dest = p->newID[j];
-			newedge->next = s->head;
-			s->head = newedge;
-		}
-	}
-	else{
-		outdegree = outDegree(i);
-		if(outdegree){
-			p = (struct tempHash*)malloc(sizeof(struct tempHash));
-			p->oldID = i;
-			p->numIDs = outdegree;
-			p->newID = (int*)malloc(sizeof(int)*(outdegree+1));
-			for(j=0;j<outdegree;j++){
-//				redGraph->array[cNodeId] = (struct Knoten*)malloc(sizeof(struct Knoten));
-				p->newID[j] = cNodeId++;
-			}
-			HASH_ADD(hhb,temp,oldID,sizeof(int),p);
-			for(j=0;j<p->numIDs;j++){
-				struct edge* newedge = (struct edge*)malloc(sizeof(struct edge));
-				newedge->dest = Knoten;
-				newedge->next = redGraph->array[p->newID[j]].tail;
-				redGraph->array[p->newID[j]].tail = newedge;
-
-				newedge = (struct edge*)malloc(sizeof(struct edge));
-				newedge->dest = p->newID[j];
-				newedge->next = s->head;
-				s->head = newedge;
-			}
-		}
-	}
-		// whats next, create next (empty) edges, save them
-}
-
-/* 	Traverse once through the original, corrected graph and searches for junctions.
-	If one is found, it creates a new reduces edge and calls collectInternalNodes
-	till the path is not reducible anymore. */
-
-void travToRedOVL(){
-	int i,j,outdegree;
-	cNodeId = 0;
-
-	// create redGraph
-	redGraph = (struct redGraph*)malloc(sizeof(struct redGraph));
-	redGraph->array = (struct Kannte*)malloc(sizeof(struct Kannte)*(graph->V/10));
-	redGraph->vFlag = (char*)malloc(sizeof(char)*(graph->V/10));
-	struct Kannte *newArray;
-	struct KannteNode *kanntennode;
-	struct LinkListNode *link;
-	struct Reads *read;
-	int key,dir;
-	char *newFlags;
-	redGraph->V = (graph->V)/10;
-	for(j=0;j<redGraph->V;j++){
-		redGraph->array[j].len = 0;
-		redGraph->array[j].head = NULL;
-		redGraph->array[j].tail = NULL;
-		redGraph->array[j].headread = NULL;
-		redGraph->array[j].maxpos = -1;
-		redGraph->array[j].minpos = -1;
-		redGraph->vFlag[j]=0;
-	}
-
-
-	struct tempHash *s;
-	struct AdjListNode *chnode,*panode;
-	for(i=1; i<graph->V; i++){
-		chnode = graph->array[i].tail;
-		panode = graph->array[i].head;
-		if((chnode && !chnode->next) && (panode && !panode->next)){
-			// in and out == 1
-			// internal node, catched by collectInternalNodes
-			continue;
-		}
-		else if(!panode){											// out = 0
-			// parent-dead-end (upstream)
-			continue;
-		}
-		else{
-			// Junction or child-dead-end
-//			printf("Junction at: %i\n",i);
-			HASH_FIND( hhb ,temp, &i, sizeof(int), s);
-			if(s==NULL){	// New junction, not inndexed yet
-				outdegree = outDegree(i);
-				if(outdegree){
-					s = (struct tempHash*)malloc(sizeof(struct tempHash));
-					s->oldID = i;
-					s->numIDs = outdegree;
-					s->newID = (int*)malloc(sizeof(int)*(outdegree+1));
-					for(j=0;j<outdegree;j++){
-						s->newID[j] = cNodeId++;
-					}
-					HASH_ADD(hhb,temp,oldID,sizeof(int),s);
-					for(j=0;j<s->numIDs;j++){
-						link = graph->array[i].Link;
-						while(link){
-							if(__builtin_clz(link->ID)){	// start
-								key = link->ID;
-								dir = 0;
-							}
-							else{							// end
-								key = link->ID & DEL_READ_END;
-								dir = 1;
-							}
-							HASH_FIND(hhb,allReads,&key,sizeof(int),read);
-							if(!read){
-								read = (struct Reads*)malloc(sizeof(struct Reads));
-								read->ID = key;
-								read->headkannte = NULL;
-								HASH_ADD(hhb,allReads,ID,sizeof(int),read);
-							}
-							kanntennode = (struct KannteNode*)malloc(sizeof(struct KannteNode));
-							kanntennode->dest = s->newID[j];
-							kanntennode->pos = 0;
-							kanntennode->next = read->headkannte;
-							read->headkannte = kanntennode;
-
-							struct ReadNode *readnode = (struct ReadNode*)malloc(sizeof(struct ReadNode));
-							kanntennode->ReadNode = readnode;
-							readnode->dir = dir;
-							readnode->pos = 0;
-							readnode->flag = 0;
-							readnode->read = read;
-							readnode->next = redGraph->array[s->newID[j]].headread;
-							redGraph->array[s->newID[j]].headread = readnode;
-
-							link = link->next;
-
-						}
-
-						// Collect information of the first node
-//						printf("Start internal node collection at node: %i\n",i);
-						collectInternalNodes(panode->dest,s->newID[j]);
-						panode = panode->next;
-					}
-				}
-			}
-			else{ // Junction is already indexed
-				for(j=0;j<s->numIDs;j++){
-					link = graph->array[i].Link;
-					while(link){
-						if(__builtin_clz(link->ID)){	// start
-							key = link->ID;
-							dir = 0;
-						}
-						else{							// end
-							key = link->ID & DEL_READ_END;
-							dir = 1;
-						}
-						HASH_FIND(hhb,allReads,&key,sizeof(int),read);
-						if(!read){
-							read = (struct Reads*)malloc(sizeof(struct Reads));
-							read->ID = key;
-							read->headkannte = NULL;
-							HASH_ADD(hhb,allReads,ID,sizeof(int),read);
-						}
-						kanntennode = (struct KannteNode*)malloc(sizeof(struct KannteNode));
-						kanntennode->dest = s->newID[j];
-						kanntennode->pos = 0;
-						kanntennode->next = read->headkannte;
-						read->headkannte = kanntennode;
-
-						struct ReadNode *readnode = (struct ReadNode*)malloc(sizeof(struct ReadNode));
-						kanntennode->ReadNode = readnode;
-						readnode->dir = dir;
-						readnode->pos = 0;
-						readnode->flag = 0;
-						readnode->read = read;
-						readnode->next = redGraph->array[s->newID[j]].headread;
-						redGraph->array[s->newID[j]].headread = readnode;
-
-						link = link->next;
-					}
-					// Collect information of the first node
-//					printf("Start internal node collection at node: %i\n",i);
-					collectInternalNodes(panode->dest,s->newID[j]);
-					panode = panode->next;
-				}
-			}
-		}
-
-		if(cNodeId > redGraph->V-10){ // Resize reduced graph (Size depends hardly by k-size and the percentage of error)
-			printf("Reallac redGraph Size (old: %i)\n",redGraph->V);
-			newArray = (struct Kannte*)realloc(redGraph->array,(sizeof(struct Kannte))*(2*redGraph->V));
-			newFlags = (char*)realloc(redGraph->vFlag,sizeof(char)*(2*redGraph->V));
-			redGraph->array = newArray;
-			redGraph->vFlag = newFlags;
-			for(j=redGraph->V;j<(redGraph->V*2);j++){
-				redGraph->array[j].len = 0;
-				redGraph->array[j].head = NULL;
-				redGraph->array[j].tail = NULL;
-				redGraph->array[j].headread = NULL;
-				redGraph->vFlag[j]=0;
-			}
-			redGraph->V*=2;
-		}
-	}
-	redGraph->V = cNodeId;
-	printf("End Graph-contraction. Remaining Nodes: %i\n",redGraph->V);
-
-	// Delete and free the non-reduced Graph
-
-}
-
-///* 	Called by travToRedOvl
+///* 	Called by travToRedOvl_v2
 //	Transfers the graph from the error corrected original deBruijn graph,
 //	represented by adjacency list in reduced one.
 //	Traversal follows the path till it reaches a vertex with an in- or outgree unequal to one
@@ -1255,14 +1262,14 @@ int collectInternalNodes_v2(int i,int Knoten){
 				key = link->ID & DEL_READ_END;
 				dir = 1;
 			}
-			HASH_FIND(hhb,allReads,&key,sizeof(int),read);
-			if(!read){
-				read = (struct Reads*)malloc(sizeof(struct Reads));
-				read->ID = key;
-				read->headkannte = NULL;
-				HASH_ADD(hhb,allReads,ID,sizeof(int),read);
-			}
-
+//			HASH_FIND(hhb,allReads,&key,sizeof(int),read);
+//			if(!read){
+//				read = (struct Reads*)malloc(sizeof(struct Reads));
+//				read->ID = key;
+//				read->headkannte = NULL;
+//				HASH_ADD(hhb,allReads,ID,sizeof(int),read);
+//			}
+			read = &allReads[key];
 			kanntennode = (struct KannteNode*)malloc(sizeof(struct KannteNode));
 			kanntennode->dest = Knoten;
 			kanntennode->pos = depth;
@@ -1321,6 +1328,15 @@ inline static void initRedNode(int j){
 			redGraph->vFlag[j]=0;
 }
 
+void initAllReads(){
+	int i;
+	allReads = (struct Reads*)malloc(sizeof(struct Reads*)*(numreads+1));
+	for(i=1;i<=numreads;i++){
+		allReads[i].ID = i;
+		allReads[i].headkannte = NULL;
+	}
+}
+
 /* 	Traverse once through the original, corrected graph and searches for junctions.
 	If one is found, it creates a new reduces edge and calls collectInternalNodes
 	till the path is not reducible anymore. */
@@ -1336,7 +1352,8 @@ inline static void initRedNode(int j){
  * 		   					(3) One Parent with more than one Child
  */
 void travToRedOVL_v2(){
-	int i,j,outdegree;
+	int i;
+//	int j,outdegree;
 	cNodeId = 1;
 
 	struct AdjListNode *chnode,*panode;
@@ -1349,11 +1366,12 @@ void travToRedOVL_v2(){
 	printf("Number of new nodes representing a start point of a reduced graph: %i (in bits: %i)\n",nodeNum,BITS_TO_REPRESENT(nodeNum));
 
 	// create redGraph
+	initAllReads();
 	redGraph = (struct redGraph*)malloc(sizeof(struct redGraph));
 	redGraph->array = (struct Kannte*)malloc(sizeof(struct Kannte)*(nodeNum+1)); // Empty 0-Element
 	redGraph->vFlag = (char*)malloc(sizeof(char)*(nodeNum+1));
 	redGraph->V = nodeNum;
-	struct Kannte *newArray;
+//	struct Kannte *newArray;
 	struct KannteNode *kanntennode;
 	struct LinkListNode *link;
 	struct Reads *read;
@@ -1406,13 +1424,14 @@ void travToRedOVL_v2(){
 					key = link->ID & DEL_READ_END;
 					dir = 1;
 				}
-				HASH_FIND(hhb,allReads,&key,sizeof(int),read);
-				if(!read){
-					read = (struct Reads*)malloc(sizeof(struct Reads));
-					read->ID = key;
-					read->headkannte = NULL;
-					HASH_ADD(hhb,allReads,ID,sizeof(int),read);
-				}
+//				HASH_FIND(hhb,allReads,&key,sizeof(int),read);
+//				if(!read){
+//					read = (struct Reads*)malloc(sizeof(struct Reads));
+//					read->ID = key;
+//					read->headkannte = NULL;
+//					HASH_ADD(hhb,allReads,ID,sizeof(int),read);
+//				}
+				read = &allReads[key];
 				kanntennode = (struct KannteNode*)malloc(sizeof(struct KannteNode));
 				kanntennode->dest = redNode;
 				kanntennode->pos = 0;

@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "DBGraph.h"
 #include "DBGraph_stringer.h"
 //#include "DBGraph_reduced.h"

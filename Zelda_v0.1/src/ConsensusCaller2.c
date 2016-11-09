@@ -5,11 +5,13 @@
  *      Author: kaempfpp
  */
 
-#include "ConsensusCaller.h"
-#include "kmer.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
+#include "ConsensusCaller.h"
+#include "kmer.h"
+
 
 #define H_RANGE 200
 
@@ -481,9 +483,9 @@ struct pairAlign poa_backtrace(struct Sequence* contig, char* seq, struct Letter
 	struct Letter_T* newLetter;
 	struct Letter_T* left;
 	struct Letter_T* newLetterRight = NULL;
-	int32_t newLetterRightID;
+	int32_t newLetterRightID = -1;
 	struct LetterEdge* newEdge;
-	struct Letter_T* current_Right;
+	struct Letter_T* current_Right = NULL;
 
 	// Find correct letter for local end point of contained sequence alignments
 //	if(!backbone){
@@ -826,7 +828,8 @@ void poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq
 		else printf("CHECKPOINT: Start PO_Alignment for CONTAINED Read\n");
 	}
 
-	int i,j;
+//	int i;
+//	int j;
 
 	// 1. Alignemnt matrix size definition and line assignment to the poa Nodes
 	int line = poa_align_prepro(contig,strlen(seq),overhang);
@@ -871,7 +874,7 @@ void poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq
 	char* refseq = align.refSeq;
 	char* readseq = align.readSeq;
 	int length = align.len;
-	j = align.j;
+//	j = align.j;
 	current = align.current;
 
 	clock_gettime(CLOCK_MONOTONIC, &ts_finish);
