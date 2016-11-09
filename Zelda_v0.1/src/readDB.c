@@ -178,7 +178,7 @@ void writeDB(char* outDB, int blocks, struct readFiles* files){
 		fwrite(&temp,sizeof(int),1,db);
 		fwrite(files[i].leftReads,sizeof(char),temp,db);
 		if(files[i].rightReads){
-			printf("RightReads (lib %i): %s\n",i,files[i].rightReads);
+//			printf("RightReads (lib %i): %s\n",i,files[i].rightReads);
 			temp = strlen(files[i].rightReads);
 			fwrite(&temp,sizeof(int),1,db);
 			fwrite(files[i].rightReads,sizeof(char),temp,db);

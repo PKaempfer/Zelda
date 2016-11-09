@@ -395,13 +395,14 @@ void internalVerticalReduction(int c, int p){
  * 		   0 - Otherwise: Nothing could be reduced, go ahead without a new reduction iteration.
  */
 int verticalReduction(){
+	char verbose = 1;
 	int succ = 0, inter = 0;
 	int i;
 	int dest;
 	int indegree, outdegree;
 	struct edge *edge;
 	for (i = 1; i <= redGraph->V; i++){
-//		printf("Node: %i\n",i);
+		if(verbose) printf("Node: %i\n",i);
 	 	indegree = 0;
 	 	outdegree = 0;
 	 	edge = redGraph->array[i].tail;
@@ -414,7 +415,7 @@ int verticalReduction(){
 	 		// Hypothetical start point of a reduction and not an upper end point
 	 		if(redGraph->array[i].head){
 	 			inter = 1;
-//	 			printf("Hypothetical start point for vertical reduction at node: %i (outdegree: %i)\n",i,outdegree);
+	 			if(verbose) printf("Hypothetical start point for vertical reduction at node: %i (outdegree: %i)\n",i,outdegree);
 	 		}
 	 	}
 	 	else{
@@ -429,7 +430,7 @@ int verticalReduction(){
 	 		}
 	 	}
 	 	if(inter){
-//	 		printf("Test: %i\n",i);
+	 		if(verbose) printf("Test: %i\n",i);
 		 	edge = redGraph->array[i].head;
 		 	indegree = 0;
 		 	while(edge){
@@ -438,19 +439,19 @@ int verticalReduction(){
 		 		edge = edge->next;
 		 	}
 		 	if(indegree == 1){
-//		 		printf("Test 2 : %i\n",i);
+		 		if(verbose) printf("Test 2 : %i\n",i);
 		 		// Hypothetical startpoint of a reducable edge
 		 		outdegree = 0;
 		 		edge = redGraph->array[dest].tail;
 		 		while(edge){
 	 				outdegree++;
 	 				edge = edge->next;
-//	 				printf("Outdegree: %i\n",outdegree);
+	 				if(verbose) printf("Outdegree: %i\n",outdegree);
 	 			}
 	 			if(outdegree == 1){
-//	 				printf("verticalReduction start node: %i\n", i);
+	 				if(verbose) printf("verticalReduction start node: %i\n", i);
 	 				internalVerticalReduction(i,dest);
-//	 				printf("\n");
+	 				if(verbose) printf("Node Finished\n");
 	 				succ = 1;
 	 			}
 	 		}
@@ -1330,7 +1331,7 @@ inline static void initRedNode(int j){
 
 void initAllReads(){
 	int i;
-	allReads = (struct Reads*)malloc(sizeof(struct Reads*)*(numreads+1));
+	allReads = (struct Reads*)malloc(sizeof(struct Reads)*(numreads+1));
 	for(i=1;i<=numreads;i++){
 		allReads[i].ID = i;
 		allReads[i].headkannte = NULL;

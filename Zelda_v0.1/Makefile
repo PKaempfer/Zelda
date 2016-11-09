@@ -32,5 +32,3 @@ Zelda.o: $(OBJECTS)
 	$(CC) $(CFLAGS) -c src/Zelda.c -o src/Zelda.o
 clean:
 	rm -f src/*.o Zelda
-	
-

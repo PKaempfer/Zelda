@@ -31,7 +31,7 @@
 int main(int argc, char* argv[]) {
 	char findotdump = 1;
 	char dotdump = 0;
-	char sleeptime = 1;
+	char sleeptime = 0;
 	int num_threads = 1;
 	time_t start,stop;
 
@@ -187,10 +187,12 @@ int main(int argc, char* argv[]) {
 //	printRedGraph();
 //	printRedDot("output/redRedredGraph.dot");
 	do{
-		printf("Graph reduction\n");
+		printf("Horizontal reduction\n");
 		reduceRedGraph();
+		printf("Vertical reduction\n");
 	}while(verticalReduction());
-	if(findotdump) printRedDot("output/finishedGraph.dot");
+	printf("Write dot-File: Reduced_DBG.dot");
+	if(findotdump) printRedDot("output/Reduced_DBG.dot");
 	countRemainingNodes();
 //	printRedGraph();
 	printf("CHECKPOINT: Reduce Graph (strong)\n");
