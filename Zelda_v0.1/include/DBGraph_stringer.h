@@ -137,15 +137,15 @@ void countRemainingNodes();
 
 struct myovlList* initOVLgraph(int);
 
-struct string_graph* initStringGraph(struct myovlList*);
+struct string_graph* initStringGraph(struct myovlList*, char*);
 
 void printStringGraph(struct myovlList*, char*);
 
 void printOVLgraph(struct myovlList*, int , char*);
 
-struct string_graph* catOVLgraph(struct myovlList*);
+struct string_graph* catOVLgraph(struct myovlList*, char*);
 
-void ovlToString(struct myovlList *O, struct string_graph *S);
+void ovlToString(struct myovlList *O, struct string_graph *S, char* pathAssembly);
 
 void print_string_graph_list(struct string_graph* G, char* label);
 

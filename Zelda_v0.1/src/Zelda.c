@@ -264,7 +264,7 @@ int main(int argc, char* argv[]) {
 	time(&start);
 	printf("Numread: %i\n",numreads);
 	struct myovlList* G = initOVLgraph(numreads);
-	struct string_graph* S = initStringGraph(G);
+	struct string_graph* S = initStringGraph(G,pathAssembly);
 //	exit(1);
 	time(&stop);
 	printf("Stringer: %0.2f\n",difftime (stop,start));
@@ -296,7 +296,7 @@ int main(int argc, char* argv[]) {
 			scaffGraphDot(G,reads,tempPath);
 		}
 		printf("Scaffolding finished, hopefully correctly ;-)\n");
-		exit(1);
+//		exit(1);
 //		No Scaffolding
 		time(&start);
 		printf("CHECKPOINT: POA\n");

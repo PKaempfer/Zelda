@@ -240,19 +240,25 @@ struct myovlList* initOVLgraph(int numreads){
 	return ovlgraph;
 }
 
-struct string_graph* initStringGraph(struct myovlList* ovlgraph){
+struct string_graph* initStringGraph(struct myovlList* ovlgraph,char* pathAssembly){
 //	stringer2(ovlgraph);
 	printf("FIND INITIAL CONTAINMENTS\n");
 	tag_A_Contained(ovlgraph);
 	printf("BEGIN STRINGER 3\n");
 	stringer3(ovlgraph);
 	printf("END STRINGER 3\n");
-	struct string_graph* S = catOVLgraph(ovlgraph);
+	struct string_graph* S = catOVLgraph(ovlgraph, pathAssembly);
 //	catOVLgraph(ovlgraph);
-	printOVLgraph(ovlgraph,1,"output/catOrgOVL.dot");
-	printOVLgraph(ovlgraph,0,"output/catRevOVL.dot");
-	printReducedOVLgraph(ovlgraph,1, "output/catRedRevOVL.dot");
-	printStringGraph(ovlgraph,"output/string.dot");
+	char* tempPath = (char*)malloc(200);
+	sprintf(tempPath,"%s/catOrgOVL.dot",pathAssembly);
+	printOVLgraph(ovlgraph,1,tempPath);
+	sprintf(tempPath,"%s/catRevOVL.dot",pathAssembly);
+	printOVLgraph(ovlgraph,0,tempPath);
+	sprintf(tempPath,"%s/catRedRevOVL.dot",pathAssembly);
+	printReducedOVLgraph(ovlgraph,1,tempPath);
+	sprintf(tempPath,"%s/string.dot",pathAssembly);
+	printStringGraph(ovlgraph,tempPath);
+	free(tempPath);
 	return S;
 }
 
@@ -401,7 +407,7 @@ void checkTransitivity(struct myovlList *ovlGraph){
 	printf("String graph is transitively closed\n");
 }
 
-struct string_graph* catOVLgraph(struct myovlList *ovlGraph){
+struct string_graph* catOVLgraph(struct myovlList *ovlGraph, char* pathAssembly){
 	int i;
 	struct bread *bread;
 //	struct KannteNode* kannte;
@@ -549,12 +555,12 @@ struct string_graph* catOVLgraph(struct myovlList *ovlGraph){
     S->side = side;
 
 	// Fill String graph
-	ovlToString(ovlGraph,S);
+	ovlToString(ovlGraph,S, pathAssembly);
 
 	return S;
 }
 
-void ovlToString(struct myovlList *G, struct string_graph *S){
+void ovlToString(struct myovlList *G, struct string_graph *S, char* pathAssembly){
 
 	char verbose = 0;
 
@@ -772,7 +778,10 @@ void ovlToString(struct myovlList *G, struct string_graph *S){
 
     printf("CHECKPOINT: StringGraphList\n");
 	print_string_graph_list(S,"Test_label");
-	print_overlap_graph_dot(S,"output/real_string.dot","StringGraph");
+	char* tempPath = (char*) malloc(200);
+	sprintf(tempPath,"%s/stringGraph.dot",pathAssembly);
+	print_overlap_graph_dot(S,tempPath,"StringGraph");
+	free(tempPath);
 }
 
 int backedge_length(struct string_graph* G, int v1, int v2){
