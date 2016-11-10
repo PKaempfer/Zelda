@@ -13,6 +13,8 @@
 #include <string.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include <time.h>
 #include <math.h>
 #include "kmer.h"
@@ -44,19 +46,33 @@ int main(int argc, char* argv[]) {
 	char* fastaFile = NULL;
 	char* outDB = NULL;
 	char* inDB = NULL;
+	char* assemName = NULL;
+	char* pathDB = (char*)malloc(1000);
+	char* pathAssembly = (char*)malloc(1000);
+	char* tempPath = (char*)malloc(1000);
 	int blocks = 64;
 	dtSize = sizeof(KmerBitBuffer)*8;
 	minovlLen=0;
 
 	for(i=0; i<argc ; i++){
+		if(strcmp(argv[i],"-@")==0){
+			assemName = (char*)malloc(1000);
+			strcpy(assemName,argv[i+1]);
+			struct stat st = {0};
+			if (stat(assemName, &st) == -1) {
+			    mkdir(assemName, 0700);
+			}
+			sprintf(pathDB,"%s/DB",assemName);
+			sprintf(pathAssembly,"%s/assembly",assemName);
+		}
 		if(strcmp(argv[i],"-k")==0){
 			nK = atoi(argv[i+1]);
-//			if(nK+1 > dtSize/2){
-//				printf("k can not be bigger than %i, set k to %i\n",(dtSize/2)-1,(dtSize/2)-1);
-//				nK = (dtSize/2) -1;
-//
-//			}
-//			else printf("k = %i\n",nK);
+			if(nK+1 > dtSize/2){
+				printf("k can not be bigger than %i, set k to %i\n",(dtSize/2)-1,(dtSize/2)-1);
+				nK = (dtSize/2) -1;
+
+			}
+			else printf("k = %i\n",nK);
 		}
 		if(strcmp(argv[i],"-in")==0){
 			fastaFile=(char*)malloc(500);
@@ -75,10 +91,30 @@ int main(int argc, char* argv[]) {
 		if(strcmp(argv[i],"-makedb")==0){
 			outDB = (char*)malloc(1000);
 			strcpy(outDB,argv[i+1]);
+			if(assemName){
+				struct stat st = {0};
+				if (stat(pathDB, &st) == -1) {
+				    mkdir(pathDB, 0700);
+				}
+			}
+			else{
+				printUsage();
+				exit(1);
+			}
 		}
 		if(strcmp(argv[i],"-db")==0){
 			inDB = (char*)malloc(1000);
 			strcpy(inDB,argv[i+1]);
+			if(assemName){
+				struct stat st = {0};
+				if (stat(pathAssembly, &st) == -1) {
+				    mkdir(pathAssembly, 0700);
+				}
+			}
+			else{
+				printUsage();
+				exit(1);
+			}
 		}
 	}
 
@@ -192,7 +228,10 @@ int main(int argc, char* argv[]) {
 		printf("Vertical reduction\n");
 	}while(verticalReduction());
 	printf("Write dot-File: Reduced_DBG.dot");
-	if(findotdump) printRedDot("output/Reduced_DBG.dot");
+	if(findotdump){
+		sprintf(tempPath,"%s/Reduced_DBG.dot",pathAssembly);
+		printRedDot(tempPath);
+	}
 	countRemainingNodes();
 //	printRedGraph();
 	printf("CHECKPOINT: Reduce Graph (strong)\n");
@@ -201,7 +240,10 @@ int main(int argc, char* argv[]) {
 		printf("Graph reduction\n");
 		reduceRedGraph_strong();
 	}while(verticalReduction());
-	if(findotdump) printRedDot("output/finishedGraph2.dot");
+	if(findotdump){
+		sprintf(tempPath,"%s/Reduced_DBG_strong.dot",pathAssembly);
+		printRedDot(tempPath);
+	}
 	time(&stop);
 	printf("Reducer Time: %0.2f\n",difftime (stop,start));
 	printf("Wait after Reduction\n");
@@ -209,8 +251,9 @@ int main(int argc, char* argv[]) {
 	printf("continue\n");
 	countRemainingNodes();
 	redGraphConnector();
-//	if(dotdump)
+	if(dotdump){
 		printRedGraphToFile("./output/redGraphAfter.list");
+	}
 
 //	testFunct();
 
@@ -248,8 +291,10 @@ int main(int argc, char* argv[]) {
 		printf("continue\n");
 //		exit(1);
 
-//		if(findotdump)
-			scaffGraphDot(G,reads,"./output/scaffGraph.dot");
+		if(findotdump){
+			sprintf(tempPath,"%s/scaffGraph.dot",pathAssembly);
+			scaffGraphDot(G,reads,tempPath);
+		}
 		printf("Scaffolding finished, hopefully correctly ;-)\n");
 		exit(1);
 //		No Scaffolding
@@ -261,7 +306,8 @@ int main(int argc, char* argv[]) {
 		printf("Wait after POA\n");
 		sleep(sleeptime);
 		printf("continue\n");
-		char* contigPath = "./output/correct_contigs.fasta";
+		char* contigPath = (char*)malloc(100);
+		sprintf(contigPath,"%s/contigs.fasta",pathAssembly);
 		printf("CHECKPOINT: FastaOut\n");
 		time(&start);
 		poa_printContigs(contigs_pog,contigPath);

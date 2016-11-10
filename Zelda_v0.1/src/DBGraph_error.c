@@ -433,6 +433,7 @@ void indelHandle(int ori){
 void perfectErrorCorrection(){
 //	struct AdjListNode *nextnode;
 //	int a, b;
+	char verbose = 0;
 	int i;
 	int round=0;
 	int change = 0;
@@ -457,9 +458,11 @@ void perfectErrorCorrection(){
 			}
 		}
 		round++;
-		if(round>2) break;
-		sprintf(dotFile,"test_%i.dot",round);
-		writeDot(dotFile);
+		if(round>5) break;
+		if(verbose){
+			sprintf(dotFile,"test_%i.dot",round);
+			writeDot(dotFile);
+		}
 	} while(change);
 	// Delete self pointing circles ?!?
 	indelHandle(i);
