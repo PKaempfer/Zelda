@@ -155,4 +155,6 @@ void poa_consensus(struct Sequence* contig);
 
 void poa_printContigs(struct POG* pog, char* contigFile);
 
+void free_POG(struct POG* contigs_pog);
+
 #endif

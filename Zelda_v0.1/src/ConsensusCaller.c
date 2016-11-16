@@ -1783,6 +1783,53 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     return pog;
 }
 
+void free_POG(struct POG* contigs_pog){
+	int i;
+	struct Letter_T* current;
+	struct LetterEdge* edge;
+	struct LetterEdge* nextedge;
+	struct LetterSource_S* sedge;
+	struct LetterSource_S* nextsedge;
+	for(i=0;i<numNodes;i++){
+//				printf("Letter NUmber %i\n",i);
+		current = &Letters[i];
+		edge = current->left;
+		while(edge){
+//					printf("Free left edge\n");
+			nextedge = edge->next;
+			free(edge);
+			edge = nextedge;
+		}
+		edge = current->right;
+		while(edge){
+//					printf("Free right edge\n");
+//					printf("Free right edge at pos: %i\n",i);
+			nextedge = edge->next;
+			free(edge);
+			edge = nextedge;
+		}
+		sedge = &current->source;
+		if(sedge){
+			sedge = sedge->next;
+			while(sedge){
+//						printf("Free source\n");
+				nextsedge = sedge->next;
+				free(sedge);
+				sedge = nextsedge;
+			}
+		}
+
+	}
+	for(i=0;i<contigs_pog->contigNum;i++){
+		free(contigs_pog->contig[i].name);
+		free(contigs_pog->contig[i].sequence);
+	}
+
+	free(Letters);
+	free(contigs_pog->contig);
+	free(contigs_pog);
+}
+
 
 ////#define SHOW_MATRIX
 //

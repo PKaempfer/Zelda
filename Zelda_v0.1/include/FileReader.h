@@ -46,6 +46,18 @@ struct readFiles{
 	int endId;				// Last read ID of this Lib
 };
 
+struct para{
+	char* assemblyName;
+	char* readDB;
+	char* asemblyFolder;
+	struct readFiles* files;
+	unsigned int blocks;
+	unsigned int threads;
+	unsigned int kSize;
+	unsigned int minOvlLen;
+	char run;
+};
+
 struct hash_block{
 	int pthr_id;
 	int pthr_num;
@@ -57,7 +69,11 @@ struct hash_block{
 
 void printUsage();
 
-struct readFiles* readCMDline(int argc, char *argv[], struct readFiles *files);
+void finished(struct para* para);
+
+struct para* readCMDline(int argc, char *argv[]);
+
+struct readFiles* readCMDmakeDB(int argc, char *argv[]);
 
 int readFile(struct readFiles* files);
 
