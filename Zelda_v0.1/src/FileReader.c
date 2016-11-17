@@ -23,33 +23,71 @@ int graphSize;
 char **readList;
 int numreads = 0;
 
-void printUsage(){
-	puts("Usage:");
-	puts("./DBSGA [options] -o <output_dir>");
-	puts("Options:");
-	puts("Create Database:");
-	puts("\t-makedb  <char>\t\t\t: Creates database. [Path to MetaDB]");
-	puts("\t-bn      <int>\t\t\t: Block number of the read database is split into [default: 64]");
-	puts("Make assembly:");
-	puts("\t-db      <char>\t\t\t: Reads a compressed database with all given libraries");
-	puts("\t-t       <int>\t\t\t: Number of threads for parallelized hash table construction");
-	puts("\t-k       <1..63>\t\t: k-mer size [default 47]");
-	puts("\t-m       <int>\t\t\t: Min overlap length in DeBruijn graph [k-mer size]");
-	puts("Paired-end reads:");
-	puts("\t-pe      <char char int int>\t: Paired-end library: [left-reads file, right reads file, minSize, maxSize]");
-	puts("\t-mp      <char char int int>\t: Mate-pair library: [left-reads file, right reads file, minSize, maxSize]");
-	puts("Singe-end reads:");
-	puts("\t-se      <char>\t\t\t: Single-end reads: [reads-file]");
-	puts("");
 
+
+void printUsageAll(){
+	printf("Usage:\n");
+	printf("\tZelda <Command> -@ <name> [options]\n");
+	printf("Commands:\n");
+	printf("\tmakedb\t\t Creates Read database in binary format\n");
+	printf("\tdb\t\t Make Assembly on the basis of a given database\n");
+	printf("\tassem\t\t Creates read database in binary format and makes assembly.\n");
+	printf("\n");
+}
+
+void printUsageMakeDB(){
+	printf("Usage: makedb creates read database in binary format\n");
+	printf("\tZelda makedb -@ <name> [options]\n");
+	printf("Options:\n");
+	printf("\t-@       <char>\t\t\t: Assembly Name, Creates Folder and writes database in the <name>/DB/ subfolder\n");
+	printf("\t-bn      <int>\t\t\t: Block number of the read database is split into. Should be > thread number [default: 64]\n");
+	printf("\t-t       <int>\t\t\t: Number of threads [default: 1]\n");
+	printf("Paired-end reads:\n");
+	printf("\t-pe      <char char int int>\t: Paired-end library: [left-reads file, right reads file, minSize, maxSize]\n");
+	printf("\t-mp      <char char int int>\t: Mate-pair library:  [left-reads file, right reads file, minSize, maxSize]\n");
+	printf("Singe-end reads:\n");
+	printf("\t-se      <char>\t\t\t: Single-end reads: [reads-file]\n");
+	printf("\n");
+}
+
+void printUsageDB(){
+	printf("Usage: db make assembly with existing database in existing assembly folder\n");
+	printf("\tZelda db -@ <name> [options]\n");
+	printf("Options:\n");
+	printf("\t-@       <char>\t\t\t: Assembly Name, Creates Folder and writes database in the <name>/DB/ subfolder\n");
+	printf("\t-t       <int>\t\t\t: Number of threads\n");
+	printf("\t-k       <1..63>\t\t: k-mer size [default 47]\n");
+	printf("\t-m       <int>\t\t\t: Min overlap length in DeBruijn graph >=k [default: k-mer size, k]\n");
+	printf("\n");
+}
+
+void printUsageAssem(){
+	printf("Usage: assem creates read database in binary format and makes assembly. Overwrites old database if already existing\n");
+	printf("\tZelda assem -@ <name> [options]\n");
+	printf("Options:\n");
+	printf("\t-@       <char>\t\t\t: Assembly Name, Creates Folder and writes database in the <name>/DB/ subfolder\n");
+	printf("\t-bn      <int>\t\t\t: Block number of the read database is split into. Should be > thread number [default: 64]\n");
+	printf("\t-t       <int>\t\t\t: Number of threads [default: 1]\n");
+	printf("\t-k       <1..63>\t\t: k-mer size [default 47]\n");
+
+	printf("Paired-end reads:\n");
+	printf("\t-pe      <char char int int>\t: Paired-end library: [left-reads file, right reads file, minSize, maxSize]\n");
+	printf("\t-mp      <char char int int>\t: Mate-pair library:  [left-reads file, right reads file, minSize, maxSize]\n");
+	printf("Singe-end reads:\n");
+	printf("\t-se      <char>\t\t\t: Single-end reads: [reads-file]\n");
+	printf("\n");
 }
 
 static inline void errorAbort(struct para* para){
-	printUsage();
-	int i;
+	switch(para->run){
+		case 1:  printUsageMakeDB(); break;
+		case 2:  printUsageDB(); break;
+		case 3:  printUsageAssem(); break;
+		default: printUsageAll(); break;
+	}
 	if(para->assemblyName) free(para->assemblyName);
 	if(para->files){
-		for(i=0;i<=para->files->libNum;i++){
+		for(int i=0;i<=para->files->libNum;i++){
 			free(para->files[i].leftReads);
 			free(para->files[i].rightReads);
 		}
@@ -88,26 +126,23 @@ struct para* readCMDline(int argc, char *argv[]){
 	para->kSize = 47;
 	para->minOvlLen = 0;
 	para->threads = 1;
+	para->run = 0;
 	dtSize = sizeof(KmerBitBuffer)*8;
 
 	int i;
-	int run = 0;
-	int name = 0;
 	for(i=0; i<argc; i++){
-		if(strcmp(argv[i],"makedb")==0) run = 1;
-		if(strcmp(argv[i],"db")==0) run = 2;
-		if(strcmp(argv[i],"assem")==0) run = 3;
+		if(strcmp(argv[i],"makedb")==0) para->run = 1;
+		if(strcmp(argv[i],"db")==0) para->run = 2;
+		if(strcmp(argv[i],"assem")==0) para->run = 3;
 		if(strcmp(argv[i],"-@")==0 && i+1 < argc && argv[i+1][0] != '-'){
 			para->assemblyName = (char*)malloc(strlen(argv[i+1])+1);
 			strcpy(para->assemblyName,argv[i+1]);
-			name = 1;
 		}
 	}
-	if(!run || !name){
+	if(!para->run || !para->assemblyName){
 		errorAbort(para);
 	}
-	para->run = run;
-	if(run == 1 || run == 3){
+	if(para->run == 1 || para->run == 3){
 		int error2 = 0;
 		for(i=0; i<argc; i++){
 			if(strcmp(argv[i],"-se")==0 || strcmp(argv[i],"-pe")==0 || strcmp(argv[i],"-mp")==0) error2 = 1;
@@ -120,7 +155,7 @@ struct para* readCMDline(int argc, char *argv[]){
 			errorAbort(para);
 		}
 	}
-	if(run == 2){
+	if(para->run == 2){
 		struct stat st;
 		char* temp = (char*)malloc(1000);
 		if(stat(para->assemblyName, &st) == -1) {
@@ -175,7 +210,7 @@ struct para* readCMDline(int argc, char *argv[]){
 	}
 	if(para->minOvlLen < para->kSize) para->minOvlLen = para->kSize;
 
-	if(run == 1 || run == 3){
+	if(para->run == 1 || para->run == 3){
 		struct stat st;
 		char* temp = (char*)malloc(1000);
 		if(stat(para->assemblyName, &st) == -1) mkdir(para->assemblyName, 0700);
@@ -187,7 +222,7 @@ struct para* readCMDline(int argc, char *argv[]){
 		free(temp);
 	}
 
-	if(run == 2 || run == 3){
+	if(para->run == 2 || para->run == 3){
 		struct stat st;
 		char* temp = (char*)malloc(1000);
 		sprintf(temp,"%s/Assembly",para->assemblyName);

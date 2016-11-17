@@ -67,7 +67,7 @@ struct hash_block{
 	char* fasta;
 };
 
-void printUsage();
+//void printUsage();
 
 void finished(struct para* para);
 
