@@ -117,8 +117,6 @@ volatile struct hashkmer_oa* resizeHashTable(){
 }
 
 char addReadEnd_oa(KmerBitBuffer current_new, readID read, int end, int32_t readlen){
-	char* kmer;
-	kmer = toSeq(current_new);
 	uint32_t bucket;
 	struct readEnd* new_readEnd = (struct readEnd*)malloc(sizeof(struct readEnd));
 	new_readEnd->next = NULL;

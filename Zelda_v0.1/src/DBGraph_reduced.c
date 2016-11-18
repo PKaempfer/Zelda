@@ -1470,6 +1470,7 @@ void travToRedOVL_v2(){
 			}
 		}
 	}
+	hashTable32_clean(ht);
 }
 
 /* 	GraphTraversal to provide absolute node positions in the graph. Each node knows its position in the graph
@@ -1558,4 +1559,45 @@ void prepareGraph(){
 			}
 		}
 	}
+}
+
+void freeRedGraph(){
+	struct edge* edge;
+	struct edge* edgeN;
+	struct ReadNode* read;
+	struct ReadNode* readN;
+
+	for(int i=0;i<redGraph->V;i++){
+		if(redGraph->array[i].head){
+//			printf("Free Head-Edge\n");
+			edge = redGraph->array[i].head;
+			while(edge->next){
+				edgeN = edge->next;
+				free(edge);
+				edge = edgeN;
+			}
+			free(edge);
+		}
+		if(redGraph->array[i].tail){
+//			printf("Free Tail-Edge\n");
+			edge = redGraph->array[i].tail;
+			while(edge->next){
+				edgeN = edge->next;
+				free(edge);
+				edge = edgeN;
+			}
+			free(edge);
+		}
+		if(redGraph->array[i].headread){
+//			printf("Free Read-List\n");
+			read = redGraph->array[i].headread;
+			while(read->next){
+				readN = read->next;
+				free(read);
+				read = readN;
+			}
+			free(read);
+		}
+	}
+
 }

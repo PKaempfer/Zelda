@@ -73,7 +73,7 @@ void finished(struct para* para);
 
 struct para* readCMDline(int argc, char *argv[]);
 
-struct readFiles* readCMDmakeDB(int argc, char *argv[]);
+struct readFiles* readCMDmakeDB(int argc, char *argv[], int libNum);
 
 int readFile(struct readFiles* files);
 
@@ -101,7 +101,6 @@ void fileScheduler(char* inFile, int pthr_num, pthread_t* threads);
 
 struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* threads);
 
-//void hash_chain_len_histogram(UT_hash_table *tbl);
-
+void freeFiles(struct para* para);
 
 #endif /* FILEREADER_H_ */

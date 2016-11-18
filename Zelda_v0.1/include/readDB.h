@@ -35,6 +35,8 @@ void writeDB(char* outDB, int blocks, struct readFiles* files);
 
 struct reads* readDB(char* outDB);
 
+void freeDB(struct reads* reads);
+
 int readFastA_DB(char* inFile, int readNum, int jump);
 
 int readFastQ_DB(char* inFile, int readNum, int jump);

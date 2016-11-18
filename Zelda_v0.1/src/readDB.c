@@ -302,6 +302,14 @@ struct reads* readDB(char* outDB){
 	return reads;
 }
 
+void freeDB(struct reads* reads){
+	for(int i=1;i<=numreads;i++){
+		free(reads[i].seq);
+		if(reads[i].annotation) free(reads[i].annotation);
+	}
+	free(reads);
+}
+
 char* compressRead(char* read){
 //	printf("Read: %s\n",read);
 	int len = strlen(read);

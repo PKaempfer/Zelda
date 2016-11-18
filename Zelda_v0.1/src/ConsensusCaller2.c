@@ -151,6 +151,7 @@ void poa_catBackbone2(struct Sequence* contig, struct myovlList *G, struct reads
 	leftID = contig->readright;
 	struct Letter_T* left;
 	struct Letter_T* current;
+	struct LetterEdge* oldEdge;
 
 	if(verbose) printf("Cat Backbone: ");
 	for(;i<len;i++){
@@ -172,10 +173,11 @@ void poa_catBackbone2(struct Sequence* contig, struct myovlList *G, struct reads
 		current->left->next = NULL;
 //		printf("Set Right edge to leftID: %i\n",leftID);
 		left = &Letters[leftID];
+		oldEdge = left->right;
 		left->right = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
 		left->right->counter = 0;
 		left->right->dest = numNodes;
-		left->right->next = NULL;
+		left->right->next = oldEdge;
 
 		leftID = numNodes;
 		numNodes++;
@@ -694,6 +696,9 @@ struct pairAlign poa_backtrace(struct Sequence* contig, char* seq, struct Letter
 	strcpy(align.refSeq,refseq);
 	align.j = j;
 	align.current = current;
+
+	free(refseq);
+	free(readseq);
 
 	return align;
 }

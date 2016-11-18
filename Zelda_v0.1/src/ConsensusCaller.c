@@ -610,6 +610,7 @@ void poa_catBackbone(struct Sequence* contig, struct myovlList *G, struct reads*
 	leftID = contig->readright;
 	struct Letter_T* left;
 	struct Letter_T* current;
+	struct LetterEdge* oldEdge;
 
 //	printf("LeftID: %i\n",leftID);
 
@@ -632,10 +633,11 @@ void poa_catBackbone(struct Sequence* contig, struct myovlList *G, struct reads*
 		current->left->next = NULL;
 //		printf("Set Right edge to leftID: %i\n",leftID);
 		left = &Letters[leftID];
+		oldEdge = left->right;
 		left->right = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
 		left->right->counter = 1;
 		left->right->dest = numNodes;
-		left->right->next = NULL;
+		left->right->next = oldEdge;
 
 		leftID = numNodes;
 		numNodes++;
@@ -1304,7 +1306,7 @@ void scaffold_stats(struct scaffold_set* aS){
 			ns++;
 		}
 	}
-
+	free(nStat);
 }
 
 
@@ -1770,6 +1772,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     }
 
     // _________ Scaffold Consensus Calling
+    free_schaffoldSet(aS);
 
     free(readseq);
     free(revreadseq);

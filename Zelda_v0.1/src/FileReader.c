@@ -112,6 +112,7 @@ void finished(struct para* para){
 	if(para->readDB) free(para->readDB);
 	if(para->asemblyFolder) free(para->asemblyFolder);
 	free(para);
+	printf("No program Faults occurred\nTool terminated regularly!!!\n");
 	exit(EXIT_SUCCESS);
 }
 
@@ -143,14 +144,14 @@ struct para* readCMDline(int argc, char *argv[]){
 		errorAbort(para);
 	}
 	if(para->run == 1 || para->run == 3){
-		int error2 = 0;
+		int libNum = 0;
 		for(i=0; i<argc; i++){
-			if(strcmp(argv[i],"-se")==0 || strcmp(argv[i],"-pe")==0 || strcmp(argv[i],"-mp")==0) error2 = 1;
+			if(strcmp(argv[i],"-se")==0 || strcmp(argv[i],"-pe")==0 || strcmp(argv[i],"-mp")==0) libNum++;
 		}
-		if(!error2){
+		if(!libNum){
 			errorAbort(para);
 		}
-		para->files = readCMDmakeDB(argc,argv);
+		para->files = readCMDmakeDB(argc,argv,libNum);
 		if(!para->files){
 			errorAbort(para);
 		}
@@ -235,11 +236,11 @@ struct para* readCMDline(int argc, char *argv[]){
 	return para;
 }
 
-struct readFiles* readCMDmakeDB(int argc, char *argv[]){
+struct readFiles* readCMDmakeDB(int argc, char *argv[],int libnumTot){
 	int i,j;
 	int libnum = 0;
 	int maxnum = 20;
-	struct readFiles* files = (struct readFiles*)malloc(sizeof(struct readFiles) * maxnum);
+	struct readFiles* files = (struct readFiles*)malloc(sizeof(struct readFiles) * libnumTot);
 
 	// find all read files and set their parameters
 	for(i=0; i<argc;i++){
@@ -295,6 +296,9 @@ struct readFiles* readCMDmakeDB(int argc, char *argv[]){
 		}
 	}
 	files->libNum = libnum;
+
+//	files = realloc(files,libnum*sizeof(struct readFiles));
+
 	return files;
 }
 
@@ -613,4 +617,14 @@ struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* thread
     free(readDBFile);
 
 	return files;
+}
+
+void freeFiles(struct para* para){
+	if(!para->files) return;
+	for(int i=0; i<para->files->libNum; i++){
+		free(para->files[i].leftReads);
+		free(para->files[i].rightReads);
+	}
+	free(para->files);
+	para->files = NULL;
 }

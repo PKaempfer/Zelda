@@ -328,6 +328,20 @@ struct scaffold_set* contigs_init(struct myovlList* G){ //, struct reads* reads
     return aS;
 }
 
+void free_schaffoldSet(struct scaffold_set* aS){
+	struct scaffEdge* edge;
+    for(int i = 1; i < pathsNum; i++){
+    	while(aS->scaff[i-1].first){
+    		edge = aS->scaff[i-1].first->next;
+    		free(aS->scaff[i-1].first);
+    		aS->scaff[i-1].first = edge;
+    	}
+    }
+
+	free(aS->scaff);
+	free(aS);
+}
+
 
 /**
  * Same Dot output like readStringGraph, but based on the Overlap Graph

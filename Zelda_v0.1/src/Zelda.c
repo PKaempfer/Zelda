@@ -33,12 +33,12 @@ int main(int argc, char* argv[]) {
 	char dotdump = 0;
 	char sleeptime = 0;
 	time_t start,stop;
-	int i;
 
 	struct para* para = readCMDline(argc, argv);
 
 	if(para->run == 1 || para->run == 3){
 		makeDB(para->readDB, para->blocks, para->files);
+		freeFiles(para);
 		if(para->run == 1) finished(para);
 	}
 
@@ -77,7 +77,7 @@ int main(int argc, char* argv[]) {
 //	printf("CHECKPOINT: Clean Hash Table\n");
 //	cleanGraph();
 
-	printf("CHECKPOINT: Error Correction Table\n");
+	printf("CHECKPOINT: 4 Error Correction\n");
 	time(&start);
 	perfectErrorCorrection();// errorCorrection();
 //	writeDot("./output/test_aftererror.dot");
@@ -87,7 +87,7 @@ int main(int argc, char* argv[]) {
 	sleep(sleeptime);
 	printf("continue\n");
 
-	printf("CHECKPOINT: Prepare Reduction\n");
+	printf("CHECKPOINT: 5. Graph Reduction\n");
 	time(&start);
 	prepareGraph();
 	printf("CHECKPOINT: Reduce Graph (light)\n");
@@ -142,12 +142,13 @@ int main(int argc, char* argv[]) {
 		printRedGraphToFile(tempPath);
 	}
 
+
 //	testFunct();
 
 //	printRedGraph();
 //	printRedGraphToFile("./output/redGraph.list");
 //	exit(1);
-	printf("CHECKPOINT: Stringer:\n");
+	printf("CHECKPOINT: 6. Stringer (Overlaps to String Graph):\n");
 	time(&start);
 	printf("Numread: %i\n",numreads);
 	struct myovlList* G = initOVLgraph(numreads);
@@ -162,12 +163,10 @@ int main(int argc, char* argv[]) {
 	printf("CHECKPOINT: ContigWriter\n");
 
 
+	// Scaffolding
+	printf("CHECKPOINT: 7. Scaffolding\n");
 	printf("Re-read the input Database");
 	struct reads* reads = readDB(para->readDB);
-//		initScaff(G,reads);
-
-	// Scaffolding
-	printf("CHECKPOINT: Scaffolding\n");
 	time(&start);
 	initScaff(G,reads);
 	readTouring(G,para->files,reads);
@@ -177,7 +176,6 @@ int main(int argc, char* argv[]) {
 	sleep(sleeptime);
 	printf("continue\n");
 //		exit(1);
-
 	if(findotdump){
 		sprintf(tempPath,"%s/scaffGraph.dot",para->asemblyFolder);
 		scaffGraphDot(G,reads,tempPath);
@@ -186,7 +184,8 @@ int main(int argc, char* argv[]) {
 //		exit(1);
 //		No Scaffolding
 	time(&start);
-	printf("CHECKPOINT: POA\n");
+
+	printf("CHECKPOINT: 8. POA (Layout-Consensus)\n");
 	struct POG* contigs_pog = make_poaScaff(G,reads,0);
 	time(&stop);
 	printf("POA: %0.2f\n",difftime (stop,start));
@@ -198,6 +197,7 @@ int main(int argc, char* argv[]) {
 	printf("CHECKPOINT: FastaOut\n");
 	time(&start);
 	poa_printContigs(contigs_pog,contigPath);
+	free(contigPath);
 	time(&stop);
 	printf("FASTA Out: %0.2f\n",difftime (stop,start));
 	printf("Wait after FastaOut\n");
@@ -216,91 +216,8 @@ int main(int argc, char* argv[]) {
 //		poa_printContigs(contigs_pog,contigPath);
 //		poa_toDot("output/poa.dot");
 //		exit(1);
-	if(contigs_pog){
-		free_POG(contigs_pog);
-	}
+	if(contigs_pog) free_POG(contigs_pog);
+	freeDB(reads);
+	freeMyOvlList(G,S);
 	finished(para);
-
-	for(i=1;i<=numreads;i++){
-		free(reads[i].seq);
-	}
-	free(reads);
-//		for(i=0;i<contigs->num;i++){
-//			free(contigs->contig[i].seq);
-//		}
-//		free(contigs->contig);
-//		free(contigs);
-
-
-	// Destruct all memory consuming objects
-
-	struct bread* bread;
-	struct bread* breadN;
-	for(i=0;i<=G->V;i++){
-		if(G->read[i]){
-			bread = G->read[i]->first;
-			if(bread){
-//				printf("Free bread: %i of node: %i\n",bread->ID,i);
-				while(bread->next){
-					breadN = bread->next;
-					free(bread->dest);
-					free(bread);
-					bread = breadN;
-				}
-				free(bread->dest);
-				free(bread);
-			}
-		}
-		free(G->read[i]);
-	}
-	free(G->read);
-	free(G);
-
-	free(S->ID);
-	free(S->edge);
-	free(S->length);
-	free(S->side);
-	free(S->status);
-	free(S);
-
-	struct edge* edge;
-	struct edge* edgeN;
-	struct ReadNode* read;
-	struct ReadNode* readN;
-
-	for(i=0;i<redGraph->V;i++){
-		if(redGraph->array[i].head){
-//			printf("Free Head-Edge\n");
-			edge = redGraph->array[i].head;
-			while(edge->next){
-				edgeN = edge->next;
-				free(edge);
-				edge = edgeN;
-			}
-			free(edge);
-		}
-		if(redGraph->array[i].tail){
-//			printf("Free Tail-Edge\n");
-			edge = redGraph->array[i].tail;
-			while(edge->next){
-				edgeN = edge->next;
-				free(edge);
-				edge = edgeN;
-			}
-			free(edge);
-		}
-		if(redGraph->array[i].headread){
-//			printf("Free Read-List\n");
-			read = redGraph->array[i].headread;
-			while(read->next){
-				readN = read->next;
-				free(read);
-				read = readN;
-			}
-			free(read);
-		}
-	}
-	printf("No program Faults occurred\nTool terminated regularly!!!\n");
-
-	exit(1);
 }

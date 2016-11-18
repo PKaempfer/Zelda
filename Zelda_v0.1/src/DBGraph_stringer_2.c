@@ -363,6 +363,25 @@ void upstreamTree(int i, struct partGraph* parentReadIds){
 //	}
 }
 
+void free_UpstreamTree(struct partGraph* parentReadIds){
+	int i;
+	struct edge* edge;
+	for(i=0;i<1000;i++){
+		while(parentReadIds->array[i].head){
+			edge = parentReadIds->array[i].head->next;
+			free(parentReadIds->array[i].head);
+			parentReadIds->array[i].head = edge;
+		}
+		while(parentReadIds->array[i].tail){
+			edge = parentReadIds->array[i].tail->next;
+			free(parentReadIds->array[i].tail);
+			parentReadIds->array[i].tail = edge;
+		}
+	}
+	free(parentReadIds->array);
+	free(parentReadIds);
+}
+
 // End start is again mandatory
 
 void printTag(struct partGraph *parentReadIds,struct ReadNode* rNode){
@@ -945,10 +964,8 @@ int stringer3(struct myovlList *ovlGraph){
 		}
 	}
 
-	free(parentReadIds->array);
-	free(parentReadIdsTemp->array);
-	free(parentReadIds);
-	free(parentReadIdsTemp);
+	free_UpstreamTree(parentReadIds);
+	free_UpstreamTree(parentReadIdsTemp);
 	free(seek->cbefpos);
 	free(seek->childs);
 	free(seek->parents);
@@ -1288,8 +1305,8 @@ void tag_A_Contained(struct myovlList *ovlGraph){
 	int flagged;
 	struct partGraph *childReadIds = (struct partGraph*)malloc(sizeof(struct partGraph));
 	childReadIds->V = 0;
-	childReadIds->array = (struct node*)malloc(sizeof(struct node)*100000);
-	for(i=0;i<100000;i++){
+	childReadIds->array = (struct node*)malloc(sizeof(struct node)*1000);
+	for(i=0;i<1000;i++){
 		childReadIds->array[i].head = NULL;
 		childReadIds->array[i].tail = NULL;
 		childReadIds->array[i].flag = 0;
@@ -1413,7 +1430,7 @@ void tag_A_Contained(struct myovlList *ovlGraph){
 								}
 							}
 						}
-// What ever this is: but second version does not work
+						// What ever this is: but second version does not work
 //						detagPath(rNode,endp,endk,childReadIds);
 						detagPath(rNode,detagnodepos,endk,childReadIds);
 //						printf("DeTag: ID: %i nodepos: %i , endk: %i\n",rNode->read->ID,detagnodepos,endk);
@@ -1427,13 +1444,38 @@ void tag_A_Contained(struct myovlList *ovlGraph){
 		}
 	}
 
-	for(i=0;i<100000;i++){
-		free(childReadIds->array[i].head);
-		free(childReadIds->array[i].tail);
-	}
-	free(childReadIds->array);
-	free(childReadIds);
-
+	free_UpstreamTree(childReadIds);
 	catchNonSetReads(ovlGraph);
+}
+
+void freeMyOvlList(struct myovlList* G, struct string_graph* S){
+	struct bread* bread;
+	struct bread* breadN;
+	for(int i=0;i<=G->V;i++){
+		if(G->read[i]){
+			bread = G->read[i]->first;
+			if(bread){
+				while(bread->next){
+					breadN = bread->next;
+					free(bread->dest);
+					free(bread);
+					bread = breadN;
+				}
+				free(bread->dest);
+				free(bread);
+			}
+		}
+		free(G->read[i]);
+	}
+	free(G->read);
+	free(G);
+
+	free(S->ID);
+	free(S->edge);
+	free(S->length);
+	free(S->side);
+	free(S->status);
+	free(S);
+
 }
 

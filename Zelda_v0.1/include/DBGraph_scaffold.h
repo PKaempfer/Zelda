@@ -91,6 +91,8 @@ struct scaffold_set* contigs_init(struct myovlList* G); // , struct reads* reads
 
 void initScaff(struct myovlList* G, struct reads* reads);
 
+void free_schaffoldSet(struct scaffold_set* aS);
+
 void readTouring(struct myovlList* G, struct readFiles* files, struct reads* reads);
 
 void scaffGraphDot(struct myovlList* G, struct reads* reads, char* dotfile);

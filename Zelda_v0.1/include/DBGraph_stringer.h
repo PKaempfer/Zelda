@@ -165,6 +165,8 @@ int endStart(int i,int *stp, int *endp, int *stk, int *endk, struct ReadNode *rn
 
 void tag_A_Contained(struct myovlList *ovlGraph);
 
+void freeMyOvlList(struct myovlList* G, struct string_graph* S);
+
 #endif /* DBGRAPH_STRINGER_H_ */
 
 
