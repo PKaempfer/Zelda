@@ -1,8 +1,12 @@
 /*
- * DBGraph_oa.c
- *
- *  Created on: Feb 10, 2016
- *      Author: kaempfpp
+ ============================================================================
+ Name        : DBGraph_oa.c
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Converts the dBG from (random access) hash table to cache
+ 	 	 	   coherent adjacency list and calculates edges
+ ============================================================================
  */
 
 #include <stdlib.h>

@@ -1,8 +1,11 @@
 /*
- * DBGraph_error.c
- *
- *  Created on: Nov 5, 2014
- *      Author: kaempfpp
+ ============================================================================
+ Name        : DBGraph_error.c
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Error correction of the de Bruijn Graph by zipping paths
+ ============================================================================
  */
 
 #include <stdio.h>

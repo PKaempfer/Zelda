@@ -1,8 +1,12 @@
 /*
- * DBGraph_stringer.h
- *
- *  Created on: Jan 28, 2015
- *      Author: kaempfpp
+ ============================================================================
+ Name        : DBGraph_stringer.h
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Heart of Zelda: Converts the dBG to a String Graph by calculating
+ 	 	 	   transitively irreducible overlaps from the dBG.
+ ============================================================================
  */
 
 #ifndef DBGRAPH_STRINGER_H_
@@ -26,7 +30,6 @@ struct node{							// Only used in struct partGraph, equivalent to Kannte
 	int layer;							// Number of edges to go to come to this node (0->1->2->3->4)
 	int depth;							// Global position of the node
 	int flag;							// Important to know which edges are allowed to go from the given node
-//	int minpos;							// Smallest allowed tagged area
 	struct edge *head;					// Edges to the parents
 	struct edge *tail;					// Edges to the children
 };

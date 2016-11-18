@@ -1,8 +1,13 @@
 /*
- * kmerHash_oa.h
- *
- *  Created on: Jan 25, 2016
- *      Author: lkaempfpp
+ ============================================================================
+ Name        : kmerHash_oa.h
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : This Data structure represents a open addressable hash table
+ 		 	   for concurrent, lock-free kmer hashing, exploiting the x86
+   			   architecture supported atomic CAS isntruction
+ ============================================================================
  */
 
 #ifndef KMERHASH_OA_H_

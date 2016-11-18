@@ -1,8 +1,13 @@
 /*
- * ConsensusCaller.c
- *
- *  Created on: Feb 26, 2016
- *      Author: kaempfpp
+ ============================================================================
+ Name        : ConsensusCaller.c
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Consensus Caller utilizes a re-implementation of POA - Algorithms
+ 	 	 	   (Lee et al.,2002) for multiple sequence alignments to create a
+ 	 	 	   Layout
+ ============================================================================
  */
 
 #include <stdio.h>
@@ -11,7 +16,6 @@
 #include <string.h>
 #include "ConsensusCaller.h"
 #include "DBGraph_scaffold.h"
-//#include "DBGraph_stringer.h"
 #include "readDB.h"
 #include "DBGraph.h"
 
@@ -46,7 +50,6 @@ void buildBackBone(struct myovlList* ovlgraph, struct string_graph* S, struct re
 
     int i;
     int run = 1;
-//    int breadID;
     struct bread* bread;
     char* adecomp;
     char* bdecomp;
@@ -67,7 +70,6 @@ void buildBackBone(struct myovlList* ovlgraph, struct string_graph* S, struct re
 
             for (e = side[w - 1].top + 1; e <= side[w].top; e++){
 //            	if(status[VERT(v)]==JUNCTION) printf("     %c -> %i[%3d]\n", (o ? 'e' : 'b'), edge[e].target, edge[e].length);
-
             	if(edge[e].length >= MIN_CONTIG_LEN){
             		printf("Build new Contig\n");
                     printf("     %c -> %s [len: %3d]\n",
@@ -94,7 +96,6 @@ void buildBackBone(struct myovlList* ovlgraph, struct string_graph* S, struct re
             			}
             			bread = bread->next;
             		}
-//            		ovlgraph->read[VERT(v)]->first;
             	}
             	else{
             		printf("     <100: %c -> %s [len: %3d]\n", (o ? 'e' : 'b'), vtx_name(edge[e].target, 5), edge[e].length);

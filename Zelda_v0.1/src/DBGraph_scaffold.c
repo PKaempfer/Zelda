@@ -1,8 +1,8 @@
 /*
  ============================================================================
- Name        : DBSGA.c
+ Name        : DBGraph_scaffold.c
  Author      : Kämpfer, Philipp
- Version     :
+ Version     : v0.1
  Copyright   : GPLv3 (general public license)
  Description : Scaffolding unit of the DBSGA
  ============================================================================

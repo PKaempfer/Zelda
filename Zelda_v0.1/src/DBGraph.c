@@ -1,8 +1,11 @@
 /*
- * DBgraph.c
- *
- *  Created on: Oct 13, 2014
- *      Author: kaempfpp
+ ============================================================================
+ Name        : DBGraph.c
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Meta-functions for dBG graph handling
+ ============================================================================
  */
 
 #include <stdio.h>

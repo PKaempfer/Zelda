@@ -2,7 +2,7 @@
  ============================================================================
  Name        : Zelda.c
  Author      : Kämpfer, Philipp
- Version     :
+ Version     : v0.1
  Copyright   : GPLv3 (general public license)
  Description : The Zelda Genome Assembler in C, Ansi-style
  ============================================================================

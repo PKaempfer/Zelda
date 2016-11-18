@@ -1,8 +1,12 @@
 /*
- * DBGraph_stringer_2.c
- *
- *  Created on: Jun 5, 2015
- *      Author: kaempfpp
+ ============================================================================
+ Name        : DBGraph_stringer_2.c
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Heart of Zelda: Converts the dBG to a String Graph by calculating
+ 	 	 	   transitively irreducible overlaps from the dBG.
+ ============================================================================
  */
 
 #include <stdio.h>

@@ -1,9 +1,9 @@
 /*
  ============================================================================
- Name        : DBSGA.c
+ Name        : DBGraph_scaffold.h
  Author      : Kämpfer, Philipp
- Version     :
- Copyright   : GPLv3 (GNU general public licence)
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
  Description : Scaffolding unit of the DBSGA
  ============================================================================
  */
@@ -14,15 +14,6 @@
 #include "readDB.h"
 #include "DBGraph_stringer.h"
 #include "FileReader.h"
-
-/** Relative orientation of the reads in the graph to each other */
-//#define FR 0 	//  --->   <--- (forward - reverse) -> Default
-//#define RF 1	//  <---   ---> (reverse - forward)
-//#define FF 2	//  --->   ---> (forward - forward) or
-//#define RR 2	// 	<---   <--- (reverse - reverse)
-//// FF =^ RR
-//
-//static const char* peOri[3]={"FR","RF","FF"};
 
 extern struct path* paths;
 extern int pathsNum;

@@ -1,8 +1,11 @@
 /*
- * FileReader.h
- *
- *  Created on: Oct 13, 2014
- *      Author: kaempfpp
+ ============================================================================
+ Name        : FileReader.h
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Zelda File- and Parameter-Handling
+ ============================================================================
  */
 
 #ifndef FILEREADER_H_
@@ -67,8 +70,6 @@ struct hash_block{
 	char* fasta;
 };
 
-//void printUsage();
-
 void finished(struct para* para);
 
 struct para* readCMDline(int argc, char *argv[]);
@@ -80,8 +81,6 @@ int readFile(struct readFiles* files);
 int readFastA(char* inFile, int readNum, int jump);
 
 int readFastQ(char* inFile, int readNum, int jump);
-
-//void createKmers(char* read, int readNum);// ,struct hashTable *kmere);
 
 void cleanGraph();
 

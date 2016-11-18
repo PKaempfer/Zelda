@@ -1,8 +1,11 @@
 /*
- * readDB.h
- *
- *  Created on: Feb 15, 2016
- *      Author: kaempfpp
+ ============================================================================
+ Name        : readDB.c
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Zelda Database Handling
+ ============================================================================
  */
 
 #ifndef READDB_H_

@@ -1,8 +1,11 @@
 /*
- * kmerHash.c
- *
- *  Created on: Mar 2, 2015
- *      Author: kaempfpp
+ ============================================================================
+ Name        : kmerHash.c
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Further Hash-Functions
+ ============================================================================
  */
 
 #include <stdio.h>
@@ -284,9 +287,9 @@ uint32_t murmur3_32(const char *key) {
 
 	switch (len & 3) {
 	case 3:
-		k1 ^= tail[2] << 16;
+		k1 ^= tail[2] << 16; break;
 	case 2:
-		k1 ^= tail[1] << 8;
+		k1 ^= tail[1] << 8; break;
 	case 1:
 		k1 ^= tail[0];
 

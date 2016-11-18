@@ -1,12 +1,13 @@
 /*
- * kmerHash_oa.c
- *
- *  Created on: Jan 25, 2016
- *      Author: Philipp Kämpfer
- *
- *  Description:	This Data structure represents a open addressable hash table
- *  			 	for concurrent, lock-free kmer hashing, exploiting the x86
- *  			 	architecture supported atomic CAS isntruction
+ ============================================================================
+ Name        : kmerHash_oa.c
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : This Data structure represents a open addressable hash table
+ 		 	   for concurrent, lock-free kmer hashing, exploiting the x86
+   			   architecture supported atomic CAS isntruction
+ ============================================================================
  */
 
 #include <stdio.h>
@@ -19,9 +20,6 @@
 #include "kmerHash_oa.h"
 #include "kmerHash.h"
 #include "FileReader.h"
-
-#define TRUE 1
-#define FALSE 0
 
 volatile unsigned char resize_mutex = 0;
 volatile unsigned char fin_mutex = 0;
@@ -144,7 +142,7 @@ char addReadEnd_oa(KmerBitBuffer current_new, readID read, int end, int32_t read
 		temp = __sync_val_compare_and_swap(&(*current_readEnd),NULL,new_readEnd);
 	} while(temp != NULL);
 
-	return TRUE;
+	return 1;
 }
 
 #ifdef TYPE128 // switch in kmer.h
@@ -182,7 +180,7 @@ char addKmer128_oa(KmerBitBuffer current_new){
 				// Command all threads to Stop or return if another thread already is doing this
 				if(!__sync_bool_compare_and_swap(&resize_mutex,0,1)){
 					printf("Already locked by other thread: Return and start new\n");
-					return FALSE;
+					return 0;
 				}
 				printf("Hash table full: RESIZE!\n");
 
@@ -220,7 +218,7 @@ char addKmer128_oa(KmerBitBuffer current_new){
 		new_counter = counter;
 		counter = __sync_val_compare_and_swap(&dbHash_oa[bucket].count,new_counter,new_counter+1);
 	} while(counter != new_counter);
-	return TRUE;
+	return 1;
 }
 
 
@@ -274,7 +272,7 @@ char addKmer_oa(KmerBitBuffer current_new){
 			sleep(1);
 			printf("HashTable is full, resize!!!\n");
 			pthread_mutex_unlock(&lock);
-			return FALSE;
+			return 0;
 		}
 
 		bucket = my_hash(current_new) + i;
@@ -291,7 +289,7 @@ char addKmer_oa(KmerBitBuffer current_new){
 		new_counter = counter;
 		counter = __sync_val_compare_and_swap(&dbHash_oa[bucket].count,new_counter,new_counter+1);
 	} while(counter != new_counter);
-	return TRUE;
+	return 1;
 }
 #endif
 

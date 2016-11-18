@@ -1,8 +1,11 @@
 /*
- * misc_hash.h
- *
- *  Created on: Aug 11, 2016
- *      Author: kaempfpp
+ ============================================================================
+ Name        : misc_hash.c
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : General Hash Functions
+ ============================================================================
  */
 
 #ifndef MISC_HASH_H_

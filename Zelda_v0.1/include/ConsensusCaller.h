@@ -1,17 +1,20 @@
 /*
- * ConsensusCaller.h
- *
- *  Created on: Feb 26, 2016
- *      Author: kaempfpp
+ ============================================================================
+ Name        : ConsensusCaller.h
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Consensus Caller utilizes a re-implementation of POA - Algorithms
+ 	 	 	   (Lee et al.,2002) for multiple sequence alignments to create a
+ 	 	 	   Layout
+ ============================================================================
  */
-
 
 #ifndef CONSENSUS_H_
 #define CONSENSUS_H_
 
 #include "DBGraph_stringer.h"
 #include "readDB.h"
-//#include "../poaV2/poa.h"
 
 #define GAP_PENALTY  -1
 
@@ -91,7 +94,6 @@ struct Sequence {/** */
 	char* sequence;					/** Title of the contig*/
 	char* name;						/** Name of Contig */
 	int nsource_seq;				/** Number of sequences in representing this PO graph */
-//	LPOSourceInfo_T *source_seq;	/** */
 };
 
 struct POG{

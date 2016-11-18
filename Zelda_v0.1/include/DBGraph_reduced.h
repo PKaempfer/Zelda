@@ -1,8 +1,11 @@
 /*
- * DBGraph_reduced.h
- *
- *  Created on: Nov 14, 2014
- *      Author: kaempfpp
+ ============================================================================
+ Name        : DBGraph_reduced.h
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Collapse unique paths in dBG
+ ============================================================================
  */
 
 #ifndef DBGRAPH_REDUCED_H_

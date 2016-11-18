@@ -1,8 +1,11 @@
 /*
- * kmerHash.h
- *
- *  Created on: Mar 2, 2015
- *      Author: kaempfpp
+ ============================================================================
+ Name        : kmerHash.h
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Further Hash-Functions
+ ============================================================================
  */
 
 #ifndef KMERHASH_H_
@@ -23,10 +26,6 @@ struct hashkmer {
 	int index;  // If minus the direction has changed, take further the children instead of parents and vice versa
 	struct hashkmer *next;
 };
-
-//struct hashTable{
-//	KmerBitBuffer kmer;
-//};
 
 readID setID(int, int);
 

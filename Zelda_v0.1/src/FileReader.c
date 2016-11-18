@@ -1,8 +1,11 @@
 /*
- * FileReader.c
- *
- *  Created on: Oct 13, 2014
- *      Author: kaempfpp
+ ============================================================================
+ Name        : FileReader.c
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Zelda File- and Parameter-Handling
+ ============================================================================
  */
 
 #include <stdio.h>
@@ -569,7 +572,6 @@ struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* thread
 	int blockend;
 	rest_blocks = blocks%pthr_num;
 	blocks_per_thread = blocks/pthr_num;
-//	fin_mutex = -1;
 	pthr_runN = pthr_num;
 
 	printf("Init Number of Threads: %i in %i blocks\n",pthr_num,blocks);
@@ -590,15 +592,6 @@ struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* thread
 	    pthread_create(&threads[i], NULL, mt_fileReaderDB, (void*)&hash_block[i]);
 		blockst = blockend+1;
 	}
-
-//    do{
-//    	sleep(5);
-//    	printf("Waited another 5 seconds -> That means a new STATS (YEAHH)\n");
-//    	if(resize_mutex){
-//    		while(resize_mutex);
-//    	}
-//    	hashStats_oa();
-//    } while(fin_mutex != pthr_num);
 
 	void* status;
     for(i = 0; i < pthr_num; i++){

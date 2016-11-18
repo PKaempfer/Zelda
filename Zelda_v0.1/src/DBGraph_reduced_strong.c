@@ -1,9 +1,13 @@
 /*
- * DBGraph_reduced_strong.c
- *
- *  Created on: Aug 8, 2016
- *      Author: kaempfpp
+ ============================================================================
+ Name        : DBGraph_reduced_strong.c
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Collapse unique paths in dBG
+ ============================================================================
  */
+
 
 #include "DBGraph_reduced.h"
 #include <stdlib.h>

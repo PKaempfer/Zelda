@@ -1,15 +1,17 @@
 /*
- * kmer.h
- *
- *  Created on: Oct 13, 2014
- *      Author: kaempfpp
+ ============================================================================
+ Name        : kmer.h
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : K-mer handling in character and binary based representation
+ ============================================================================
  */
 
 #ifndef KMER_H_
 #define KMER_H_
 
 #include <stdint.h>
-//#include "uthash.h"
 #include <math.h>
 
 #ifndef NULL
@@ -84,13 +86,11 @@ struct hashTable {
 	KmerBitBuffer kmer;
 	char trans;
 	int index;  // If minus the direction has changed, take further the children instead of parents and vice versa
-//	UT_hash_handle hhb;
 };
 
 struct readLink{
 	KmerBitBuffer kmer;
 	readID *read;
-//	UT_hash_handle hhb;
 };
 
 struct kmerList{

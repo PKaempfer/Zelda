@@ -1,26 +1,18 @@
 /*
- * DBGraph_stringer_refine.c
- *
- *  Created on: Feb 20, 2015
- *      Author: kaempfpp
+ ============================================================================
+ Name        : DBGraph_stringer_refine.c
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Heart of Zelda: Converts the dBG to a String Graph by calculating
+ 	 	 	   transitively irreducible overlaps from the dBG.
+ ============================================================================
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "DBGraph_stringer.h"
 #include "DBGraph.h"
-
-//// Macros defining functions
-//// Interesting: Creates a max function for the given type
-//#define GENERIC_MAX(type) \
-//	type type##_max(type x, type y) \
-//	{	\
-//	return x > y ? x : y;  \
-//	}
-//
-//// Creates the function:
-//// float float_max(float x, float y) {return x > y ? x : y;}
-//GENERIC_MAX(float)
 
 static char status_char[] = { 'W', 'C', 'S', 'P', 'J' };
 static const char *arrowdir[2]={"normal","inv"};

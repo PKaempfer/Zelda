@@ -1,8 +1,13 @@
 /*
- * ConsensusCaller2.c
- *
- *  Created on: Apr 12, 2016
- *      Author: kaempfpp
+ ============================================================================
+ Name        : ConsensusCaller2.c
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Consensus Caller utilizes a re-implementation of POA - Algorithms
+ 	 	 	   (Lee et al.,2002) for multiple sequence alignments to create a
+ 	 	 	   Layout
+ ============================================================================
  */
 
 #include <stdio.h>

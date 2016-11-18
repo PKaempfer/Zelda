@@ -1,8 +1,11 @@
 /*
- * kmer.c
- *
- *  Created on: Oct 13, 2014
- *      Author: kaempfpp
+ ============================================================================
+ Name        : kmer.c
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : K-mer handling in character and binary based representation
+ ============================================================================
  */
 
 #include <stdlib.h>
@@ -98,48 +101,6 @@ char getTransBaseDown(KmerBitBuffer *kmer, int dir){
 	if(dir > 0) return rev_codes[(int)((*kmer) >> ((nK-1)*2))];
 	else return rev_codes[((char)(~(*kmer))) & 0x03];
 }
-
-// can used only once for each vertex, else problems with indexing the nodes
-//struct hashTable* hasChild(KmerBitBuffer *kmer, char base, char *dir){
-//	struct hashTable *s;
-//	static KmerBitBuffer temp;
-//	static KmerBitBuffer revtemp;
-//	temp = (*kmer) << 2;
-//	temp &= ~(((KmerBitBuffer)3) << (2*nK));
-//	temp |= (KmerBitBuffer)base;
-//	revtemp=revKmer(temp);
-//	if(revtemp<temp){
-//		temp = revtemp;
-//		(*dir) *= -1;
-//	}
-//	HASH_FIND(hhb,kmere,&temp,sizeof(KmerBitBuffer),s);
-//	if(s){
-//		return s;
-//	}
-//	else{
-//		return NULL;
-//	}
-//}
-//
-//struct hashTable* hasParent(KmerBitBuffer *kmer, char base, char *dir){
-//	struct hashTable *s;
-//	static KmerBitBuffer temp;
-//	static KmerBitBuffer revtemp;
-//	temp = (*kmer) >> 2;
-//	temp |= ((KmerBitBuffer)base << ((nK-1)*2));
-//	revtemp=revKmer(temp);
-//	if(revtemp<temp){
-//		temp = revtemp;
-//		(*dir) *= -1;
-//	}
-//	HASH_FIND(hhb,kmere,&temp,sizeof(KmerBitBuffer),s);
-//	if(s){
-//		return s;
-//	}
-//	else{
-//		return NULL;
-//	}
-//}
 
 // can used only once for each vertex, else problems with indexing the nodes
 struct hashkmer* hasChild_2(KmerBitBuffer *kmer, char base, char *dir){
