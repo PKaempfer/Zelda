@@ -220,7 +220,7 @@ struct para* readCMDline(int argc, char *argv[]){
 		if(stat(para->assemblyName, &st) == -1) mkdir(para->assemblyName, 0700);
 		sprintf(temp,"%s/DB",para->assemblyName);
 		if(stat(temp, &st) == -1) mkdir(temp, 0700);
-		sprintf(temp,"%s/DB/%s",para->assemblyName,para->assemblyName);
+		sprintf(temp,"%s/DB/%s.db",para->assemblyName,para->assemblyName);
 		para->readDB = (char*)malloc(strlen(temp)+1);
 		strcpy(para->readDB,temp);
 		free(temp);

@@ -42,6 +42,8 @@ static const int SM1[5][5] = 	{
 								 {-1, -1, -1, -1, -1}	// -
 };
 
+static const char* const varType[] = {"snp\0", "mnp\0", "ins\0", "del\0", "complex\0"};
+
 struct contig{
 	int len;
 	int stReadID;
@@ -58,15 +60,16 @@ struct contigList{
 // POA structs -> See ../poaV2/poa.h
 // Make my own data structure
 
-struct LetterSource_S {
-	int iseq;						/** index of the sequence, referencing the source_seq[] array*/
-	uint32_t ipos;					/** index of the corresponding position in that sequence */
-	struct LetterSource_S *next; 	/** next node in the linked list */
-};
+//struct LetterSource_S {
+//	int iseq;						/** index of the sequence, referencing the source_seq[] array*/
+//	uint32_t ipos;					/** index of the corresponding position in that sequence */
+//	struct LetterSource_S *next; 	/** next node in the linked list */
+//};
 
 struct LetterEdge{
 	uint32_t dest;
 	unsigned char counter;
+	char vFlag;
 	struct LetterEdge* next;
 };
 
@@ -74,7 +77,7 @@ struct LetterEdge{
 struct Letter_T {
 	struct LetterEdge* left; 		/** ADJACENT LETTER(S) TO THE LEFT */
 	struct LetterEdge* right; 		/** ADJACENT LETTER(S) TO THE RIGHT */
-	struct LetterSource_S source;	/** SOURCE SEQ POSITION(S) */
+//	struct LetterSource_S source;	/** SOURCE SEQ POSITION(S) */
 	struct Letter_T* align_ring; 	/** CIRCULAR LIST OF ALIGNED POSITIONS */
 	uint16_t counter;				/** Number reads supporting this letter (number of sources)  */
 	int* ml;						/** Line of Alignment matrix between the local PO graph and the new sequence*/
@@ -84,8 +87,21 @@ struct Letter_T {
 	char vFlag;
 };
 
+struct Variation{
+	uint32_t pos;					/** Variant Position relatively to reference sequence */
+	char* refSeq;					/** Reference sequence at the given pos */
+	char* altSeq;					/** Reference sequence at the given pos */
+	char* cigar;					/** CIGAR-String*/
+	uint16_t dp;					/** Totol Read Depth at this position */
+	uint16_t ao;					/** Number of reads supporting the alternative */
+	uint16_t ro;					/** Number of reads supporting the reference */
+	uint16_t len;					/** Length of truly different bases */
+	uint16_t type;					/** Type of alternative (snp, mnp, ins, del, complex) */
+	struct Variation* next;		/** Next Variation Position*/
+};
+
 /** holder for an LPO sequence, its letters, and associated information */
-struct Sequence {/** */
+struct Sequence{
 	int length;						/** Backbone/Ref length */
 	struct LetterEdge startLetter;	/** First Letter of the contig graph1*/
 	uint32_t readleft;				/** */
@@ -93,7 +109,10 @@ struct Sequence {/** */
 	char* title;					/** */
 	char* sequence;					/** Title of the contig*/
 	char* name;						/** Name of Contig */
+	float avgCov;					/** Average Coverage of Contig*/
 	int nsource_seq;				/** Number of sequences in representing this PO graph */
+	struct Variation* var;			/** Linked List of all Variations of the Contig/Scaffold */
+	struct Variation* lastvar;		/** Last Variation of the Contig/Scaffold */
 };
 
 struct POG{
@@ -149,9 +168,11 @@ void poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq
 
 struct POG* make_poa(struct myovlList* G, struct reads* reads);
 
-struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffolding);
+struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffolding, struct para* para);
 
 void poa_toDot(char* dotFile);
+
+void poa_reportVariant(struct POG* pog, char* vcfFile);
 
 void poa_consensus(struct Sequence* contig);
 

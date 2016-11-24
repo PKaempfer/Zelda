@@ -614,6 +614,7 @@ int endStart(int tag,int *stp, int *endp, int *stk, int *endk, struct ReadNode *
 int stringer3(struct myovlList *ovlGraph){
 	char verbose = 0;
 	char verbose2 = 0;
+	char verboseJOvl = 0;
 
 	int i,m,k;
 	int rNid = 0, rnNid = 0;
@@ -862,21 +863,22 @@ int stringer3(struct myovlList *ovlGraph){
 												if(ovlLen > MINOVL && (readedge || !anyfound)){
 													k = setbRead2(rNid,rnNid,nextrNode->dir,ovlGraph,abover,baover,1);
 													if(k == 2){
-//														if(astk == TESTNODE || astk == TESTNODE2)
+														if(verboseJOvl){
 															printf("-> Next Overlap (PROPER): %i -> %i --->>> k: %i (abover: %i (%i - %i) baover: %i (%i - %i))\n",rNid,rnNid,k,abover,aendp,bendp,baover,astp,bstp);
 															printf("InfoTest: --->  a: %i -> %i // b: %i -> %i\n",aendk,astk,bendk,bstk);
+														}
 														found = 1;
 														break;
 													}
 													if(k == 1){
-//														if(astk == TESTNODE || astk == TESTNODE2)
+														if(verboseJOvl)
 															printf("-> Next Overlap (b is CONTAINED): %i -> %i --->>> k: %i (abover: %i baover: %i)\n",rNid,rnNid,k,abover,baover);
 														nextrNode = nextrNode->next;
 														continue;
 													}
 													if(k == 0){
 														found = 1;
-//														if(astk == TESTNODE || astk == TESTNODE2)
+														if(verboseJOvl)
 															printf("-> Next Overlap (a is CONTAINED): %i -> %i --->>> k: %i (abover: %i baover: %i)\n",rNid,rnNid,k,abover,baover);
 														break;
 													}

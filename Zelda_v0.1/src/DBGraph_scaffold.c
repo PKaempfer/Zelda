@@ -2014,7 +2014,7 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 
 void buildBridge(struct myovlList* G, struct readFiles lib, struct reads* reads, int r1ID, char spurs, int r1path, int r2path, int oriPE){
 	// Look which side is spur? Try all of bit type is 0
-//	int i;
+	char verbose = 0;
 	int dist = 0;
 	int hitnum = 0;
 	struct pc_anno* r1anno = (struct pc_anno*)reads[r1ID].annotation;
@@ -2077,7 +2077,7 @@ void buildBridge(struct myovlList* G, struct readFiles lib, struct reads* reads,
 			}
 		}
 	}
-	if(hitnum != 1){
+	if(hitnum != 1 && verbose){
 		printf("Found NOTHING or to MUCH\n");
 		printf("Print path 45\n");
 //		if(r1path == 45) printPath(G,reads,r1path);
@@ -2115,7 +2115,7 @@ void readTouring(struct myovlList* G, struct readFiles* files, struct reads* rea
 	char verbose2 = 0;
 	char verbose3 = 0;
 	char verboseBridge = 0;
-	char verboseBridgeYes = 1;
+	char verboseBridgeYes = 0;
 	char debug = 0;
 
 	int i,j;

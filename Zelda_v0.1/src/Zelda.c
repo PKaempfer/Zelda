@@ -186,7 +186,7 @@ int main(int argc, char* argv[]) {
 	time(&start);
 
 	printf("CHECKPOINT: 8. POA (Layout-Consensus)\n");
-	struct POG* contigs_pog = make_poaScaff(G,reads,0);
+	struct POG* contigs_pog = make_poaScaff(G,reads,0,para);
 	time(&stop);
 	printf("POA: %0.2f\n",difftime (stop,start));
 	printf("Wait after POA\n");
@@ -197,7 +197,9 @@ int main(int argc, char* argv[]) {
 	printf("CHECKPOINT: FastaOut\n");
 	time(&start);
 	poa_printContigs(contigs_pog,contigPath);
-	free(contigPath);
+	sprintf(contigPath,"%s/contigs.vcf",para->asemblyFolder);
+	printf("CHECKPOINT: FastaOut\n");
+	poa_reportVariant(contigs_pog,contigPath);
 	time(&stop);
 	printf("FASTA Out: %0.2f\n",difftime (stop,start));
 	printf("Wait after FastaOut\n");
@@ -216,8 +218,11 @@ int main(int argc, char* argv[]) {
 //		poa_printContigs(contigs_pog,contigPath);
 //		poa_toDot("output/poa.dot");
 //		exit(1);
+	// Free Variations
 	if(contigs_pog) free_POG(contigs_pog);
 	freeDB(reads);
 	freeMyOvlList(G,S);
+	free(contigPath);
+	free(tempPath);
 	finished(para);
 }

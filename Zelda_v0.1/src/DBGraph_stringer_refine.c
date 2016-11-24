@@ -400,6 +400,7 @@ void checkTransitivity(struct myovlList *ovlGraph){
 }
 
 struct string_graph* catOVLgraph(struct myovlList *ovlGraph, char* pathAssembly){
+	char verbose = 0;
 	int i;
 	struct bread *bread;
 //	struct KannteNode* kannte;
@@ -498,24 +499,27 @@ struct string_graph* catOVLgraph(struct myovlList *ovlGraph, char* pathAssembly)
 
 	all = wid+cont+str+prop+junc;
 
-	printf("Sting graph as Table:\n");
-	printf("Correct memopos of ovlgraph: %p\n",ovlGraph);
+	if(verbose){
+		printf("Sting graph as Table:\n");
+		printf("Correct memopos of ovlgraph: %p\n",ovlGraph);
 
-	for(i=0;i<=ovlGraph->V;i++){
-		if(ovlGraph->read[i] && ovlGraph->read[i]->flag == JUNCTION){// && i == 126342){
-			printf("Read: %i (%i) -> Dir: %i\n",i,ovlGraph->read[i]->flag,ovlGraph->read[i]->dir);
-			bread = ovlGraph->read[i]->first;
-			while(bread){
-				if(bread->dest){
-					printf("\t-> %i (destJ: %i)\t%i\t%i  -> dir: %i  -> flag: %i\n",bread->ID,bread->dest->ID,ovlGraph->read[i]->dir != ovlGraph->read[bread->ID]->dir,bread->overhang,(int)bread->sideflag,ovlGraph->read[bread->ID]->flag);
+		for(i=0;i<=ovlGraph->V;i++){
+			if(ovlGraph->read[i] && ovlGraph->read[i]->flag == JUNCTION){// && i == 126342){
+				printf("Read: %i (%i) -> Dir: %i\n",i,ovlGraph->read[i]->flag,ovlGraph->read[i]->dir);
+				bread = ovlGraph->read[i]->first;
+				while(bread){
+					if(bread->dest){
+						printf("\t-> %i (destJ: %i)\t%i\t%i  -> dir: %i  -> flag: %i\n",bread->ID,bread->dest->ID,ovlGraph->read[i]->dir != ovlGraph->read[bread->ID]->dir,bread->overhang,(int)bread->sideflag,ovlGraph->read[bread->ID]->flag);
+					}
+					else{
+						printf("\t-> %i\t%i\t%i  -> dir: %i  -> flag: %i\n",bread->ID,ovlGraph->read[i]->dir != ovlGraph->read[bread->ID]->dir,bread->overhang,(int)bread->sideflag,ovlGraph->read[bread->ID]->flag);
+					}
+					bread = bread->next;
 				}
-				else{
-					printf("\t-> %i\t%i\t%i  -> dir: %i  -> flag: %i\n",bread->ID,ovlGraph->read[i]->dir != ovlGraph->read[bread->ID]->dir,bread->overhang,(int)bread->sideflag,ovlGraph->read[bread->ID]->flag);
-				}
-				bread = bread->next;
 			}
 		}
 	}
+
 
 	printf("StringGraph Stats: \n");
 	printf("Widowed:\t\t\t%i\n",wid);

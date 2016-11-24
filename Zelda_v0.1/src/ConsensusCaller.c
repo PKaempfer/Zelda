@@ -496,7 +496,7 @@ struct contigList* realBackbone2(struct myovlList* G, struct reads* reads){
 
 struct Letter_T* Letters     =      NULL;
 uint32_t          numNodes    =         0;	// Current number of elements in LPOLetter_T array
-uint32_t          maxNumNodes =  10000000;	// Initial max size of LPOLetter_T array
+uint32_t          maxNumNodes =   1000000;	// Initial max size of LPOLetter_T array
 
 int **alMatrix = NULL;
 struct Letter_T** alMatrix_Letter = NULL;
@@ -516,7 +516,7 @@ static inline void poa_LetterSizeCheck(){
 				Letters[j].left = NULL;
 				Letters[j].right = NULL;
 				Letters[j].junction = 0;
-				Letters[j].source.next = NULL;
+//				Letters[j].source.next = NULL;
 				Letters[j].score = 0;
 				Letters[j].vFlag = 0;
 			}
@@ -553,9 +553,9 @@ void poa_initBackbone2(struct Sequence* contig, struct reads* read, char* seq){
 		current->letter = seq[i];
 		current->align_ring = NULL;
 		current->ml = NULL;
-		current->source.ipos = i;
-		current->source.iseq = read->ID;
-		current->source.next = NULL;
+//		current->source.ipos = i;
+//		current->source.iseq = read->ID;
+//		current->source.next = NULL;
 		current->counter = 1;
 
 		if(left){
@@ -568,6 +568,7 @@ void poa_initBackbone2(struct Sequence* contig, struct reads* read, char* seq){
 			left->right = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
 			left->right->counter = 1;
 			left->right->dest = numNodes;
+			left->right->vFlag = 0;
 			left->right->next = NULL;
 		}
 
@@ -621,12 +622,12 @@ void poa_catBackbone(struct Sequence* contig, struct myovlList *G, struct reads*
 		current->align_ring = NULL;
 		current->ml = NULL;
 		current->counter=1;
-		// _________
-		// This things not until alignment
-		current->source.ipos = i;
-		current->source.iseq = read->ID;
-		current->source.next = NULL;
-		// _________
+//		// _________
+//		// This things not until alignment
+//		current->source.ipos = i;
+//		current->source.iseq = read->ID;
+//		current->source.next = NULL;
+//		// _________
 //		printf("NewLetter: %i\n",numNodes);
 		current->left = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
 		current->left->counter = 1;
@@ -638,6 +639,7 @@ void poa_catBackbone(struct Sequence* contig, struct myovlList *G, struct reads*
 		left->right = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
 		left->right->counter = 1;
 		left->right->dest = numNodes;
+		left->right->vFlag = 0;
 		left->right->next = oldEdge;
 
 		leftID = numNodes;
@@ -663,6 +665,7 @@ void poa_catBackbone(struct Sequence* contig, struct myovlList *G, struct reads*
 
 
 void poa_toDot(char* dotFile){
+	printf("Write POA-Graph to : %s\n",dotFile);
 	FILE* dot = fopen(dotFile,"w");
 
 	int i;
@@ -837,34 +840,251 @@ void poa_part_toDot(char* dotFile, struct Sequence* contig){
 //	exit(1);
 }
 
-void poa_consensus(struct Sequence* contig){
-	printf("CHECKPOINT: PO-MSA to Contig\n");
+void poa_avgCov(struct Sequence* contig){
+	int i;
+	uint32_t totCov = 0;
+	for(i=0;i<numNodes;i++){
+		totCov += Letters[i].counter;
+	}
+	contig->avgCov = (float)totCov/contig->length;
+	printf("Contig: %s \t\t AvgCov: %0.2f\n",contig->name,contig->avgCov);
+}
 
+static inline void resetLetterNum(int* letters){
+	letters[0] = 0;
+	letters[1] = 0;
+	letters[2] = 0;
+	letters[3] = 0;
+}
+
+static inline void resetLetterSt(struct LetterEdge** letters){
+	letters[0] = NULL;
+	letters[1] = NULL;
+	letters[2] = NULL;
+	letters[3] = NULL;
+}
+
+#define maxAltLen 100
+
+void poa_reportVariant(struct POG* pog, char* vcfFile){
+	// Write Alternative to VCF
+	FILE* vcf = fopen(vcfFile,"w");
+
+	// ToDo: Write Header
+	int i;
+	struct Variation* var;
+	for(i=0;i<pog->contigNum;i++){
+		var = pog->contig[i].var;
+		while(var){
+			fprintf(vcf,"%s\t",pog->contig[i].name);
+			fprintf(vcf,"%i\t",var->pos);
+			fprintf(vcf,".\t");
+			fprintf(vcf,"%s\t",var->refSeq);
+			fprintf(vcf,"%s\t",var->altSeq);
+			fprintf(vcf,"100\t");
+			fprintf(vcf,"PASS\t");
+			fprintf(vcf,"AO=%i;CIGAR=%s;DP=%i;LEN=%i;RO=%i;TYPE=%s\t",var->ao,var->cigar,var->dp,var->len,var->ro,varType[(int)var->type]);
+			fprintf(vcf,"GT:DP:RO:QR:AO:QA\t");
+			fprintf(vcf,"%i:%i:%i:%i:%i:%i\t",1,var->dp,var->ro,1,var->ao,1);
+			fprintf(vcf,"\n");
+			var = var->next;
+		}
+	}
+
+	fclose(vcf);
+}
+
+void poa_recMainPath(struct Letter_T* currentLetter, struct Letter_T* endLetter, int startPos, int altLen, char* altSeq, int altCov, struct Sequence* contig){
+	char verbose = 0;
+	if(verbose) printf("Checkpoint recMainPath");
+	char* refSeq = (char*)malloc(maxAltLen);
+	char* cigar = (char*)malloc(2);
+	cigar[0] = 'X';
+	cigar[1] = '\0';
+	int refLen = 0;
+	int refCov = 100000;
+	struct LetterEdge* edge;
+	struct Letter_T* startLetter = currentLetter;
+	while(currentLetter != endLetter){
+		if(refLen == maxAltLen){
+			printf("No Proper Ref Path Found (Length Error)\n");
+			return;
+		}
+		refSeq[refLen++] = currentLetter->letter;
+		edge = currentLetter->right;
+		if(edge){
+			while(edge){
+				if(edge->vFlag){
+					refCov = _min(refCov,edge->counter);
+					break;
+				}
+				edge = edge->next;
+			}
+			currentLetter = & Letters[edge->dest];
+		}
+	}
+	char type = -1;
+	if(altLen == 2 && refLen == 2) type = 0; 	// snp
+	else if(altLen == refLen) type = 1; 		// mnp
+	else if(altLen > refLen) type = 2;
+	else if(altLen < refLen) type = 3;
+
+	struct Variation* var = (struct Variation*)malloc(sizeof(struct Variation));
+	if(type == 0){
+		var->altSeq = (char*)malloc(2);
+		var->altSeq[0] = altSeq[1];
+		var->altSeq[1] = '\0';
+		var->refSeq = (char*)malloc(2);
+		var->refSeq[0] = refSeq[1];
+		var->refSeq[1] = '\0';
+	}
+	else{
+		altSeq[altLen] = '\0';
+		refSeq[refLen] = '\0';
+		var->altSeq = (char*)malloc(strlen(altSeq)+1);
+		var->refSeq = (char*)malloc(strlen(refSeq)+1);
+		strcpy(var->altSeq,altSeq);
+		strcpy(var->refSeq,refSeq);
+	}
+	var->dp = _min(startLetter->counter,endLetter->counter);
+	var->ao = altCov;
+	var->ro = refCov;
+	var->pos = startPos;
+	if(type == 0) var->pos++;
+	var->next = NULL;
+	var->type = type;
+	// ToDo: rest entries down under
+	var->len = strlen(var->altSeq);
+	var->cigar = (char*)malloc((strlen(cigar)+1));
+	strcpy(var->cigar,cigar);
+	if(!contig->var){
+		contig->var = var;
+	}
+	else contig->lastvar->next = var;
+	contig->lastvar = var;
+	printf("Write Variation:\n");
+	printf("\t%s\t%i\t%s\t%s\tDP:%i;AO:%i;RO:%i\n",contig->name,var->pos,var->refSeq,var->altSeq,var->dp,var->ao,var->ro);
+
+	free(refSeq);
+	free(cigar);
+	// walk main path to Letter is End of Alt Path
+	// call poa_reportVariant()
+}
+
+/**
+ * DFS-Search
+ */
+void poa_recVariantPath(struct Letter_T* startLetter, int startPos, int len, char* seq, struct LetterEdge* edge, int cov, struct Sequence* contig){
+	// Include Path counting
+	struct Letter_T* current = &Letters[edge->dest];
+	// IF current is Consensus Path call poa_recMainPath()
+	if(current->vFlag) poa_recMainPath(startLetter,current,startPos,len,seq,cov,contig);
+	// ELSE next not flagged go deeper
+	else{
+		edge = current->right;
+		if(edge){
+			seq[len] = current->letter;
+			while(edge){
+				if(edge->counter > 2 && len < maxAltLen){
+					poa_recVariantPath(startLetter,startPos,len+1,seq,edge,_min(cov,edge->counter),contig);
+				}
+				edge = edge->next;
+			}
+		}
+	}
+}
+
+void poa_variantCalling(struct Sequence* contig){
+	int verbose = 0;
+	int i=0;
+	struct Letter_T* current = &Letters[contig->startLetter.dest];
+	struct LetterEdge* edge;
+	char* altPath = (char*)malloc(maxAltLen);
+	contig->var = NULL;
+	contig->lastvar = NULL;
+
+	while(1){
+		edge = current->right;
+		if(edge){
+			while(edge){
+				if(!edge->vFlag && edge->counter > 2){
+					altPath[0] = current->letter;
+					poa_recVariantPath(current,i,1,altPath,edge,edge->counter,contig);
+				}
+				edge = edge->next;
+			}
+			edge = current->right;
+			while(edge){
+				if(edge->vFlag) break;
+				edge = edge->next;
+			}
+			current = &Letters[edge->dest];
+			i++;
+		}
+		else{
+			break;
+		}
+	}
+
+}
+
+
+void poa_consensus2(struct Sequence* contig){
+	printf("CHECKPOINT: PO-MSA to Contig\n");
+	int verbose = 0;
+//	if(strcmp(contig->name,"Scaffold_19_90086_186097_len:")==0) verbose = 1;
 	char* seq = (char*)malloc(contig->length + 100);
 	int i=0;
 
 	struct Letter_T* current = &Letters[contig->startLetter.dest];
 	struct LetterEdge* edge;
 	struct LetterEdge* bestedge;
+	struct Letter_T* ring;
+	struct Letter_T* bestRing = NULL;
 
+	printf("Contig: %s%i\n",contig->name,contig->length);
+
+	struct LetterEdge* lettersSt[4];
 
 	while(1){
 		if(current->counter < 5) seq[i++] = current->letter+32;
 		else seq[i++] = current->letter;
+		if(current->vFlag) printf("Flag was set\n");
+		current->vFlag = 1;
 		edge = current->right;
+		resetLetterSt(lettersSt);
 		if(edge){
 			bestedge = edge;
 			while(edge){
+				lettersSt[codes[(int)Letters[edge->dest].letter]] = edge;
 				if(bestedge->counter < edge->counter){
 					bestedge = edge;
 				}
 				edge = edge->next;
 			}
-			current = &Letters[bestedge->dest];
+			edge = bestedge;
+			bestRing = &Letters[bestedge->dest];
+			if(Letters[bestedge->dest].align_ring){
+				ring = Letters[bestedge->dest].align_ring;
+				if(verbose) printf("Pos: %i -> BestRing Lettter: %c (code: %i)-> Ring Counter: %i\n",i-1,bestRing->letter,(int)bestRing->letter,bestRing->counter);
+				while(ring != &Letters[bestedge->dest]){
+					if(verbose) printf("\tPos: %i -> Ring Lettter: %c (code: %i)-> Ring Counter: %i\n",i-1,ring->letter,codes[(int)ring->letter],ring->counter);
+					if(lettersSt[codes[(int)ring->letter]] && ring->counter > bestRing->counter && ring == &Letters[lettersSt[codes[(int)ring->letter]]->dest]){
+						bestRing = ring;
+						edge = lettersSt[codes[(int)ring->letter]];
+					}
+					ring = ring->align_ring;
+				}
+				if(verbose) printf("Pos: %i -> BestRing Lettter: %c (code: %i)-> Ring Counter: %i\n",i-1,bestRing->letter,(int)bestRing->letter,bestRing->counter);
+			}
+			edge->vFlag = 1;
+			current = bestRing;
 		}
 		else{
+			current->vFlag = 1;
 			break;
 		}
+		bestRing = NULL;
 	}
 
 	seq[i]='\0';
@@ -875,6 +1095,85 @@ void poa_consensus(struct Sequence* contig){
 //	}
 //	printf("\n");
 	contig->sequence = seq;
+	poa_variantCalling(contig);
+	poa_avgCov(contig);
+	if(verbose) exit(1);
+}
+
+void poa_consensus(struct Sequence* contig){
+	printf("CHECKPOINT: PO-MSA to Contig\n");
+	int verbose = 0;
+	if(strcmp(contig->name,"Scaffold_19_90086_186097_len:")==0) verbose = 1;
+	char* seq = (char*)malloc(contig->length + 100);
+	int i=0;
+	int j;
+
+	struct Letter_T* current = &Letters[contig->startLetter.dest];
+	struct LetterEdge* edge;
+	struct LetterEdge* bestedge;
+	struct Letter_T* ring;
+	struct Letter_T* bestRing = NULL;
+
+	printf("Contig: %s%i\n",contig->name,contig->length);
+
+	int letters[4];
+	int totLetters;
+
+	while(1){
+		if(current->counter < 5) seq[i++] = current->letter+32;
+		else seq[i++] = current->letter;
+		if(current->align_ring){
+			resetLetterNum(letters);
+			letters[codes[(int)current->letter]] = current->counter;
+			totLetters = current->counter;
+			ring = current->align_ring;
+			bestRing = current;
+			while(ring != current){
+				if(verbose) printf("Pos: %i -> Ring Lettter: %c (code: %i)-> Ring Counter: %i\n",i-1,ring->letter,(int)ring->letter,ring->counter);
+				letters[codes[(int)ring->letter]] = ring->counter;
+				if(ring->counter > bestRing->counter) bestRing = ring;
+				totLetters += ring->counter;
+				ring = ring->align_ring;
+			}
+			if(current->counter < totLetters - 3){
+				printf("Variation at Pos: %i (Bases: %i)\n",i-1,totLetters);
+				printf("\tBestLetter: %c (%i)\n",current->letter,current->counter);
+				printf("BestRingLetter: %c (%i)\n",bestRing->letter,bestRing->counter);
+				for(j=0;j<4;j++){
+					printf("\t\t%c: %i\n",rev_codes[j],letters[j]);
+				}
+			}
+		}
+		edge = current->right;
+		if(edge){
+			bestedge = edge;
+			while(edge){
+				if(bestRing && &Letters[edge->dest] == bestRing){
+					bestedge = edge;
+					break;
+				}
+				if(bestedge->counter < edge->counter){
+					bestedge = edge;
+				}
+				edge = edge->next;
+			}
+			current = &Letters[bestedge->dest];
+		}
+		else{
+			break;
+		}
+		bestRing = NULL;
+	}
+
+	seq[i]='\0';
+//	printf(">Correct_%s\n",contig->name);
+//	int k;
+//	for(k=0;k<i;k+=80){
+//		printf("%.80s\n",&seq[k]);
+//	}
+//	printf("\n");
+	contig->sequence = seq;
+	if(verbose) exit(1);
 }
 
 void poa_printContigs(struct POG* pog, char* contigFile){
@@ -951,7 +1250,7 @@ struct POG* make_poa(struct myovlList* G, struct reads* reads){
     	Letters[i].left = NULL;
     	Letters[i].right = NULL;
     	Letters[i].junction = 0;
-    	Letters[i].source.next = NULL;
+//    	Letters[i].source.next = NULL;
     	Letters[i].score = 0;
     	Letters[i].vFlag = 0;
     }
@@ -1503,11 +1802,57 @@ struct scaffold_set* scaffold_init(){
 	return aS;
 }
 
+static inline void resetLetters(struct Letter_T* Letters){
+	int i;
+	struct Letter_T* current;
+	struct LetterEdge* edge;
+	struct LetterEdge* nextedge;
+//	struct LetterSource_S* sedge;
+//	struct LetterSource_S* nextsedge;
+	for(i=0;i<numNodes;i++){
+//				printf("Letter NUmber %i\n",i);
+		current = &Letters[i];
+		edge = current->left;
+		while(edge){
+//					printf("Free left edge\n");
+			nextedge = edge->next;
+			free(edge);
+			edge = nextedge;
+		}
+		edge = current->right;
+		while(edge){
+//					printf("Free right edge\n");
+//					printf("Free right edge at pos: %i\n",i);
+			nextedge = edge->next;
+			free(edge);
+			edge = nextedge;
+		}
+//		sedge = &current->source;
+//		if(sedge){
+//			sedge = sedge->next;
+//			while(sedge){
+////						printf("Free source\n");
+//				nextsedge = sedge->next;
+//				free(sedge);
+//				sedge = nextsedge;
+//			}
+//		}
+		current->vFlag = 0;
+		current->counter = 0;
+//		current->source.next = NULL;
+		current->align_ring = NULL;
+		current->junction = 0;
+		current->score = 0;
+		current->left = NULL;
+		current->right = NULL;
+	}
+}
+
 /**
  * Same implementation of the pao algorithms but graph touring over the paths instead of the junctions. Spanning junctions of scaffolds span over
  * @return
  */
-struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffolding){
+struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffolding, struct para* para){
 
 	struct scaffold_set* aS;
 	if(scaffolding){
@@ -1529,6 +1874,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     char* readseq = (char*)malloc(sizeof(char)*(maxReadLen+1));
     char* revreadseq = (char*)malloc(maxReadLen+1);
     char* name = (char*)malloc(1000);
+    char* dotPath = (char*)malloc(1000);
 
 //    Sequence_T *contigs = (Sequence_T*)malloc(sizeof(Sequence_T) * max_contigNum);
 //    LPOnodes = (LPOLetter_T*)malloc(sizeof(LPOLetter_T)*maxNodes);
@@ -1543,7 +1889,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     	Letters[i].left = NULL;
     	Letters[i].right = NULL;
     	Letters[i].junction = 0;
-    	Letters[i].source.next = NULL;
+//    	Letters[i].source.next = NULL;
     	Letters[i].score = 0;
     	Letters[i].vFlag = 0;
     }
@@ -1584,7 +1930,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     		// Scaffold is a Singleton; Just on Contig (no scaffEdge)
     		if(aS->scaff[i].type == 1){
     			while(bread){
-    				if(bread->dest) printf("destID: %i == endJunction: %i\n",bread->dest->ID, aS->scaff[i].endJunction);
+    				if(verbose && bread->dest) printf("destID: %i == endJunction: %i\n",bread->dest->ID, aS->scaff[i].endJunction);
     				if(bread->dest && bread->dest->ID == aS->scaff[i].endJunction) break;
     				else bread = bread->next;
     			}
@@ -1764,7 +2110,11 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     		else{
     			printf("Path for this Junction not found\n Abort!\n");
     		}
-    		poa_consensus(&pog->contig[pog->contigNum]);
+    		poa_consensus2(&pog->contig[pog->contigNum]);
+    		sprintf(dotPath,"%s/%s.dot",para->asemblyFolder,pog->contig[pog->contigNum].name);
+    		poa_toDot(dotPath);
+    		resetLetters(Letters);
+    		numNodes = 0;
     		pog->contigNum++;
     		printf("Matrix time:    %.3f s\n",(float)sumMatrix/1000000000);
     		printf("Backtrace time: %.3f s\n",(float)sumTrace/1000000000);
@@ -1783,6 +2133,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     	free(alMatrix[i]);
     }
     free(alMatrix);
+    free(dotPath);
 
     return pog;
 }
@@ -1792,8 +2143,8 @@ void free_POG(struct POG* contigs_pog){
 	struct Letter_T* current;
 	struct LetterEdge* edge;
 	struct LetterEdge* nextedge;
-	struct LetterSource_S* sedge;
-	struct LetterSource_S* nextsedge;
+//	struct LetterSource_S* sedge;
+//	struct LetterSource_S* nextsedge;
 	for(i=0;i<numNodes;i++){
 //				printf("Letter NUmber %i\n",i);
 		current = &Letters[i];
@@ -1812,16 +2163,16 @@ void free_POG(struct POG* contigs_pog){
 			free(edge);
 			edge = nextedge;
 		}
-		sedge = &current->source;
-		if(sedge){
-			sedge = sedge->next;
-			while(sedge){
-//						printf("Free source\n");
-				nextsedge = sedge->next;
-				free(sedge);
-				sedge = nextsedge;
-			}
-		}
+//		sedge = &current->source;
+//		if(sedge){
+//			sedge = sedge->next;
+//			while(sedge){
+////						printf("Free source\n");
+//				nextsedge = sedge->next;
+//				free(sedge);
+//				sedge = nextsedge;
+//			}
+//		}
 
 	}
 	for(i=0;i<contigs_pog->contigNum;i++){
@@ -1832,6 +2183,7 @@ void free_POG(struct POG* contigs_pog){
 	free(Letters);
 	free(contigs_pog->contig);
 	free(contigs_pog);
+	Letters = NULL;
 }
 
 

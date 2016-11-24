@@ -41,7 +41,7 @@ static inline void poa_LetterSizeCheck(){
 				Letters[j].left = NULL;
 				Letters[j].right = NULL;
 				Letters[j].junction = 0;
-				Letters[j].source.next = NULL;
+//				Letters[j].source.next = NULL;
 				Letters[j].vFlag = 0;
 			}
 		}
@@ -165,12 +165,12 @@ void poa_catBackbone2(struct Sequence* contig, struct myovlList *G, struct reads
 		current->align_ring = NULL;
 		current->ml = NULL;
 		current->counter=0;
-		// _________
-		// This things not until alignment
-		current->source.ipos = i;
-		current->source.iseq = read->ID;
-		current->source.next = NULL;
-		// _________
+//		// _________
+//		// This things not until alignment
+//		current->source.ipos = i;
+//		current->source.iseq = read->ID;
+//		current->source.next = NULL;
+//		// _________
 //		printf("NewLetter: %i (%c)\n",numNodes,current->letter);
 		current->left = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
 		current->left->counter = 0;
@@ -182,6 +182,7 @@ void poa_catBackbone2(struct Sequence* contig, struct myovlList *G, struct reads
 		left->right = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
 		left->right->counter = 0;
 		left->right->dest = numNodes;
+		left->right->vFlag = 0;
 		left->right->next = oldEdge;
 
 		leftID = numNodes;
@@ -561,6 +562,7 @@ struct pairAlign poa_backtrace(struct Sequence* contig, char* seq, struct Letter
 								current->right = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
 								current->right->dest = newLetterRightID;
 								current->right->counter = 1;
+								current->right->vFlag = 0;
 								current->right->next = newEdge;
 //								printf("Letters: %p current: %p\n",Letters,current);
 								newLetterRightID = current - Letters;
@@ -590,9 +592,9 @@ struct pairAlign poa_backtrace(struct Sequence* contig, char* seq, struct Letter
 						newLetter = &Letters[numNodes];
 						newLetter->counter = 1;
 						newLetter->letter = seq[k];
-						newLetter->source.ipos = k;
-						newLetter->source.iseq = readID;
-						newLetter->source.next = NULL;
+//						newLetter->source.ipos = k;
+//						newLetter->source.iseq = readID;
+//						newLetter->source.next = NULL;
 						// Make, Close alignment ring
 						if(current->align_ring){
 							newLetter->align_ring = current->align_ring;
@@ -614,6 +616,7 @@ struct pairAlign poa_backtrace(struct Sequence* contig, char* seq, struct Letter
 							newLetter->right->dest = newLetterRightID;
 //							printf("dest: %i\n",newLetter->right->dest);
 							newLetter->right->counter = 1;
+							newLetter->right->vFlag = 0;
 							newLetter->right->next = NULL;
 						}
 						newLetterRightID = numNodes;
@@ -637,9 +640,9 @@ struct pairAlign poa_backtrace(struct Sequence* contig, char* seq, struct Letter
 					newLetter = &Letters[numNodes];
 					newLetter->counter = 1;
 					newLetter->letter = seq[k];
-					newLetter->source.ipos = k;
-					newLetter->source.iseq = readID;
-					newLetter->source.next = NULL;
+//					newLetter->source.ipos = k;
+//					newLetter->source.iseq = readID;
+//					newLetter->source.next = NULL;
 					if(newLetterRight){
 						newEdge = newLetterRight->left;
 						newLetterRight->left = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
@@ -650,6 +653,7 @@ struct pairAlign poa_backtrace(struct Sequence* contig, char* seq, struct Letter
 						newLetter->right = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
 						newLetter->right->dest = newLetterRightID;
 						newLetter->right->counter = 1;
+						newLetter->right->vFlag = 0;
 						newLetter->right->next = NULL;
 					}
 					newLetterRightID = numNodes;
