@@ -34,6 +34,7 @@ struct j_anno{		 			// Annotation for Junction reads
 struct pathEdge{				// PE - Connection of the path to the following paths on the way in concordance to the read pairings (order of the pathedges should be consistent with the depth of the path)
 	int ID;						// ID of the connected Path
 	int counter;				// Number of read pairs supporting this path connection
+	int targetcounter;			// Number of read pairs targeting this path directly
 	int depth;					// distance of the connected path to the origin path
 	int targetJunction;			// .--->.<---. (readR1 on first path, target would be the last dot (junction))
 	int estLen;					// Estimated Length of the path edge, can span several paths, than the sum of length or be a virtual path, than estimated by insert size
@@ -46,6 +47,7 @@ struct pathEdge{				// PE - Connection of the path to the following paths on the
 struct path{
 	int ID;						// ID of the path -> not necessary, because identical with the index
 	int len;					// length of the path/contig
+	int freq;					// Contig frequency
 	char pathdir;				// 0 if the path was created over bread->sideflag == 0 from leftJunction; 1 if bread->sideflag was 1 from leftJunction
 	int leftJunction;			// left Junction read ID
 	struct pathEdge* leftPath;	// adjacency list of possible following paths with counter of read pairs supporting this connection
@@ -53,6 +55,7 @@ struct path{
 	struct pathEdge* rightPath;	// adjacency list of possible following paths with counter of read pairs supporting this connection
 	int component;				// Component ID, the path is a part of
 	char flag;					// nothing at the moment - just there
+	char scaffflag;				// first 4 bit left, last 4 bit right (0 - End, 1 - Proper, 2 - Ambiguous)
 };
 
 struct scaffEdge{
@@ -70,6 +73,11 @@ struct scaffold{
 	int startJunction;
 	int endJunction;
 	struct scaffEdge* first;
+};
+
+struct contigScaff{
+	int ID;
+	char sameside;				// 1 - if same side as start contig, 0 - otherwise
 };
 
 struct scaffold_set{

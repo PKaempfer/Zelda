@@ -228,7 +228,6 @@ struct myovlList* initOVLgraph(int numreads){
 	for(i=0;i<=numreads;i++){
 		ovlgraph->read[i] = NULL;
 	}
-	printf("Numreads: %i\n",numreads);
 	return ovlgraph;
 }
 
@@ -236,12 +235,13 @@ struct string_graph* initStringGraph(struct myovlList* ovlgraph,char* pathAssemb
 //	stringer2(ovlgraph);
 	printf("FIND INITIAL CONTAINMENTS\n");
 	tag_A_Contained(ovlgraph);
-	printf("BEGIN STRINGER 3\n");
+	printf("CALCULATE OVERLAPS\n");
 	stringer3(ovlgraph);
-	printf("END STRINGER 3\n");
+//	printf("CATEGORIZE OVERLAPS\n");
 	struct string_graph* S = catOVLgraph(ovlgraph, pathAssembly);
 //	catOVLgraph(ovlgraph);
 	char* tempPath = (char*)malloc(200);
+	printf("WRITE DOT-FILES\n");
 	sprintf(tempPath,"%s/catOrgOVL.dot",pathAssembly);
 	printOVLgraph(ovlgraph,1,tempPath);
 	sprintf(tempPath,"%s/catRevOVL.dot",pathAssembly);
@@ -266,7 +266,7 @@ void printStringGraph(struct myovlList *ovlGraph, char *filename){
 	struct bread* internb;
 
 	fprintf(string,"digraph StringGraph {\n");
-	printf("Number of nodes in the StringGraph: %i\n",ovlGraph->V);
+//	printf("Number of nodes in the StringGraph: %i\n",ovlGraph->V);
 
 	for(i = 0; i <= ovlGraph->V; i++){
 		if(ovlGraph->read[i] && ovlGraph->read[i]->flag == JUNCTION){
@@ -350,6 +350,7 @@ void printReducedOVLgraph(struct myovlList *ovlGraph,int dir, char *ovlPath){
 }
 
 void checkTransitivity(struct myovlList *ovlGraph){
+	printf("CHECK OVERLAP-TRANSITIVETY\n");
 	int i;
 	int in;
 	int target;
@@ -772,8 +773,8 @@ void ovlToString(struct myovlList *G, struct string_graph *S, char* pathAssembly
 //    }
 //    printf("\n");
 
-    printf("CHECKPOINT: StringGraphList\n");
-	print_string_graph_list(S,"Test_label");
+    if(verbose) printf("CHECKPOINT: StringGraphList\n");
+	if(verbose) print_string_graph_list(S,"Test_label");
 	char* tempPath = (char*) malloc(200);
 	sprintf(tempPath,"%s/stringGraph.dot",pathAssembly);
 	print_overlap_graph_dot(S,tempPath,"StringGraph");
@@ -864,19 +865,21 @@ void print_string_graph_list(struct string_graph* G, char* label){
     fflush(stdout);
 }
 
-void print_overlap_graph_dot(struct string_graph* G, const char* pcFile, const char* title)
-{
+void print_overlap_graph_dot(struct string_graph* G, const char* pcFile, const char* title){
+	char verbose = 0;
     int       nends  = G->nends;
     unsigned char*     status = G->status;
     struct readend*  side   = G->side;
     struct overhang* edge   = G->edge;
 
-    printf("Create overlap graph:\n");
-    printf("nverts: %i\n",G->nverts);
-    printf("nends: %i\n",G->nends);
-    printf("edges: %i\n",G->nedges);
-    printf("StatusSize: %i\n",G->nverts+1);
-    printf("sideSize: %i\n",G->nends+1);
+    if(verbose){
+        printf("Create overlap graph:\n");
+        printf("nverts: %i\n",G->nverts);
+        printf("nends: %i\n",G->nends);
+        printf("edges: %i\n",G->nedges);
+        printf("StatusSize: %i\n",G->nverts+1);
+        printf("sideSize: %i\n",G->nends+1);
+    }
 
     stringGraphStats(G);
 

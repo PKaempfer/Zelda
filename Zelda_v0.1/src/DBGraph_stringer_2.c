@@ -476,6 +476,7 @@ struct KannteNode* tagKannte;
  * @return				1 if the reads has the right direction at this position (next end is upstream), 0 otherwise
  */
 int endStart(int tag,int *stp, int *endp, int *stk, int *endk, struct ReadNode *rnode, struct partGraph *childReadIds,int *reallen){
+	char verbose = 0;
 	static struct KannteNode *kannte;
 	static struct edge *edge;
 	static struct ReadNode* tagReadNode;
@@ -518,7 +519,7 @@ int endStart(int tag,int *stp, int *endp, int *stk, int *endk, struct ReadNode *
 							// Tag all ReadNodes on the path explicitly
 							// Depth of the tagged area could be used as value to set the minOLVlen
 
-							if(rnode->read->ID == TESTREAD){
+							if(verbose && rnode->read->ID == TESTREAD){
 								printf("Before Tags\n");
 //								printUpstreamTree(childReadIds);
 								printTag(childReadIds,rnode);
@@ -527,7 +528,7 @@ int endStart(int tag,int *stp, int *endp, int *stk, int *endk, struct ReadNode *
 							tagReadNode = kannte->ReadNode;
 							childReadIds->array[j].flag = 1;
 
-							if(rnode->read->ID == TESTREAD) printf("j = 0 ? : %i (Startpos: %i)\n",j,tagReadNode->pos);
+							if(verbose && rnode->read->ID == TESTREAD) printf("j = 0 ? : %i (Startpos: %i)\n",j,tagReadNode->pos);
 
 //							if(rnode->read->ID == TESTREAD){
 //								printTag(childReadIds,rnode);
@@ -582,17 +583,17 @@ int endStart(int tag,int *stp, int *endp, int *stk, int *endk, struct ReadNode *
 						else{
 							if(kannte->ReadNode->flag){
 								(*reallen) = relen;
-								if((*stk) == TESTNODE || (*stk) == TESTNODE2) printf("(j: %i)ID(%i): %i -> stp: %i (k: %i) endp: %i (k: %i) (mylen: %i / relen: %i)\n",j,tag,rnode->read->ID,(*stp),(*stk),(*endp),(*endk), mylen, relen);
+								if(verbose && ((*stk) == TESTNODE || (*stk) == TESTNODE2)) printf("(j: %i)ID(%i): %i -> stp: %i (k: %i) endp: %i (k: %i) (mylen: %i / relen: %i)\n",j,tag,rnode->read->ID,(*stp),(*stk),(*endp),(*endk), mylen, relen);
 								return 1;
 							}
 							else{
 								(*reallen) = relen;
-								if((*stk) == TESTNODE || (*stk) == TESTNODE2) printf("(j: %i)ID(%i) NOT FLAGGED: %i -> stp: %i (k: %i) endp: %i (k: %i) (mylen: %i / relen: %i)\n",j,tag,rnode->read->ID,(*stp),(*stk),(*endp),(*endk), mylen, relen);
+								if(verbose && ((*stk) == TESTNODE || (*stk) == TESTNODE2)) printf("(j: %i)ID(%i) NOT FLAGGED: %i -> stp: %i (k: %i) endp: %i (k: %i) (mylen: %i / relen: %i)\n",j,tag,rnode->read->ID,(*stp),(*stk),(*endp),(*endk), mylen, relen);
 								return 2;
 							}
 							return 0;
 						}
-						if((*stk) == TESTNODE || (*stk) == TESTNODE2) printf("(j: %i)ID(%i): %i -> stp: %i (k: %i) endp: %i (k: %i) (mylen: %i / relen: %i)\n",j,tag,rnode->read->ID,(*stp),(*stk),(*endp),(*endk), mylen, relen);
+						if(verbose &&((*stk) == TESTNODE || (*stk) == TESTNODE2)) printf("(j: %i)ID(%i): %i -> stp: %i (k: %i) endp: %i (k: %i) (mylen: %i / relen: %i)\n",j,tag,rnode->read->ID,(*stp),(*stk),(*endp),(*endk), mylen, relen);
 						(*reallen) = relen;
 //						printf("Return true (rNode)\n");
 						return 1;
@@ -671,7 +672,7 @@ int stringer3(struct myovlList *ovlGraph){
 		redGraph->vFlag[i] = 0;
 	}
 
-	printf("redGraph->V: %i\n",ovlGraph->V);
+//	printf("redGraph->V: %i\n",ovlGraph->V);
 	for(i=1;i<=redGraph->V;i++){
 		if(redGraph->array[i].headread){
 			if(verbose2) printf("Node : %i -> V: %i\n",i,parentReadIds->V);
@@ -947,7 +948,7 @@ int stringer3(struct myovlList *ovlGraph){
 					else{
 //							tagReadNode = redGraph->array[0].headread;
 						tagReadNode = tagKannte->ReadNode;
-						if(tagReadNode->read->ID == TESTREAD) printf("Startpos for deletion: %i\n",tagReadNode->pos);
+						if(verbose && tagReadNode->read->ID == TESTREAD) printf("Startpos for deletion: %i\n",tagReadNode->pos);
 						while(tagReadNode && tagReadNode->pos >= rNode->pos){
 //								if(!tagReadNode->flag){
 //									printf("!!! FALSCH !!!");
@@ -978,8 +979,8 @@ int stringer3(struct myovlList *ovlGraph){
 	free(seek->pbefpos);
 	free(seek);
 
-	printf("STARTS: %i\n",starts);
-	printf("ENDS  : %i\n",ends);
+	if(verbose) printf("STARTS: %i\n",starts);
+	if(verbose) printf("ENDS  : %i\n",ends);
 
 	return 1;
 

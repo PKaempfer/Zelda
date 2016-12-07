@@ -155,7 +155,8 @@ void junctionDFS(int readID, struct myovlList* G, struct reads* reads){
 							}
 							counterbread = counterbread->next;
 						}
-//						printf("Set annotation c for : %i (path: %i / distlJ: %i / distrJ: %i)\n",internb->ID,pc_anno->pathID,pc_anno->lJunctionDist,pc_anno->rJunctionDist);
+						if(pathsNum == 51 && overhang < 300)
+						printf("Set annotation c for : %i (path: %i / distlJ: %i / distrJ: %i) -> Side: %i\n",internb->ID,pc_anno->pathID,pc_anno->lJunctionDist,pc_anno->rJunctionDist,internb->sideflag);
 					}
 					internb = internb->next;
 				}
@@ -175,7 +176,8 @@ void junctionDFS(int readID, struct myovlList* G, struct reads* reads){
 						pc_anno->pathID = pathsNum;
 						pc_anno->lJunctionDist = overhang;
 						pc_anno->rJunctionDist = pathlength - counteroverhang;
-//						printf("Set annotation p for : %i (path: %i / distlJ: %i / distrJ: %i)\n",internb->ID,pc_anno->pathID,pc_anno->lJunctionDist,pc_anno->rJunctionDist);
+						if(pathsNum == 51 && overhang < 300)
+						printf("Set annotation p for : %i (path: %i / distlJ: %i / distrJ: %i) -> Side: %i\n",internb->ID,pc_anno->pathID,pc_anno->lJunctionDist,pc_anno->rJunctionDist,internb->sideflag);
 						breadID = internb->ID;
 						break;
 					}
@@ -265,7 +267,7 @@ void initScaff(struct myovlList* G, struct reads* reads){
     	}
     }
 
-    statsScaff();
+    if(verbose) statsScaff();
 
     struct bread* bread;
 
@@ -308,7 +310,7 @@ struct scaffold_set* contigs_init(struct myovlList* G){ //, struct reads* reads
     	aS->scaff[i-1].first->next = NULL;
     }
 
-    statsScaff();
+//    statsScaff();
 
     struct bread* bread;
 
@@ -450,18 +452,20 @@ void scaffGraphDot(struct myovlList* G, struct reads* reads, char* dotfile){
 
 	// set bridges as dashed paths
 	printf("CHECKPOINT: Write ScaffGraph.dot (bridges)\n");
+	verbose = 0;
 	struct pathEdge* pathEdge;
 	int r1junc,r2junc;
 	int r1rev, r2rev;
 	for(i=1;i<pathsNum;i++){
 		if(paths[i].leftPath && paths[i].leftPath->estLen != -1 && paths[i].leftPath->ID > i){
-			printf("left Test (%i)\n",i);
+			if(verbose) printf("left Test (%i)\n",i);
 			pathEdge = paths[i].leftPath;
 			r1junc = paths[i].leftJunction;
 			if(pathEdge->junctionCon & 4) r2junc = paths[pathEdge->ID].rightJunction;
 			else r2junc = paths[pathEdge->ID].leftJunction;
 			r1rev = pathEdge->junctionCon & 2;
 			r2rev = pathEdge->junctionCon & 1;
+			if(verbose)
 			printf("%i -> %i [dir=both, arrowtail=%s, arrowhead=%s, color= \"red\",style=dashed, label=\"~%i (c:%i)\"]\n",
 					r1junc,
 					r2junc,
@@ -478,14 +482,14 @@ void scaffGraphDot(struct myovlList* G, struct reads* reads, char* dotfile){
 					pathEdge->counter);
 		}
 		if(paths[i].rightPath && paths[i].rightPath->estLen != -1 && paths[i].rightPath->ID > i){
-			printf("right Test (%i)\n",i);
+			if(verbose) printf("right Test (%i)\n",i);
 			pathEdge = paths[i].rightPath;
 			r1junc = paths[i].rightJunction;
 			if(pathEdge->junctionCon & 4) r2junc = paths[pathEdge->ID].rightJunction;
 			else r2junc = paths[pathEdge->ID].leftJunction;
 			r1rev = pathEdge->junctionCon & 2;
 			r2rev = pathEdge->junctionCon & 1;
-			printf("%i -> %i [dir=both, arrowtail=%s, arrowhead=%s, color= \"red\",style=dashed, label=\"~%i (c:%i)\"]\n",
+			if(verbose) printf("%i -> %i [dir=both, arrowtail=%s, arrowhead=%s, color= \"red\",style=dashed, label=\"~%i (c:%i)\"]\n",
 					r1junc,
 					r2junc,
 					r1rev ? "normal" : "inv",
@@ -641,7 +645,7 @@ void reportSib(struct pathEdge* pathEdge, int depth, int verbose){
 			for(i=0;i<depth;i++){
 				printf("\t");
 			}
-			printf("-> Path: %i, Depth: %i, Target: %i, Counts: %i\n",pathEdge->ID,pathEdge->depth,pathEdge->targetJunction,pathEdge->counter);
+			printf("-> Path: %i, Depth: %i, Target: %i, Counts: %i (Part of Target: %i)\n",pathEdge->ID,pathEdge->depth,pathEdge->targetJunction,pathEdge->counter, pathEdge->targetcounter);
 		}
 		pathEdge = pathEdge->next;
 	}
@@ -654,6 +658,12 @@ void connectPathStats(){
 	for(i=1;i<pathsNum;i++){
 		pathEdge = paths[i].leftPath;
 		if(pathEdge){
+			if(verbose){
+				if(paths[i].scaffflag & 32) printf("Ambi   -> ");
+				if(paths[i].scaffflag & 16) printf("Proper -> ");
+				else  printf("Start  -> ");
+
+			}
 			if(verbose) printf("Path %i (l: %i) -> Edges over left junction: %i:\n",i,paths[i].len,paths[i].leftJunction);
 		}
 		while(pathEdge){
@@ -665,12 +675,17 @@ void connectPathStats(){
 				}
 			}
 			if(verbose){
-				printf("\t -> Path: %i, Depth: %i, Target: %i, Counts: %i\n",pathEdge->ID,pathEdge->depth,pathEdge->targetJunction,pathEdge->counter);
+				printf("\t -> Path: %i, Depth: %i, Target: %i, Counts: %i (Part of Target: %i)\n",pathEdge->ID,pathEdge->depth,pathEdge->targetJunction,pathEdge->counter,pathEdge->targetcounter);
 			}
 			pathEdge = pathEdge->next;
 		}
 		pathEdge = paths[i].rightPath;
 		if(pathEdge){
+			if(verbose){
+				if(paths[i].scaffflag & 2) printf("Ambi   -> ");
+				if(paths[i].scaffflag & 1) printf("Proper -> ");
+				else  printf("Start  -> ");
+			}
 			if(verbose) printf("Path %i (l:%i) -> Edges over right junction: %i:\n",i,paths[i].len,paths[i].rightJunction);
 		}
 		while(pathEdge){
@@ -682,12 +697,34 @@ void connectPathStats(){
 				}
 			}
 			if(verbose){
-				printf("\t -> Path: %i, Depth: %i, Target: %i, Counts: %i\n",pathEdge->ID,pathEdge->depth,pathEdge->targetJunction,pathEdge->counter);
+				printf("\t -> Path: %i, Depth: %i, Target: %i, Counts: %i (Part of Target: %i)\n",pathEdge->ID,pathEdge->depth,pathEdge->targetJunction,pathEdge->counter,pathEdge->targetcounter);
 			}
 			pathEdge =pathEdge->next;
 		}
 	}
 }
+
+void annotatePaths(){
+	int i;
+	struct pathEdge* edge;
+	for(i=1;i<pathsNum;i++){
+		// Leftside
+		paths[i].scaffflag = 0;
+		edge = paths[i].leftPath;
+		if(edge){
+			if(edge->sibl) paths[i].scaffflag = 32;
+			else paths[i].scaffflag = 16;
+
+		}
+		// rightside
+		edge = paths[i].rightPath;
+		if(edge){
+			if(edge->sibl) paths[i].scaffflag |= 2;
+			else paths[i].scaffflag |= 1;
+		}
+	}
+}
+
 
 ///**
 // * DFS -> Recursive Function Call, traverse along the paths to find the right corresponding read to mark visited paths as a way and count their observation numbers
@@ -1315,8 +1352,10 @@ void connectPathsPairwise3(){
 				pathEdge = (struct pathEdge*)malloc(sizeof(struct pathEdge));
 				pathEdge->ID = finpathStack[k*PE];
 				pathEdge->targetJunction = finpathStack[k*PE+2];
-				pathEdge->counter = 1;
 				pathEdge->depth = k-l; // == 1
+				pathEdge->counter = 1;
+				if(k-l == finp-1) pathEdge->targetcounter = 1;
+				else pathEdge->targetcounter = 0;
 				pathEdge->estLen = -1;
 				pathEdge->sibl = NULL;
 				pathEdge->next = NULL;
@@ -1329,6 +1368,7 @@ void connectPathsPairwise3(){
 				// First element found and counted up
 				if(pathEdge->ID == finpathStack[k*PE]){
 					pathEdge->counter++;
+					if(k-l == finp-1) pathEdge->targetcounter++;
 				}
 				// First element not found, search in siblings
 				else{
@@ -1338,6 +1378,7 @@ void connectPathsPairwise3(){
 						// Sibling found, count up
 						if(pathEdge->ID == finpathStack[k*PE]){
 							pathEdge->counter++;
+							if(k-l == finp-1) pathEdge->targetcounter++;
 							break;
 						}
 						if(!pathEdge->sibl) lastEdge = pathEdge;
@@ -1350,6 +1391,8 @@ void connectPathsPairwise3(){
 						pathEdge->targetJunction = finpathStack[k*PE+2];
 						pathEdge->counter = 1;
 						pathEdge->depth = k-l; // == 1
+						if(k-l == finp-1) pathEdge->targetcounter = 1;
+						else pathEdge->targetcounter = 0;
 						pathEdge->estLen = -1;
 						pathEdge->next = NULL;
 						pathEdge->sibl = NULL;
@@ -1367,6 +1410,8 @@ void connectPathsPairwise3(){
 				pathEdge->targetJunction = finpathStack[k*PE+2];
 				pathEdge->counter = 1;
 				pathEdge->depth = k-l; // == 1
+				if(k-l == finp-1) pathEdge->targetcounter = 1;
+				else pathEdge->targetcounter = 0;
 				pathEdge->estLen = -1;
 				pathEdge->next = NULL;
 				pathEdge->sibl = NULL;
@@ -1379,6 +1424,7 @@ void connectPathsPairwise3(){
 				// First element found and counted up
 				if(pathEdge->ID == finpathStack[k*PE]){
 					pathEdge->counter++;
+					if(k-l == finp-1) pathEdge->targetcounter++;
 				}
 				// First element not found, search in siblings
 				else{
@@ -1388,6 +1434,7 @@ void connectPathsPairwise3(){
 						// Sibling found, count up
 						if(pathEdge->ID == finpathStack[k*PE]){
 							pathEdge->counter++;
+							if(k-l == finp-1) pathEdge->targetcounter++;
 							break;
 						}
 						if(!pathEdge->sibl) lastEdge = pathEdge;
@@ -1400,6 +1447,8 @@ void connectPathsPairwise3(){
 						pathEdge->targetJunction = finpathStack[k*PE+2];
 						pathEdge->counter = 1;
 						pathEdge->depth = k-l; // == 1
+						if(k-l == finp-1) pathEdge->targetcounter = 1;
+						else pathEdge->targetcounter = 0;
 						pathEdge->estLen = -1;
 						pathEdge->next = NULL;
 						pathEdge->sibl = NULL;
@@ -1424,6 +1473,8 @@ void connectPathsPairwise3(){
 				pathEdge->targetJunction = finpathStack[k*PE+2];
 				pathEdge->counter = 1;
 				pathEdge->depth = k-l;
+				if(k-l == finp-1) pathEdge->targetcounter = 1;
+				else pathEdge->targetcounter = 0;
 				pathEdge->estLen = -1;
 				pathEdge->next = NULL;
 				pathEdge->sibl = NULL;
@@ -1434,6 +1485,7 @@ void connectPathsPairwise3(){
 				pathEdge = pathEdge->next;
 				if(pathEdge->ID == finpathStack[k*PE]){
 					pathEdge->counter++;
+					if(k-l == finp-1) pathEdge->targetcounter++;
 				}
 				else{
 					lastEdge = pathEdge;
@@ -1442,6 +1494,7 @@ void connectPathsPairwise3(){
 						// Sibling found, count up
 						if(pathEdge->ID == finpathStack[k*PE]){
 							pathEdge->counter++;
+							if(k-l == finp-1) pathEdge->targetcounter++;
 							break;
 						}
 						if(!pathEdge->sibl) lastEdge = pathEdge;
@@ -1454,6 +1507,8 @@ void connectPathsPairwise3(){
 						pathEdge->targetJunction = finpathStack[k*PE+2];
 						pathEdge->counter = 1;
 						pathEdge->depth = k-l;
+						if(k-l == finp-1) pathEdge->targetcounter = 1;
+						else pathEdge->targetcounter = 0;
 						pathEdge->estLen = -1;
 						pathEdge->next = NULL;
 						pathEdge->sibl = NULL;
@@ -1469,6 +1524,7 @@ void connectPathsPairwise3(){
 	}
 	// Backward direction R2 -> R1
 	if(verbose) printf("Tag Reverse direction\n");
+//	verbosenew = 1;
 	for(l=finp-1;l>0;l--){
 		k = l-1;
 		if(finpathStack[(l-1)*PE+2] == paths[finpathStack[l*PE]].leftJunction){
@@ -1477,9 +1533,15 @@ void connectPathsPairwise3(){
 			if(!paths[finpathStack[l*PE]].leftPath){
 				pathEdge = (struct pathEdge*)malloc(sizeof(struct pathEdge));
 				pathEdge->ID = finpathStack[k*PE];
-				pathEdge->targetJunction = finpathStack[k*PE+2];
+				//_________________________
+//				pathEdge->targetJunction = finpathStack[k*PE+2];
+				if(paths[finpathStack[k*PE]].leftJunction == finpathStack[k*PE+2]) pathEdge->targetJunction = paths[finpathStack[k*PE]].rightJunction;
+				else pathEdge->targetJunction = paths[finpathStack[k*PE]].leftJunction;
+				//_________________________
 				pathEdge->counter = 1;
 				pathEdge->depth = l-k; // == 1
+				if(l-k == finp-1) pathEdge->targetcounter = 1;
+				else pathEdge->targetcounter = 0;
 				pathEdge->estLen = -1;
 				pathEdge->sibl = NULL;
 				pathEdge->next = NULL;
@@ -1492,6 +1554,7 @@ void connectPathsPairwise3(){
 				// First element found and counted up
 				if(pathEdge->ID == finpathStack[k*PE]){
 					pathEdge->counter++;
+					if(l-k == finp-1) pathEdge->targetcounter++;
 				}
 				// First element not found, search in siblings
 				else{
@@ -1501,6 +1564,7 @@ void connectPathsPairwise3(){
 						// Sibling found, count up
 						if(pathEdge->ID == finpathStack[k*PE]){
 							pathEdge->counter++;
+							if(l-k == finp-1) pathEdge->targetcounter++;
 							break;
 						}
 						if(!pathEdge->sibl) lastEdge = pathEdge;
@@ -1514,6 +1578,8 @@ void connectPathsPairwise3(){
 						else pathEdge->targetJunction = paths[finpathStack[k*PE]].leftJunction;
 						pathEdge->counter = 1;
 						pathEdge->depth = l-k; // == 1
+						if(l-k == finp-1) pathEdge->targetcounter = 1;
+						else pathEdge->targetcounter = 0;
 						pathEdge->estLen = -1;
 						pathEdge->next = NULL;
 						pathEdge->sibl = NULL;
@@ -1529,9 +1595,15 @@ void connectPathsPairwise3(){
 			if(!paths[finpathStack[l*PE]].rightPath){
 				pathEdge = (struct pathEdge*)malloc(sizeof(struct pathEdge));
 				pathEdge->ID = finpathStack[k*PE];
-				pathEdge->targetJunction = finpathStack[k*PE+2];
+				//__________________________
+//				pathEdge->targetJunction = finpathStack[k*PE+2];
+				if(paths[finpathStack[k*PE]].leftJunction == finpathStack[k*PE+2]) pathEdge->targetJunction = paths[finpathStack[k*PE]].rightJunction;
+				else pathEdge->targetJunction = paths[finpathStack[k*PE]].leftJunction;
+				//__________________________
 				pathEdge->counter = 1;
 				pathEdge->depth = l-k; // == 1
+				if(l-k == finp-1) pathEdge->targetcounter = 1;
+				else pathEdge->targetcounter = 0;
 				pathEdge->estLen = -1;
 				pathEdge->sibl = NULL;
 				pathEdge->next = NULL;
@@ -1544,6 +1616,7 @@ void connectPathsPairwise3(){
 				// First element found and counted up
 				if(pathEdge->ID == finpathStack[k*PE]){
 					pathEdge->counter++;
+					if(l-k == finp-1) pathEdge->targetcounter++;
 				}
 				// First element not found, search in siblings
 				else{
@@ -1553,6 +1626,7 @@ void connectPathsPairwise3(){
 						// Sibling found, count up
 						if(pathEdge->ID == finpathStack[k*PE]){
 							pathEdge->counter++;
+							if(l-k == finp-1) pathEdge->targetcounter++;
 							break;
 						}
 						if(!pathEdge->sibl) lastEdge = pathEdge;
@@ -1566,6 +1640,8 @@ void connectPathsPairwise3(){
 						else pathEdge->targetJunction = paths[finpathStack[k*PE]].leftJunction;
 						pathEdge->counter = 1;
 						pathEdge->depth = l-k; // == 1
+						if(l-k == finp-1) pathEdge->targetcounter = 1;
+						else pathEdge->targetcounter = 0;
 						pathEdge->estLen = -1;
 						pathEdge->next = NULL;
 						pathEdge->sibl = NULL;
@@ -1592,6 +1668,8 @@ void connectPathsPairwise3(){
 				else pathEdge->targetJunction = paths[finpathStack[k*PE]].leftJunction;
 				pathEdge->counter = 1;
 				pathEdge->depth = l-k;
+				if(l-k == finp-1) pathEdge->targetcounter = 1;
+				else pathEdge->targetcounter = 0;
 				pathEdge->estLen = -1;
 				pathEdge->next = NULL;
 				pathEdge->sibl = NULL;
@@ -1603,6 +1681,7 @@ void connectPathsPairwise3(){
 				pathEdge = pathEdge->next;
 				if(pathEdge->ID == finpathStack[k*PE]){
 					pathEdge->counter++;
+					if(l-k == finp-1) pathEdge->targetcounter++;
 				}
 				else{
 					lastEdge = pathEdge;
@@ -1611,6 +1690,7 @@ void connectPathsPairwise3(){
 						// Sibling found, count up
 						if(pathEdge->ID == finpathStack[k*PE]){
 							pathEdge->counter++;
+							if(l-k == finp-1) pathEdge->targetcounter++;
 							break;
 						}
 						if(!pathEdge->sibl) lastEdge = pathEdge;
@@ -1624,6 +1704,8 @@ void connectPathsPairwise3(){
 						else pathEdge->targetJunction = paths[finpathStack[k*PE]].leftJunction;
 						pathEdge->counter = 1;
 						pathEdge->depth = l-k;
+						if(l-k == finp-1) pathEdge->targetcounter = 1;
+						else pathEdge->targetcounter = 0;
 						pathEdge->estLen = -1;
 						pathEdge->next = NULL;
 						pathEdge->sibl = NULL;
@@ -1846,6 +1928,7 @@ void printPath(struct myovlList* G, struct reads* reads, int pathID){
 
 void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right, char r2right, int dist){
 //	printf("Set Virtual Bridge\n");
+	char verbose = 0;
 	struct pathEdge* pathedgeR1;
 	struct pathEdge* pathedgeR2;
 	struct pathEdge* tempEdge;
@@ -1860,7 +1943,7 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 			avgDist = (pathedgeR1->counter * pathedgeR1->estLen) + dist;
 			pathedgeR1->counter++;
 			pathedgeR1->estLen = avgDist / pathedgeR1->counter;
-			printf("Update Bridge: %i -> %i (dist: %i, avg: %i) Count: %i\n",r1path,r2path,dist,pathedgeR1->estLen,pathedgeR1->counter);
+			if(verbose) printf("Update Bridge: %i -> %i (dist: %i, avg: %i) Count: %i\n",r1path,r2path,dist,pathedgeR1->estLen,pathedgeR1->counter);
 			break;
 		}
 		if(pathedgeR1->sibl){
@@ -1871,7 +1954,7 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 					avgDist = (pathedgeR1->counter * pathedgeR1->estLen) + dist;
 					pathedgeR1->counter++;
 					pathedgeR1->estLen = avgDist / pathedgeR1->counter;
-					printf("Update Bridge (Sibl!: BAD CASE): %i -> %i (dist: %i, avg: %i) Count: %i\n",r1path,r2path,dist,pathedgeR1->estLen,pathedgeR1->counter);
+					if(verbose) printf("Update Bridge (Sibl!: BAD CASE): %i -> %i (dist: %i, avg: %i) Count: %i\n",r1path,r2path,dist,pathedgeR1->estLen,pathedgeR1->counter);
 					break;
 				}
 				tempEdge = tempEdge->sibl;
@@ -1889,7 +1972,7 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 			avgDist = (pathedgeR2->counter * pathedgeR2->estLen) + dist;
 			pathedgeR2->counter++;
 			pathedgeR2->estLen = avgDist / pathedgeR2->counter;
-			printf("Update Bridge: %i -> %i (dist: %i, avg: %i) Count: %i\n",r2path,r1path,dist,pathedgeR2->estLen,pathedgeR2->counter);
+			if(verbose)printf("Update Bridge: %i -> %i (dist: %i, avg: %i) Count: %i\n",r2path,r1path,dist,pathedgeR2->estLen,pathedgeR2->counter);
 			break;
 		}
 		if(pathedgeR2->sibl){
@@ -1900,7 +1983,7 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 					avgDist = (pathedgeR2->counter * pathedgeR2->estLen) + dist;
 					pathedgeR2->counter++;
 					pathedgeR2->estLen = avgDist / pathedgeR2->counter;
-					printf("Update Bridge (Sibl!: BAD CASE): %i -> %i (dist: %i, avg: %i) Count: %i\n",r2path,r1path,dist,pathedgeR2->estLen,pathedgeR2->counter);
+					if(verbose) printf("Update Bridge (Sibl!: BAD CASE): %i -> %i (dist: %i, avg: %i) Count: %i\n",r2path,r1path,dist,pathedgeR2->estLen,pathedgeR2->counter);
 					break;
 				}
 				tempEdge = tempEdge->sibl;
@@ -1936,7 +2019,7 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 		pathedgeR2->targetJunction = paths[r1path].leftJunction;
 //		pathedgeR2->targetJunction = paths[r1path].rightJunction;
 		if(paths[r1path].rightPath){
-			printf("R1 right: Multiple Virtual Edges\n");
+			if(verbose) printf("R1 right: Multiple Virtual Edges\n");
 			return;
 			exit(1);
 		}
@@ -1949,7 +2032,7 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 	else{
 		pathedgeR2->targetJunction = paths[r1path].rightJunction;
 		if(paths[r1path].leftPath){
-			printf("R1 left: Multiple Virtual Edges\n");
+			if(verbose) printf("R1 left: Multiple Virtual Edges\n");
 			return;
 			exit(1);
 		}
@@ -1963,7 +2046,7 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 	if(r2right){
 		pathedgeR1->targetJunction = paths[r2path].leftJunction;
 		if(paths[r2path].rightPath){
-			printf("R2 right: Multiple Virtual Edges\n");
+			if(verbose) printf("R2 right: Multiple Virtual Edges\n");
 			return;
 			exit(1);
 		}
@@ -1976,7 +2059,7 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 	else{
 		pathedgeR1->targetJunction = paths[r2path].rightJunction;
 		if(paths[r2path].leftPath){
-			printf("R2 left: Multiple Virtual Edges\n");
+			if(verbose) printf("R2 left: Multiple Virtual Edges\n");
 			return;
 			exit(1);
 		}
@@ -2004,8 +2087,8 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 	if(r1right) pathedgeR2->junctionCon |= (!G->read[paths[r1path].rightJunction]->first->sideflag);
 	else pathedgeR2->junctionCon |= (!G->read[paths[r1path].leftJunction]->first->sideflag);
 
-	printf("Set New Bridge: %i -> %i (dist: %i) Count: %i (TargetJunction: %i)\n",r1path,r2path,dist,pathedgeR1->counter,pathedgeR1->targetJunction);
-	printf("Set New Bridge: %i -> %i (dist: %i) Count: %i (TargetJunction: %i)\n",r2path,r1path,dist,pathedgeR2->counter,pathedgeR2->targetJunction);
+	if(verbose) printf("Set New Bridge: %i -> %i (dist: %i) Count: %i (TargetJunction: %i)\n",r1path,r2path,dist,pathedgeR1->counter,pathedgeR1->targetJunction);
+	if(verbose) printf("Set New Bridge: %i -> %i (dist: %i) Count: %i (TargetJunction: %i)\n",r2path,r1path,dist,pathedgeR2->counter,pathedgeR2->targetJunction);
 
 	// Print the connection in scaffGraph.dot (with dashed lines);
 	// Scaffold stats: the touring is essetial;
@@ -2024,26 +2107,26 @@ void buildBridge(struct myovlList* G, struct readFiles lib, struct reads* reads,
 	if(!((spurs >> 3) & 1)){
 		// LL
 		if(!((spurs >> 1) & 1)){
-			printf("LL (DIR: %i (FLAG: %i) -> %i (FLAG: %i))\n",G->read[r1ID]->dir,G->read[r1ID]->flag, G->read[r1ID + 1]->dir,G->read[r1ID+1]->flag);
+			if(verbose) printf("LL (DIR: %i (FLAG: %i) -> %i (FLAG: %i))\n",G->read[r1ID]->dir,G->read[r1ID]->flag, G->read[r1ID + 1]->dir,G->read[r1ID+1]->flag);
 			r1dir = bridgeReadsSide(G,reads,r1ID,1,G->read[r1ID ]->flag == PROPER ? 1 : 0);
 			r2dir = bridgeReadsSide(G,reads,r1ID+1,1,G->read[r1ID +1]->flag == PROPER ? 1 : 0);
 			dist = r1anno->lJunctionDist + r2anno->lJunctionDist;
 			if(dist < lib.maxInsert && ((oriPE == 0 && r1dir && r2dir) || (oriPE == 1 && !r1dir && !r2dir) || (oriPE == 2 && (r1dir != r2dir)))){
-				printf("Set virtual Bridge\n");
-				printf("Found Bridge over R1Left: %i R2Left: %i (Paths: %i : %i)\n",r1anno->lJunctionDist,r2anno->lJunctionDist,r1path,r2path);
+				if(verbose) printf("Set virtual Bridge\n");
+				if(verbose) printf("Found Bridge over R1Left: %i R2Left: %i (Paths: %i : %i)\n",r1anno->lJunctionDist,r2anno->lJunctionDist,r1path,r2path);
 				setVirtualBridge(G,r1path,r2path,0,0,dist);
 				hitnum++;
 			}
 		}
 		// LR
 		if(!(spurs & 1)){
-			printf("LR (DIR: %i (FLAG: %i) -> %i (FLAG: %i))\n",G->read[r1ID]->dir,G->read[r1ID]->flag, G->read[r1ID + 1]->dir,G->read[r1ID+1]->flag);
+			if(verbose) printf("LR (DIR: %i (FLAG: %i) -> %i (FLAG: %i))\n",G->read[r1ID]->dir,G->read[r1ID]->flag, G->read[r1ID + 1]->dir,G->read[r1ID+1]->flag);
 			r1dir = bridgeReadsSide(G,reads,r1ID,1,G->read[r1ID ]->flag == PROPER ? 1 : 0);
 			r2dir = bridgeReadsSide(G,reads,r1ID+1,0,G->read[r1ID +1]->flag == PROPER ? 1 : 0);
 			dist = r1anno->lJunctionDist + r2anno->rJunctionDist;
 			if(dist < lib.maxInsert && ((oriPE == 0 && r1dir && r2dir) || (oriPE == 1 && !r1dir && !r2dir) || (oriPE == 2 && (r1dir != r2dir)))){
-				printf("Set virtual Bridge\n");
-				printf("Found Bridge over R1Left: %i R2Right: %i (Paths: %i : %i)\n",r1anno->lJunctionDist,r2anno->rJunctionDist,r1path,r2path);
+				if(verbose) printf("Set virtual Bridge\n");
+				if(verbose) printf("Found Bridge over R1Left: %i R2Right: %i (Paths: %i : %i)\n",r1anno->lJunctionDist,r2anno->rJunctionDist,r1path,r2path);
 				setVirtualBridge(G,r1path,r2path,0,1,dist);
 				hitnum++;
 			}
@@ -2052,26 +2135,27 @@ void buildBridge(struct myovlList* G, struct readFiles lib, struct reads* reads,
 	if(!((spurs >> 2) & 1)){
 		// RL
 		if(!((spurs >> 1) & 1)){
-			printf("RL (DIR: %i (FLAG: %i) -> %i (FLAG: %i))\n",G->read[r1ID]->dir,G->read[r1ID]->flag, G->read[r1ID + 1]->dir,G->read[r1ID+1]->flag);
+			if(verbose) printf("RL (DIR: %i (FLAG: %i) -> %i (FLAG: %i))\n",G->read[r1ID]->dir,G->read[r1ID]->flag, G->read[r1ID + 1]->dir,G->read[r1ID+1]->flag);
 			r1dir = bridgeReadsSide(G,reads,r1ID,0,G->read[r1ID ]->flag == PROPER ? 1 : 0);
 			r2dir = bridgeReadsSide(G,reads,r1ID+1,1,G->read[r1ID +1]->flag == PROPER ? 1 : 0);
 			dist = r1anno->rJunctionDist + r2anno->lJunctionDist;
 			if(dist < lib.maxInsert && ((oriPE == 0 && r1dir && r2dir) || (oriPE == 1 && !r1dir && !r2dir) || (oriPE == 2 && (r1dir != r2dir)))){
-				printf("Set virtual Bridge\n");
-				printf("Found Bridge over R1Right: %i R2Left: %i (Paths: %i : %i)\n",r1anno->rJunctionDist,r2anno->lJunctionDist,r1path,r2path);
+				if(verbose) printf("Set virtual Bridge\n");
+				if(verbose) printf("Found Bridge over R1Right: %i R2Left: %i (Paths: %i : %i)\n",r1anno->rJunctionDist,r2anno->lJunctionDist,r1path,r2path);
 				setVirtualBridge(G,r1path,r2path,1,0,dist);
 				hitnum++;
 			}
 		}
 		// RR
 		if(!(spurs & 1)){
-			printf("RR (DIR: %i (FLAG: %i) -> %i (FLAG: %i))\n",G->read[r1ID]->dir,G->read[r1ID]->flag, G->read[r1ID + 1]->dir,G->read[r1ID+1]->flag);
 			r1dir = bridgeReadsSide(G,reads,r1ID,0,G->read[r1ID ]->flag == PROPER ? 1 : 0);
 			r2dir = bridgeReadsSide(G,reads,r1ID+1,0,G->read[r1ID +1]->flag == PROPER ? 1 : 0);
 			dist = r1anno->rJunctionDist + r2anno->rJunctionDist;
+			if(verbose) printf("RR (DIR: %i (oriPE: %i) (FLAG: %i) -> %i (FLAG: %i)) dist<maxsize?(%i<%i)\n",G->read[r1ID]->dir,oriPE,G->read[r1ID]->flag, G->read[r1ID + 1]->dir,G->read[r1ID+1]->flag,dist,lib.maxInsert);
+//			printf("%i < %i && (oriPE(%i) == 0 && r1dir(%i) && r2dir(%i))",dist,lib.maxInsert,oriPE,r1dir,r2dir);
 			if(dist < lib.maxInsert && ((oriPE == 0 && r1dir && r2dir) || (oriPE == 1 && !r1dir && !r2dir) || (oriPE == 2 && (r1dir != r2dir)))){
-				printf("Set virtual Bridge\n");
-				printf("Found Bridge over R1Right: %i R2Right: %i (Paths: %i : %i)\n",r1anno->rJunctionDist,r2anno->rJunctionDist,r1path,r2path);
+				if(verbose) printf("Set virtual Bridge\n");
+				if(verbose) printf("Found Bridge over R1Right: %i R2Right: %i (Paths: %i : %i)\n",r1anno->rJunctionDist,r2anno->rJunctionDist,r1path,r2path);
 				setVirtualBridge(G,r1path,r2path,1,1,dist);
 				hitnum++;
 			}
@@ -2509,6 +2593,8 @@ void readTouring(struct myovlList* G, struct readFiles* files, struct reads* rea
 	printf("SINGLE     READS : %i\n",si_num_tot);
 	printf("\n");
 
+	annotatePaths();
 	connectPathStats();
+
 }
 

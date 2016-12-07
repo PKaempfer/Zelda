@@ -150,7 +150,6 @@ int main(int argc, char* argv[]) {
 //	exit(1);
 	printf("CHECKPOINT: 6. Stringer (Overlaps to String Graph):\n");
 	time(&start);
-	printf("Numread: %i\n",numreads);
 	struct myovlList* G = initOVLgraph(numreads);
 	struct string_graph* S = initStringGraph(G,para->asemblyFolder);
 //	exit(1);
@@ -158,7 +157,6 @@ int main(int argc, char* argv[]) {
 	printf("Stringer: %0.2f\n",difftime (stop,start));
 	printf("Wait after Stringer\n");
 	sleep(sleeptime);
-	printf("continue\n");
 	// exit for fixing the stringgraph bug
 	printf("CHECKPOINT: ContigWriter\n");
 
@@ -186,7 +184,7 @@ int main(int argc, char* argv[]) {
 	time(&start);
 
 	printf("CHECKPOINT: 8. POA (Layout-Consensus)\n");
-	struct POG* contigs_pog = make_poaScaff(G,reads,0,para);
+	struct POG* contigs_pog = make_poaScaff(G,reads,1,para); // 3. Argument, scaffolding 1 - yes, 0 - no
 	time(&stop);
 	printf("POA: %0.2f\n",difftime (stop,start));
 	printf("Wait after POA\n");
@@ -197,9 +195,9 @@ int main(int argc, char* argv[]) {
 	printf("CHECKPOINT: FastaOut\n");
 	time(&start);
 	poa_printContigs(contigs_pog,contigPath);
-	sprintf(contigPath,"%s/contigs.vcf",para->asemblyFolder);
-	printf("CHECKPOINT: FastaOut\n");
-	poa_reportVariant(contigs_pog,contigPath);
+	sprintf(tempPath,"%s/contigs.vcf",para->asemblyFolder);
+	printf("CHECKPOINT: Variation Calling\n");
+	poa_reportVariant(contigs_pog,tempPath,contigPath);
 	time(&stop);
 	printf("FASTA Out: %0.2f\n",difftime (stop,start));
 	printf("Wait after FastaOut\n");

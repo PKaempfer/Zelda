@@ -864,29 +864,194 @@ static inline void resetLetterSt(struct LetterEdge** letters){
 	letters[3] = NULL;
 }
 
+long double variant_qualaty(int n,int k){
+	long double right = 0.995;
+	long double wrong = 0.005;
+    long long ans=1;
+    k=k>n-k?n-k:k;
+    int j=1;
+    for(;j<=k;j++,n--)
+    {
+        if(n%j==0)
+        {
+            ans*=n/j;
+        }else
+        if(ans%j==0)
+        {
+            ans=ans/j*n;
+        }else
+        {
+            ans=(ans*n)/j;
+        }
+    }
+    return (-10 * log10((ans*(pow(wrong,k)*pow(right,n-k)))));
+}
+
 #define maxAltLen 100
 
-void poa_reportVariant(struct POG* pog, char* vcfFile){
+static inline unsigned char poa_makeCigar(char* cigar, char* ref, char* alt){
+	unsigned char numM = 0;
+	unsigned char numX = 0;
+	unsigned char totX = 0;
+	uint16_t rl = strlen(ref);
+	uint16_t al = strlen(alt);
+	cigar[0]='\0';
+	// SNP
+	if(al==1 && rl ==1){
+		sprintf(cigar,"1X");
+		return 0;
+	}
+	else{
+
+	}
+	int min = _min(rl,al);
+	int i;
+	for(i=0;i<min;i++){
+		if(ref[i] == alt[i]){
+			if(numM) numM++;
+			else{
+				if(numX){
+					sprintf(cigar,"%s%iX",cigar,(int)numX);
+					numX=0;
+				}
+				numM++;
+			}
+		}
+		else{
+			if(numX) numX++;
+			else{
+				if(numM){
+					sprintf(cigar,"%s%iM",cigar,(int)numM);
+					numM=0;
+				}
+				numX++;
+			}
+			totX++;
+		}
+	}
+	if(numM) sprintf(cigar,"%s%iM",cigar,(int)numM);
+	if(numX) sprintf(cigar,"%s%iX",cigar,(int)numX);
+	if(rl == al) return 1;
+	else{
+		if(al > rl){
+			sprintf(cigar,"%s%iI",cigar,al-rl);
+			if(totX) return 4;
+			else return 2;
+		}
+		else{
+			sprintf(cigar,"%s%iD",cigar,rl-al);
+			if(totX) return 4;
+			else return 3;
+		}
+	}
+	return 0;
+}
+
+void poa_reportVariant(struct POG* pog, char* vcfFile, char* ref){
 	// Write Alternative to VCF
 	FILE* vcf = fopen(vcfFile,"w");
 
 	// ToDo: Write Header
+    time_t current_time;
+    char* cigar = (char*)malloc(2*maxAltLen);
+    char* c_time_string;
+    /* Obtain current time. */
+    current_time = time(NULL);
+
+    if (current_time == ((time_t)-1))
+    {
+        (void) fprintf(stderr, "Failure to obtain the current time.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    /* Convert to local time format. */
+    c_time_string = ctime(&current_time);
+
+    if (c_time_string == NULL)
+    {
+        (void) fprintf(stderr, "Failure to convert the current time.\n");
+        exit(EXIT_FAILURE);
+    }
+    c_time_string[strlen(c_time_string)-1] = '\0';
+    fprintf(vcf,"##fileformat=VCFv4.1\n");
+    fprintf(vcf,"##fileDate=\"%s\"\n",c_time_string);
+    fprintf(vcf,"##source=%s\n",version);
+    fprintf(vcf,"##reference=%s\n",ref);
+    fprintf(vcf,"##phasing=none\n");
+    fprintf(vcf,"##filter=\"QUAL > 20\"\n");
+    fprintf(vcf,"##INFO=<ID=NS,Number=1,Type=Integer,Description=\"Number of Samples With Data\">\n");
+    fprintf(vcf,"##INFO=<ID=DP,Number=1,Type=Integer,Description=\"Total read depth at the locus\">\n");
+//    fprintf(vcf,"##INFO=<ID=DPB,Number=1,Type=Float,Description=\"Total read depth per bp at the locus; bases in reads overlapping / bases in haplotype\">\n");
+//    fprintf(vcf,"##INFO=<ID=AC,Number=A,Type=Integer,Description=\"Total number of alternate alleles in called genotypes\">\n");
+//    fprintf(vcf,"##INFO=<ID=AN,Number=1,Type=Integer,Description=\"Total number of alleles in called genotypes\">\n");
+//    fprintf(vcf,"##INFO=<ID=AF,Number=A,Type=Float,Description=\"Estimated allele frequency in the range (0,1]\">\n");
+    fprintf(vcf,"##INFO=<ID=RO,Number=1,Type=Integer,Description=\"Reference allele observation count, with partial observations recorded fractionally\">\n");
+    fprintf(vcf,"##INFO=<ID=AO,Number=A,Type=Integer,Description=\"Alternate allele observations, with partial observations recorded fractionally\">\n");
+//    fprintf(vcf,"##INFO=<ID=PRO,Number=1,Type=Float,Description=\"Reference allele observation count, with partial observations recorded fractionally\">\n");
+//    fprintf(vcf,"##INFO=<ID=PAO,Number=A,Type=Float,Description=\"Alternate allele observations, with partial observations recorded fractionally\">\n");
+//    fprintf(vcf,"##INFO=<ID=QR,Number=1,Type=Integer,Description=\"Reference allele quality sum in phred\">\n");
+//    fprintf(vcf,"##INFO=<ID=QA,Number=A,Type=Integer,Description=\"Alternate allele quality sum in phred\">\n");
+//    fprintf(vcf,"##INFO=<ID=PQR,Number=1,Type=Float,Description=\"Reference allele quality sum in phred for partial observations\">\n");
+//    fprintf(vcf,"##INFO=<ID=PQA,Number=A,Type=Float,Description=\"Alternate allele quality sum in phred for partial observations\">\n");
+//    fprintf(vcf,"##INFO=<ID=SRF,Number=1,Type=Integer,Description=\"Number of reference observations on the forward strand\">\n");
+//    fprintf(vcf,"##INFO=<ID=SRR,Number=1,Type=Integer,Description=\"Number of reference observations on the reverse strand\">\
+//    fprintf(vcf,"##INFO=<ID=SAF,Number=A,Type=Integer,Description=\"Number of alternate observations on the forward strand\">\n");
+//    fprintf(vcf,"##INFO=<ID=SAR,Number=A,Type=Integer,Description=\"Number of alternate observations on the reverse strand\">\n");
+//    fprintf(vcf,"##INFO=<ID=SRP,Number=1,Type=Float,Description=\"Strand balance probability for the reference allele: Phred-scaled upper-bounds estimate of the probability of observing the deviation between SRF and SRR given E(SRF/SRR) ~ 0.5, derived using Hoeffding's inequality\">\n");
+//    fprintf(vcf,"##INFO=<ID=SAP,Number=A,Type=Float,Description=\"Strand balance probability for the alternate allele: Phred-scaled upper-bounds estimate of the probability of observing the deviation between SAF and SAR given E(SAF/SAR) ~ 0.5, derived using Hoeffding's inequality\">\n");
+//    fprintf(vcf,"##INFO=<ID=AB,Number=A,Type=Float,Description=\"Allele balance at heterozygous sites: a number between 0 and 1 representing the ratio of reads showing the reference allele to all reads, considering only reads from individuals called as heterozygous\">\n");
+//    fprintf(vcf,"##INFO=<ID=ABP,Number=A,Type=Float,Description=\"Allele balance probability at heterozygous sites: Phred-scaled upper-bounds estimate of the probability of observing the deviation between ABR and ABA given E(ABR/ABA) ~ 0.5, derived using Hoeffding's inequality\">\n");
+//    fprintf(vcf,"##INFO=<ID=RUN,Number=A,Type=Integer,Description=\"Run length: the number of consecutive repeats of the alternate allele in the reference genome\">\n");
+//    fprintf(vcf,"##INFO=<ID=RPP,Number=A,Type=Float,Description=\"Read Placement Probability: Phred-scaled upper-bounds estimate of the probability of observing the deviation between RPL and RPR given E(RPL/RPR) ~ 0.5, derived using Hoeffding's inequality\">\n");
+//    fprintf(vcf,"##INFO=<ID=RPPR,Number=1,Type=Float,Description=\"Read Placement Probability for reference observations: Phred-scaled upper-bounds estimate of the probability of observing the deviation between RPL and RPR given E(RPL/RPR) ~ 0.5, derived using Hoeffding's inequality\">\n");
+//    fprintf(vcf,"##INFO=<ID=RPL,Number=A,Type=Float,Description=\"Reads Placed Left: number of reads supporting the alternate balanced to the left (5') of the alternate allele\">\n");
+//    fprintf(vcf,"##INFO=<ID=RPR,Number=A,Type=Float,Description=\"Reads Placed Right: number of reads supporting the alternate balanced to the right (3') of the alternate allele\">\n");
+//    fprintf(vcf,"##INFO=<ID=EPP,Number=A,Type=Float,Description=\"End Placement Probability: Phred-scaled upper-bounds estimate of the probability of observing the deviation between EL and ER given E(EL/ER) ~ 0.5, derived using Hoeffding's inequality\">\n");
+//    fprintf(vcf,"##INFO=<ID=EPPR,Number=1,Type=Float,Description=\"End Placement Probability for reference observations: Phred-scaled upper-bounds estimate of the probability of observing the deviation between EL and ER given E(EL/ER) ~ 0.5, derived using Hoeffding's inequality\">\n");
+//    fprintf(vcf,"##INFO=<ID=DPRA,Number=A,Type=Float,Description=\"Alternate allele depth ratio.  Ratio between depth in samples with each called alternate allele and those without.\">\n");
+//    fprintf(vcf,"##INFO=<ID=ODDS,Number=1,Type=Float,Description=\"The log odds ratio of the best genotype combination to the second-best.\">\n");
+//    fprintf(vcf,"##INFO=<ID=GTI,Number=1,Type=Integer,Description=\"Number of genotyping iterations required to reach convergence or bailout.\">\n");
+    fprintf(vcf,"##INFO=<ID=TYPE,Number=A,Type=String,Description=\"The type of allele, either snp, mnp, ins, del, or complex.\">\n");
+    fprintf(vcf,"##INFO=<ID=CIGAR,Number=A,Type=String,Description=\"The extended CIGAR representation of each alternate allele, with the exception that '=' is replaced by 'M' to ease VCF parsing.  Note that INDEL alleles do not have the first matched base (which is provided by default, per the spec) referred to by the CIGAR.\">\n");
+//    fprintf(vcf,"##INFO=<ID=NUMALT,Number=1,Type=Integer,Description=\"Number of unique non-reference alleles in called genotypes at this position.\">\n");
+//    fprintf(vcf,"##INFO=<ID=MEANALT,Number=A,Type=Float,Description=\"Mean number of unique non-reference allele observations per sample with the corresponding alternate alleles.\">\n");
+    fprintf(vcf,"##INFO=<ID=LEN,Number=A,Type=Integer,Description=\"allele length\">\n");
+//    fprintf(vcf,"##INFO=<ID=MQM,Number=A,Type=Float,Description=\"Mean mapping quality of observed alternate alleles\">\n");
+//    fprintf(vcf,"##INFO=<ID=MQMR,Number=1,Type=Float,Description=\"Mean mapping quality of observed reference alleles\">\n");
+//    fprintf(vcf,"##INFO=<ID=PAIRED,Number=A,Type=Float,Description=\"Proportion of observed alternate alleles which are supported by properly paired read fragments\">\n");
+//    fprintf(vcf,"##INFO=<ID=PAIREDR,Number=1,Type=Float,Description=\"Proportion of observed reference alleles which are supported by properly paired read fragments\">\n");
+    fprintf(vcf,"##FORMAT=<ID=GT,Number=1,Type=String,Description=\"Genotype\">\n");
+//    fprintf(vcf,"##FORMAT=<ID=GQ,Number=1,Type=Float,Description=\"Genotype Quality, the Phred-scaled marginal (or unconditional) probability of the called genotype\">\n");
+//    fprintf(vcf,"##FORMAT=<ID=GL,Number=G,Type=Float,Description=\"Genotype Likelihood, log10-scaled likelihoods of the data given the called genotype for each possible genotype generated from the reference and alternate alleles given the sample ploidy\">\n");
+    fprintf(vcf,"##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">\n");
+    fprintf(vcf,"##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">\n");
+    fprintf(vcf,"##FORMAT=<ID=RO,Number=1,Type=Integer,Description=\"Reference allele observation count\">\n");
+    fprintf(vcf,"##FORMAT=<ID=QR,Number=1,Type=Integer,Description=\"Sum of quality of the reference observations\">\n");
+    fprintf(vcf,"##FORMAT=<ID=AO,Number=A,Type=Integer,Description=\"Alternate allele observation count\">\n");
+    fprintf(vcf,"##FORMAT=<ID=QA,Number=A,Type=Integer,Description=\"Sum of quality of the alternate observations\">\n");
+    fprintf(vcf,"#CHROM  POS     ID      REF     ALT     QUAL    FILTER  INFO    FORMAT  unknown\n");
+
 	int i;
+	long double qual;
 	struct Variation* var;
 	for(i=0;i<pog->contigNum;i++){
 		var = pog->contig[i].var;
 		while(var){
-			fprintf(vcf,"%s\t",pog->contig[i].name);
-			fprintf(vcf,"%i\t",var->pos);
-			fprintf(vcf,".\t");
-			fprintf(vcf,"%s\t",var->refSeq);
-			fprintf(vcf,"%s\t",var->altSeq);
-			fprintf(vcf,"100\t");
-			fprintf(vcf,"PASS\t");
-			fprintf(vcf,"AO=%i;CIGAR=%s;DP=%i;LEN=%i;RO=%i;TYPE=%s\t",var->ao,var->cigar,var->dp,var->len,var->ro,varType[(int)var->type]);
-			fprintf(vcf,"GT:DP:RO:QR:AO:QA\t");
-			fprintf(vcf,"%i:%i:%i:%i:%i:%i\t",1,var->dp,var->ro,1,var->ao,1);
-			fprintf(vcf,"\n");
+			qual = variant_qualaty(var->dp,var->ao);
+			if(qual>20){
+				var->type = poa_makeCigar(cigar,var->refSeq,var->altSeq);
+				fprintf(vcf,"%s\t",pog->contig[i].name);
+				fprintf(vcf,"%i\t",var->pos);
+				fprintf(vcf,".\t");
+				fprintf(vcf,"%s\t",var->refSeq);
+				fprintf(vcf,"%s\t",var->altSeq);
+				fprintf(vcf,"%.3Lf\t",qual);
+				fprintf(vcf,".\t");
+				fprintf(vcf,"AO=%i;CIGAR=%s;DP=%i;LEN=%i;RO=%i;TYPE=%s\t",var->ao,cigar,var->dp,var->len,var->ro,varType[(int)var->type]);
+				fprintf(vcf,"GT:DP:RO:QR:AO:QA\t");
+				fprintf(vcf,"%i:%i:%i:%i:%i:%i\t",1,var->dp,var->ro,1,var->ao,1);
+				fprintf(vcf,"\n");
+			}
 			var = var->next;
 		}
 	}
@@ -899,8 +1064,6 @@ void poa_recMainPath(struct Letter_T* currentLetter, struct Letter_T* endLetter,
 	if(verbose) printf("Checkpoint recMainPath");
 	char* refSeq = (char*)malloc(maxAltLen);
 	char* cigar = (char*)malloc(2);
-	cigar[0] = 'X';
-	cigar[1] = '\0';
 	int refLen = 0;
 	int refCov = 100000;
 	struct LetterEdge* edge;
@@ -926,8 +1089,8 @@ void poa_recMainPath(struct Letter_T* currentLetter, struct Letter_T* endLetter,
 	char type = -1;
 	if(altLen == 2 && refLen == 2) type = 0; 	// snp
 	else if(altLen == refLen) type = 1; 		// mnp
-	else if(altLen > refLen) type = 2;
-	else if(altLen < refLen) type = 3;
+	else if(altLen > refLen) type = 2;			// ins
+	else if(altLen < refLen) type = 3;			// del
 
 	struct Variation* var = (struct Variation*)malloc(sizeof(struct Variation));
 	if(type == 0){
@@ -955,15 +1118,14 @@ void poa_recMainPath(struct Letter_T* currentLetter, struct Letter_T* endLetter,
 	var->type = type;
 	// ToDo: rest entries down under
 	var->len = strlen(var->altSeq);
-	var->cigar = (char*)malloc((strlen(cigar)+1));
-	strcpy(var->cigar,cigar);
+
 	if(!contig->var){
 		contig->var = var;
 	}
 	else contig->lastvar->next = var;
 	contig->lastvar = var;
-	printf("Write Variation:\n");
-	printf("\t%s\t%i\t%s\t%s\tDP:%i;AO:%i;RO:%i\n",contig->name,var->pos,var->refSeq,var->altSeq,var->dp,var->ao,var->ro);
+	if(verbose) printf("Write Variation:\n");
+	if(verbose) printf("\t%s\t%i\t%s\t%s\tDP:%i;AO:%i;RO:%i\n",contig->name,var->pos,var->refSeq,var->altSeq,var->dp,var->ao,var->ro);
 
 	free(refSeq);
 	free(cigar);
@@ -1095,6 +1257,8 @@ void poa_consensus2(struct Sequence* contig){
 //	}
 //	printf("\n");
 	contig->sequence = seq;
+	contig->length = strlen(seq);
+	sprintf(contig->name,"%s%i",contig->name,contig->length);
 	poa_variantCalling(contig);
 	poa_avgCov(contig);
 	if(verbose) exit(1);
@@ -1185,7 +1349,7 @@ void poa_printContigs(struct POG* pog, char* contigFile){
 
 	for(i=0;i<pog->contigNum;i++){
 		len = strlen(pog->contig[i].sequence);
-		fprintf(correctContigs,">%s_%i\n",pog->contig[i].name,len);
+		fprintf(correctContigs,">%s\n",pog->contig[i].name);
 		for(j=0;j<len;j+=80){
 			fprintf(correctContigs,"%.80s\n",&pog->contig[i].sequence[j]);
 		}
@@ -1307,7 +1471,7 @@ struct POG* make_poa(struct myovlList* G, struct reads* reads){
     				pog->contig[pog->contigNum].nsource_seq = 0;
     				pog->contig[pog->contigNum].length = 0;
     				sprintf(name,"%i_%i_%i_%i",bread->dest->pathID,pog->contigNum,i,bread->dest->ID);
-    				pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+1);
+    				pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+10);
     				strcpy(pog->contig[pog->contigNum].name,name);
     				if(dir){
     					if(bread->sideflag) 	multidir = 3;
@@ -1748,8 +1912,7 @@ void scaffold_uniqueStringTouring(int i, int rightdir, struct scaffold* scaff){
 	}
 }
 
-
-struct scaffold_set* scaffold_init(){
+struct scaffold_set* scaffold_init_old(){
     int i;
     struct scaffold_set* aS = (struct scaffold_set*)malloc(sizeof(struct scaffold_set));
     aS->num = 0;
@@ -1793,6 +1956,292 @@ struct scaffold_set* scaffold_init(){
         			exit(1);
         		}
         	}
+    	}
+    }
+	return aS;
+}
+
+struct scaffold_set* scaffold_init(){
+    int i;
+    struct scaffold_set* aS = (struct scaffold_set*)malloc(sizeof(struct scaffold_set));
+    aS->num = 0;
+    aS->nummax = 1000;
+    aS->scaff = (struct scaffold*)malloc(sizeof(struct scaffold)*aS->nummax);
+
+    char verbose = 0;
+
+    int depth = 0;
+    int len = 0;
+
+    int lpos = 0;
+    int rpos = 0;
+    int lelem = 0;
+    int relem = 0;
+    int lmaxelem = 1000;
+    int rmaxelem = 1000;
+    int current;
+    struct contigScaff* left = (struct contigScaff*)malloc(sizeof(struct contigScaff)*lmaxelem);
+    struct contigScaff* right = (struct contigScaff*)malloc(sizeof(struct contigScaff)*rmaxelem);
+    struct pathEdge* edge = (struct pathEdge*)malloc(sizeof(struct pathEdge));
+
+    for(i=1;i<pathsNum;i++){
+    	if(!paths[i].flag){
+    		if((paths[i].scaffflag & 32) && (paths[i].scaffflag & 2)){
+    			continue;
+    		}
+    		if(verbose) printf("\t NEW SCAFFOLD\n");
+    		paths[i].flag++;
+    		// initial left
+    		lpos = 0;
+    		rpos = 0;
+    		lelem = 0;
+    		relem = 0;
+    		edge = paths[i].leftPath;
+    		while(edge && !edge->sibl){
+    			if(verbose) printf("(%i) Set left %i\n",i,edge->ID);
+    			left[lelem].ID = edge->ID;
+    			if(edge->targetJunction == paths[edge->ID].leftJunction) left[lelem].sameside = 1;
+    			else left[lelem].sameside = 0;
+    			lelem++;
+    			if(lelem == lmaxelem){
+    				lmaxelem *= 2;
+    				left = (struct contigScaff*)realloc(left,sizeof(struct contigScaff)*lmaxelem);
+    				if(!left){
+    					printf("Error in realloc lmaxelem in scaffold_init\n");
+    					exit(1);
+    				}
+    			}
+    			edge = edge->next;
+    		}
+    		// initial right
+    		edge = paths[i].rightPath;
+    		while(edge && !edge->sibl){
+    			if(verbose) printf("(%i) Set right %i\n",i,edge->ID);
+    			right[relem].ID = edge->ID;
+    			if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
+    			else right[relem].sameside = 0;
+    			relem++;
+    			if(relem == rmaxelem){
+    				rmaxelem *= 2;
+    				right = (struct contigScaff*)realloc(right,sizeof(struct contigScaff)*rmaxelem);
+    				if(!right){
+    					printf("Error in realloc rmaxelem in scaffold_init\n");
+    					exit(1);
+    				}
+    			}
+    			edge = edge->next;
+    		}
+    		while(lpos<lelem || rpos<relem){
+    			if(verbose) printf("Somithing was set, go deeper\n");
+    			// left
+    			while(lpos<lelem){
+    				current = left[lpos].ID;
+    				paths[current].flag++;
+    				// left -> left
+    				if(left[lpos].sameside) edge = paths[current].leftPath;
+    				else edge = paths[current].rightPath;
+    				while(edge && !edge->sibl){
+    					if(edge->depth + lpos == lelem){
+    						if(verbose) printf("(%i) (lpos: %i) Set left left %i (target: %i)\n",i,lpos,edge->ID,edge->targetJunction);
+    						left[lelem].ID = edge->ID;
+    		    			if(edge->targetJunction == paths[edge->ID].leftJunction) left[lelem].sameside = 1;
+    		    			else left[lelem].sameside = 0;
+    		    			lelem++;
+    		    			if(lelem == lmaxelem){
+    		    				lmaxelem *= 2;
+    		    				left = (struct contigScaff*)realloc(left,sizeof(struct contigScaff)*lmaxelem);
+    		    				if(!left){
+    		    					printf("Error in realloc lmaxelem in scaffold_init\n");
+    		    					exit(1);
+    		    				}
+    		    			}
+    					}
+    					edge = edge->next;
+    				}
+    				// left -> right
+    				if(left[lpos].sameside) edge = paths[current].rightPath;
+    				else edge = paths[current].leftPath;
+    				while(edge && !edge->sibl){
+    					if(edge->depth == lpos + relem +2){
+    						if(verbose) printf("(%i) (lpos: %i) Set left right %i",i,lpos,edge->ID);
+    						right[relem].ID = edge->ID;
+    		    			if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
+    		    			else right[relem].sameside = 0;
+    		    			relem++;
+    		    			if(relem == rmaxelem){
+    		    				rmaxelem *= 2;
+    		    				right = (struct contigScaff*)realloc(right,sizeof(struct contigScaff)*rmaxelem);
+    		    				if(!right){
+    		    					printf("Error in realloc rmaxelem in scaffold_init\n");
+    		    					exit(1);
+    		    				}
+    		    			}
+    					}
+    					edge = edge->next;
+    				}
+    				lpos++;
+    			}
+    			// right
+    			while(rpos < relem){
+    				current = right[rpos].ID;
+    				paths[current].flag++;
+    				// right -> right
+    				if(right[rpos].sameside) edge = paths[current].rightPath;
+    				else edge = paths[current].leftPath;
+    				while(edge && !edge->sibl){
+    					if(edge->depth + rpos == relem){
+    						right[relem].ID = edge->ID;
+    						if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
+    						else right[relem].sameside = 0;
+    						relem++;
+    		    			if(relem == rmaxelem){
+    		    				rmaxelem *= 2;
+    		    				right = (struct contigScaff*)realloc(right,sizeof(struct contigScaff)*rmaxelem);
+    		    				if(!right){
+    		    					printf("Error in realloc rmaxelem in scaffold_init\n");
+    		    					exit(1);
+    		    				}
+    		    			}
+    					}
+    					edge = edge->next;
+    				}
+    				// right -> left
+    				if(right[rpos].sameside) edge = paths[current].leftPath;
+    				else edge = paths[current].rightPath;
+    				while(edge && !edge->sibl){
+    					if(edge->depth == rpos + lelem +2){
+    						left[lelem].ID = edge->ID;
+    						if(edge->targetJunction == paths[edge->ID].leftJunction) left[lelem].sameside = 1;
+    						else left[lelem].sameside = 0;
+    						lelem++;
+    		    			if(lelem == lmaxelem){
+    		    				lmaxelem *= 2;
+    		    				left = (struct contigScaff*)realloc(left,sizeof(struct contigScaff)*lmaxelem);
+    		    				if(!left){
+    		    					printf("Error in realloc lmaxelem in scaffold_init\n");
+    		    					exit(1);
+    		    				}
+    		    			}
+    					}
+    					edge = edge->next;
+    				}
+    				rpos++;
+    			}
+    		}
+        	if(verbose){
+        		int a = lpos-1;
+        		printf("Scaffold Nodes (%i):\n",i);
+        		while(a>-1){
+        			printf("%i (%i) ",left[a].ID,left[a].sameside);
+        			a--;
+        		}
+        		printf("<- %i -> ",i);
+        		a = 0;
+        		while(a<rpos){
+        			printf("%i (%i) ",right[a].ID,right[a].sameside);
+        			a++;
+        		}
+        		printf("\n");
+        	}
+        	// save results in aS
+        	depth = 0;
+        	len = 0;
+        	int ID;
+        	struct scaffEdge* scaffedge;
+        	struct scaffEdge* scaffedgenew;
+        	aS->scaff[aS->num].ID = aS->num;
+        	if(lpos){
+        		lpos--;
+        		scaffedge = (struct scaffEdge*)malloc(sizeof(struct scaffEdge));
+        		ID = left[lpos].ID;
+        		len += paths[ID].len;
+        		scaffedge->ID = ID;
+        		scaffedge->depth = depth;
+        		scaffedge->len = len;
+        		scaffedge->next = NULL;
+        		if(left[lpos].sameside){
+        			aS->scaff[aS->num].startJunction = paths[ID].leftJunction;
+        			aS->scaff[aS->num].endJunction = paths[ID].rightJunction;
+        			scaffedge->targetJunction = paths[ID].rightJunction;
+        		}
+        		else{
+        			aS->scaff[aS->num].startJunction = paths[ID].rightJunction;
+        			aS->scaff[aS->num].endJunction = paths[ID].leftJunction;
+        			scaffedge->targetJunction = paths[ID].leftJunction;
+        		}
+        		depth ++;
+        		aS->scaff[aS->num].type = 1;
+        		aS->scaff[aS->num].first = scaffedge;
+        		while(lpos){
+        			aS->scaff[aS->num].type = 0;
+        			lpos--;
+        			scaffedgenew = (struct scaffEdge*)malloc(sizeof(struct scaffEdge));
+        			ID = left[lpos].ID;
+        			scaffedgenew->ID = ID;
+        			scaffedgenew->len = paths[ID].len;
+        			scaffedgenew->depth = depth;
+        			scaffedgenew->next = NULL;
+        			if(left[lpos].sameside) scaffedgenew->targetJunction = paths[ID].rightJunction;
+        			else scaffedgenew->targetJunction = paths[ID].leftJunction;
+        			depth ++;
+        			len += scaffedgenew->len;
+        			scaffedge->next = scaffedgenew;
+        			scaffedge = scaffedge->next;
+        		}
+
+        		scaffedgenew = (struct scaffEdge*)malloc(sizeof(struct scaffEdge));
+        		scaffedgenew->ID = i;
+        		scaffedgenew->next = NULL;
+        		scaffedgenew->depth = depth;
+        		scaffedgenew->targetJunction = paths[i].rightJunction;
+        		scaffedgenew->len = paths[i].len;
+        		scaffedge->next = scaffedgenew;
+        		scaffedge = scaffedgenew;
+        		len += paths[i].len;
+        		depth++;
+           	}
+        	else{
+        		len += paths[i].len;
+        		scaffedge = (struct scaffEdge*)malloc(sizeof(struct scaffEdge));
+        		scaffedge->ID = i;
+        		scaffedge->next = NULL;
+        		scaffedge->depth = depth;
+        		scaffedge->targetJunction = paths[i].rightJunction;
+        		scaffedge->len = paths[i].len;
+        		aS->scaff[aS->num].type = 1;
+        		aS->scaff[aS->num].endJunction = paths[i].rightJunction;
+        		aS->scaff[aS->num].startJunction = paths[i].leftJunction;
+        		aS->scaff[aS->num].first = scaffedge;
+        		depth++;
+        	}
+        	rpos = 0;
+        	while(rpos < relem){
+    			aS->scaff[aS->num].type = 0;
+        		scaffedgenew = (struct scaffEdge*)malloc(sizeof(struct scaffEdge));
+        		ID = right[rpos].ID;
+        		scaffedgenew->ID = ID;
+        		scaffedgenew->next = NULL;
+        		scaffedgenew->depth = depth;
+        		scaffedgenew->len = paths[ID].len;
+        		if(right[rpos].sameside) scaffedgenew->targetJunction = paths[ID].rightJunction;
+        		else scaffedgenew->targetJunction = paths[ID].leftJunction;
+        		scaffedge->next = scaffedgenew;
+        		scaffedge = scaffedgenew;
+        		len += paths[ID].len;
+        		depth++;
+        		rpos++;
+        	}
+        	aS->scaff[aS->num].len = len;
+        	aS->num++;
+        	if(aS->num == aS->nummax){
+        		aS->nummax *= 2;
+        		aS->scaff = (struct scaffold*)realloc(aS->scaff,sizeof(struct scaffold)*aS->nummax);
+        		if(!aS->scaff){
+        			printf("No realloc of struct scaffold possible\n Abort\n");
+        			exit(1);
+        		}
+        	}
+
     	}
 
     }
@@ -1853,6 +2302,7 @@ static inline void resetLetters(struct Letter_T* Letters){
  * @return
  */
 struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffolding, struct para* para){
+	char verbose = 1;
 
 	struct scaffold_set* aS;
 	if(scaffolding){
@@ -1863,9 +2313,10 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 		printf("Checkpoint: Init Contig Correction\n");
 		aS = contigs_init(G); // ,reads
 	}
-    scaffold_stats(aS);
 
-	char verbose = 0;
+	if(verbose) scaffold_stats(aS);
+	exit(1);
+
     int i,j;
     int breadID;
     struct bread* bread;
@@ -1958,7 +2409,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 				pog->contig[pog->contigNum].nsource_seq = 0;
 				pog->contig[pog->contigNum].length = 0;
 				sprintf(name,"Scaffold_%i_%i_%i_len:",i+1,aS->scaff[i].startJunction,aS->scaff[i].endJunction);
-				pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+1);
+				pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+10);
 				strcpy(pog->contig[pog->contigNum].name,name);
 				if(dir){
 					if(bread->sideflag) 	multidir = 3;

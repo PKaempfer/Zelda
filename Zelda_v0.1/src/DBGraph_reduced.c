@@ -398,7 +398,7 @@ void internalVerticalReduction(int c, int p){
  * 		   0 - Otherwise: Nothing could be reduced, go ahead without a new reduction iteration.
  */
 int verticalReduction(){
-	char verbose = 1;
+	char verbose = 0;
 	int succ = 0, inter = 0;
 	int i;
 	int dest;
@@ -1356,6 +1356,7 @@ void initAllReads(){
  * 		   					(3) One Parent with more than one Child
  */
 void travToRedOVL_v2(){
+	char verbose = 0;
 	int i;
 //	int j,outdegree;
 	cNodeId = 1;
@@ -1364,10 +1365,10 @@ void travToRedOVL_v2(){
 	int nodeNum = countNodes();
 	int go;
 
-	printf("Count Node: %i\n",nodeNum);
-	printf("Create temporary hashTable32\n");
+	if(verbose) printf("Count Node: %i\n",nodeNum);
+	if(verbose) printf("Create temporary hashTable32\n");
 	struct hashTable32* ht = hashTable32_create(BITS_TO_REPRESENT(nodeNum));
-	printf("Number of new nodes representing a start point of a reduced graph: %i (in bits: %i)\n",nodeNum,BITS_TO_REPRESENT(nodeNum));
+	if(verbose) printf("Number of new nodes representing a start point of a reduced graph: %i (in bits: %i)\n",nodeNum,BITS_TO_REPRESENT(nodeNum));
 
 	// create redGraph
 	initAllReads();
@@ -1401,7 +1402,7 @@ void travToRedOVL_v2(){
 		}
 	}
 
-	hashTable32_stats(ht);
+//	hashTable32_stats(ht);
 
 	int key,dir;
 	int redNode,redNodeParent;
@@ -1428,13 +1429,6 @@ void travToRedOVL_v2(){
 					key = link->ID & DEL_READ_END;
 					dir = 1;
 				}
-//				HASH_FIND(hhb,allReads,&key,sizeof(int),read);
-//				if(!read){
-//					read = (struct Reads*)malloc(sizeof(struct Reads));
-//					read->ID = key;
-//					read->headkannte = NULL;
-//					HASH_ADD(hhb,allReads,ID,sizeof(int),read);
-//				}
 				read = &allReads[key];
 				kanntennode = (struct KannteNode*)malloc(sizeof(struct KannteNode));
 				kanntennode->dest = redNode;
@@ -1458,7 +1452,8 @@ void travToRedOVL_v2(){
 			while(panode){
 				redNodeParent = hashTable32_find(ht,panode->dest);
 				if(!redNodeParent){
-					printf("ParentNode is not part of the HashTable (But have to be impossible)\n");
+					printf("ParentNode is not part of the HashTable (But have to be impossible)\n"
+							"Error in travToRedOVL_v2 in DBGraph_reduced.c\n");
 					exit(1);
 				}
 				tempedge = (struct edge*)malloc(sizeof(struct edge));

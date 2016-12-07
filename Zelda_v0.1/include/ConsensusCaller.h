@@ -91,12 +91,11 @@ struct Variation{
 	uint32_t pos;					/** Variant Position relatively to reference sequence */
 	char* refSeq;					/** Reference sequence at the given pos */
 	char* altSeq;					/** Reference sequence at the given pos */
-	char* cigar;					/** CIGAR-String*/
 	uint16_t dp;					/** Totol Read Depth at this position */
 	uint16_t ao;					/** Number of reads supporting the alternative */
 	uint16_t ro;					/** Number of reads supporting the reference */
 	uint16_t len;					/** Length of truly different bases */
-	uint16_t type;					/** Type of alternative (snp, mnp, ins, del, complex) */
+	unsigned char type;			/** Type of alternative (snp, mnp, ins, del, complex) */
 	struct Variation* next;		/** Next Variation Position*/
 };
 
@@ -172,7 +171,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 
 void poa_toDot(char* dotFile);
 
-void poa_reportVariant(struct POG* pog, char* vcfFile);
+void poa_reportVariant(struct POG* pog, char* vcfFile, char* ref);
 
 void poa_consensus(struct Sequence* contig);
 

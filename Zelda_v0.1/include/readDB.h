@@ -13,6 +13,7 @@
 
 #include "FileReader.h"
 
+static const char version[] = "Zelda_v0.1";
 extern int maxReadLen;
 
 /** FLAG meanings, important for Scaffolding */
