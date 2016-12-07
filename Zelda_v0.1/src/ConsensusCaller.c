@@ -30,7 +30,7 @@
 #define KWHT  "\x1B[37m"
 
 #define MIN_CONTIG_LEN 100
-#define MIN_SCAFF_LEN 100
+#define MIN_SCAFF_LEN 200
 #define MATRIX_MAX_BR 20
 
 static char status_char[] = { 'W', 'C', 'S', 'P', 'J' };
@@ -3116,15 +3116,17 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     			printf("Path for this Junction not found\n Abort!\n");
     		}
     		poa_consensus2(&pog->contig[pog->contigNum]);
-    		sprintf(dotPath,"%s/%s.dot",para->asemblyFolder,pog->contig[pog->contigNum].name);
-    		poa_toDot(dotPath);
+    		if(verbose){
+    			sprintf(dotPath,"%s/%s.dot",para->asemblyFolder,pog->contig[pog->contigNum].name);
+    			poa_toDot(dotPath);
+    		}
+
     		resetLetters(Letters);
     		numNodes = 0;
     		pog->contigNum++;
     		printf("Matrix time:    %.3f s\n",(float)sumMatrix/1000000000);
     		printf("Backtrace time: %.3f s\n",(float)sumTrace/1000000000);
     	}
-
     }
 
     // _________ Scaffold Consensus Calling

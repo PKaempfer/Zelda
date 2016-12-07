@@ -184,7 +184,7 @@ int main(int argc, char* argv[]) {
 	time(&start);
 
 	printf("CHECKPOINT: 8. POA (Layout-Consensus)\n");
-	struct POG* contigs_pog = make_poaScaff(G,reads,1,para); // 3. Argument, scaffolding 1 - yes, 0 - no
+	struct POG* contigs_pog = make_poaScaff(G,reads,0,para); // 3. Argument, scaffolding 1 - yes, 0 - no
 	time(&stop);
 	printf("POA: %0.2f\n",difftime (stop,start));
 	printf("Wait after POA\n");
