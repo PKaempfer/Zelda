@@ -108,6 +108,7 @@ void travDFS_oa(uint32_t i){
 
 
 void goUpDFS_2_oa(uint32_t** upStackold,uint32_t** downStackold, uint32_t* upPtr, uint32_t* downPtr, uint32_t* upSPtr, uint32_t* downSPtr, int upbool){
+	char verbose = 0;
 	uint32_t up = (*upPtr);
 	uint32_t down = (*downPtr);
 	uint32_t upSize = (*upSPtr);
@@ -213,7 +214,7 @@ void goUpDFS_2_oa(uint32_t** upStackold,uint32_t** downStackold, uint32_t* upPtr
 						if(up==upSize-1){
 							tmp = (uint32_t*)realloc(upStack,sizeof(uint32_t)*(upSize*2));
 							if(tmp){
-								printf("Realloc: New UpSize: %i (%p %p)\n",upSize,tmp,upStack);
+								if(verbose) printf("Realloc: New UpSize: %i (%p %p)\n",upSize,tmp,upStack);
 								upStack = tmp;
 								upSize *=2;
 							}
@@ -226,7 +227,7 @@ void goUpDFS_2_oa(uint32_t** upStackold,uint32_t** downStackold, uint32_t* upPtr
 						if(down==downSize-1){
 							tmp = (uint32_t*)realloc(downStack,sizeof(uint32_t)*(downSize*2));
 							if(tmp){
-								printf("Realloc: New DownSize: %i (	%p %p)\n",downSize,tmp,downStack);
+								if(verbose) printf("Realloc: New DownSize: %i (	%p %p)\n",downSize,tmp,downStack);
 								downStack = tmp;
 								downSize *=2;
 							}

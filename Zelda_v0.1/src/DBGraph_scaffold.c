@@ -155,7 +155,7 @@ void junctionDFS(int readID, struct myovlList* G, struct reads* reads){
 							}
 							counterbread = counterbread->next;
 						}
-						if(pathsNum == 51 && overhang < 300)
+						if(verbose && pathsNum == 51 && overhang < 300)
 						printf("Set annotation c for : %i (path: %i / distlJ: %i / distrJ: %i) -> Side: %i\n",internb->ID,pc_anno->pathID,pc_anno->lJunctionDist,pc_anno->rJunctionDist,internb->sideflag);
 					}
 					internb = internb->next;
@@ -176,7 +176,7 @@ void junctionDFS(int readID, struct myovlList* G, struct reads* reads){
 						pc_anno->pathID = pathsNum;
 						pc_anno->lJunctionDist = overhang;
 						pc_anno->rJunctionDist = pathlength - counteroverhang;
-						if(pathsNum == 51 && overhang < 300)
+						if(verbose && pathsNum == 51 && overhang < 300)
 						printf("Set annotation p for : %i (path: %i / distlJ: %i / distrJ: %i) -> Side: %i\n",internb->ID,pc_anno->pathID,pc_anno->lJunctionDist,pc_anno->rJunctionDist,internb->sideflag);
 						breadID = internb->ID;
 						break;

@@ -231,7 +231,7 @@ struct myovlList* initOVLgraph(int numreads){
 	return ovlgraph;
 }
 
-struct string_graph* initStringGraph(struct myovlList* ovlgraph,char* pathAssembly){
+struct string_graph* initStringGraph(struct myovlList* ovlgraph,char* pathAssembly, char dotdump){
 //	stringer2(ovlgraph);
 	printf("FIND INITIAL CONTAINMENTS\n");
 	tag_A_Contained(ovlgraph);
@@ -240,17 +240,19 @@ struct string_graph* initStringGraph(struct myovlList* ovlgraph,char* pathAssemb
 //	printf("CATEGORIZE OVERLAPS\n");
 	struct string_graph* S = catOVLgraph(ovlgraph, pathAssembly);
 //	catOVLgraph(ovlgraph);
-	char* tempPath = (char*)malloc(200);
-	printf("WRITE DOT-FILES\n");
-	sprintf(tempPath,"%s/catOrgOVL.dot",pathAssembly);
-	printOVLgraph(ovlgraph,1,tempPath);
-	sprintf(tempPath,"%s/catRevOVL.dot",pathAssembly);
-	printOVLgraph(ovlgraph,0,tempPath);
-	sprintf(tempPath,"%s/catRedRevOVL.dot",pathAssembly);
-	printReducedOVLgraph(ovlgraph,1,tempPath);
-	sprintf(tempPath,"%s/string.dot",pathAssembly);
-	printStringGraph(ovlgraph,tempPath);
-	free(tempPath);
+	if(dotdump){
+		char* tempPath = (char*)malloc(200);
+		printf("WRITE DOT-FILES\n");
+		sprintf(tempPath,"%s/catOrgOVL.dot",pathAssembly);
+		printOVLgraph(ovlgraph,1,tempPath);
+		sprintf(tempPath,"%s/catRevOVL.dot",pathAssembly);
+		printOVLgraph(ovlgraph,0,tempPath);
+		sprintf(tempPath,"%s/catRedRevOVL.dot",pathAssembly);
+		printReducedOVLgraph(ovlgraph,1,tempPath);
+		sprintf(tempPath,"%s/string.dot",pathAssembly);
+		printStringGraph(ovlgraph,tempPath);
+		free(tempPath);
+	}
 	return S;
 }
 

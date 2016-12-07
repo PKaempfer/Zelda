@@ -29,7 +29,7 @@
 #include "ConsensusCaller.h"
 
 int main(int argc, char* argv[]) {
-	char findotdump = 1;
+	char findotdump = 0;
 	char dotdump = 0;
 	char sleeptime = 0;
 	time_t start,stop;
@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
 	printf("CHECKPOINT: 6. Stringer (Overlaps to String Graph):\n");
 	time(&start);
 	struct myovlList* G = initOVLgraph(numreads);
-	struct string_graph* S = initStringGraph(G,para->asemblyFolder);
+	struct string_graph* S = initStringGraph(G,para->asemblyFolder,dotdump);
 //	exit(1);
 	time(&stop);
 	printf("Stringer: %0.2f\n",difftime (stop,start));

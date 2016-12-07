@@ -140,7 +140,7 @@ void countRemainingNodes();
 
 struct myovlList* initOVLgraph(int);
 
-struct string_graph* initStringGraph(struct myovlList*, char*);
+struct string_graph* initStringGraph(struct myovlList*, char*, char);
 
 void printStringGraph(struct myovlList*, char*);
 
