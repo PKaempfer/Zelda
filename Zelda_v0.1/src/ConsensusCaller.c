@@ -2855,7 +2855,7 @@ static inline void resetLetters(struct Letter_T* Letters){
  * @return
  */
 struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffolding, struct para* para){
-	char verbose = 1;
+	char verbose = 0;
 
 	struct scaffold_set* aS;
 	if(scaffolding){
@@ -2867,7 +2867,8 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 		aS = contigs_init(G); // ,reads
 	}
 
-	if(verbose) scaffold_stats(aS);
+//	if(verbose)
+		scaffold_stats(aS);
 //	exit(1);
 
     int i,j;
@@ -3042,7 +3043,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	    						poa_catBackbone2(&pog->contig[pog->contigNum],G,&reads[breadID],readseq,oldbreadID,breadID);
 	//        						poa_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts);
 	//            						printf("Insert Number: %i in contig %i\n",inserts,pog->contigNum);
-	    						if(verbose) printf("ALINGING PROPER READ\n");
+	    						if(verbose) printf("ALINING PROPER READ\n");
 	    						if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 			        			if(verbose) printf("Read: %s\n",readseq);
 	    						poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,nextoverhang);
@@ -3067,7 +3068,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 			            			revReadSt(readseq,revreadseq);
 			            			strcpy(readseq,revreadseq);
 			        			}
-			        			if(verbose) printf("ALINGING CONTAINED READ\n");
+			        			if(verbose) printf("ALIGING CONTAINED READ\n");
 			        			if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 			        			if(verbose) printf("Read: %s\n",readseq);
 	//            						printf("Insert Number: %i in contig %i\n",inserts,pog->contigNum);
@@ -3095,7 +3096,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	    						poa_catBackbone2(&pog->contig[pog->contigNum],G,&reads[breadID],readseq,oldbreadID,breadID);
 	//        						poa_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts);
 	//            						printf("Insert Number: %i in contig %i\n",inserts,pog->contigNum);
-	    						if(verbose) printf("ALINGING PROPER READ\n");
+	    						if(verbose) printf("ALIGING PROPER READ\n");
 	    						if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 			        			if(verbose) printf("Read: %s\n",readseq);
 	    						poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,nextoverhang);
