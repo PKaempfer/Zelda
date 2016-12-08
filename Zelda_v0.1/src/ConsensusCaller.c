@@ -1350,7 +1350,12 @@ void poa_printContigs(struct POG* pog, char* contigFile){
 	for(i=0;i<pog->contigNum;i++){
 		len = strlen(pog->contig[i].sequence);
 		fprintf(correctContigs,">%s\n",pog->contig[i].name);
-		for(j=0;j<len;j+=80){
+		j=0;
+		if(len>480){
+			j = 160;
+			len -= 160;
+		}
+		for(;j<len;j+=80){
 			fprintf(correctContigs,"%.80s\n",&pog->contig[i].sequence[j]);
 		}
 	}

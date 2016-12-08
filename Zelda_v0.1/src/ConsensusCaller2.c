@@ -242,7 +242,7 @@ int poa_align_prepro(struct Sequence* contig, int len, int overhang){
 	struct LetterEdge* edge;
 	int depth = 0;
 
-	if(overhang >= 30) printf("Wide range overhang could cause a problem\n");
+//	if(overhang >= 30) printf("Wide range overhang could cause a problem\n");
 
 	while(new_num && depth <= len + overhang + 50){
 //		printf("Go deeper: %i\n",depth);
@@ -364,8 +364,9 @@ int poa_fillMatrix(int new_num, struct Letter_T** new_letters, char* seq,struct 
 					rightbool = 0;
 				}
 				else{
-					printf("This case should not happen\n");
-					exit(1);
+					printf("This case should not happen (Junction Number < 1: %i -> (oldnum: %i / j: %i))\n",old_letters[old_num]->junction,old_num,j);
+					return -1;
+//					exit(1);
 				}
 
 				while(edge){
@@ -861,6 +862,10 @@ void poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq
 	// 3. Fill the Alignment Matrix
 	struct Letter_T* end_node = &Letters[contig->readright];
 	end_num = poa_fillMatrix(new_num,new_letters,seq,end_node,end_letters,overhang);
+
+	if(end_num < 0){
+		return;
+	}
 
 	clock_gettime(CLOCK_MONOTONIC, &ts_finish);
 	sumMatrix += (((ts_finish.tv_sec * 1000000000) + ts_finish.tv_nsec) - ((ts_start.tv_sec * 1000000000) + ts_start.tv_nsec));

@@ -31,13 +31,19 @@
 int main(int argc, char* argv[]) {
 	char findotdump = 0;
 	char dotdump = 0;
-	char sleeptime = 0;
+	char sleeptime = 5;
 	time_t start,stop;
 
 	struct para* para = readCMDline(argc, argv);
 
 	if(para->run == 1 || para->run == 3){
+		printf("CHECKPOINT: 0. craete DB\n");
+		time(&start);
 		makeDB(para->readDB, para->blocks, para->files);
+		time(&stop);
+		printf("Time: %0.2f\n",difftime (stop,start));
+		sleep(sleeptime);
+		printf("Continue\n");
 		freeFiles(para);
 		if(para->run == 1) finished(para);
 	}
@@ -48,13 +54,14 @@ int main(int argc, char* argv[]) {
 
 	const int NUM_THREADS = para->threads;
     pthread_t threads[NUM_THREADS];
-	para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
-
-	printf("CHECKPOINT: 1. create Graph\n");
+    printf("CHECKPOINT: 1. create Graph\n");
 	time(&stop);
+    para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
 	createGraph(graphSize);
 	time(&start);
 	printf("Time: %0.2f\n",difftime (start,stop));
+	sleep(sleeptime);
+	printf("Continue\n");
 
 	printf("CHECKPOINT: 2. Fill Adjacency List\n");
 	hashToTabDFS_oa();
@@ -72,7 +79,7 @@ int main(int argc, char* argv[]) {
 
 //	printf("CHECKPOINT: Print Graph\n");
 //	printGraph();
-	printf("CHECKPOINT: Write Dot-File\n");
+//	printf("CHECKPOINT: Write Dot-File\n");
 //	writeDot(NULL);
 //	printf("CHECKPOINT: Clean Hash Table\n");
 //	cleanGraph();
