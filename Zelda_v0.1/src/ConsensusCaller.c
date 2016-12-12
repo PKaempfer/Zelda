@@ -2874,7 +2874,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 
 //	if(verbose)
 		scaffold_stats(aS);
-//	exit(1);
+	exit(1);
 
     int i,j;
     int breadID;

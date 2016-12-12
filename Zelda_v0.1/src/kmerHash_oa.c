@@ -162,14 +162,14 @@ char addKmer128_oa(KmerBitBuffer current_new){
 			new_counter = counter;
 			counter = __sync_val_compare_and_swap(&resize_mutex,new_counter,new_counter+1);
 		} while(counter != new_counter);
-		printf("Thread Stop inserting, wait for free mutex -> oldHash: %p\n",dbHash_oa);
+//		printf("Thread Stop inserting, wait for free mutex -> oldHash: %p\n",dbHash_oa);
 		// During waiting they could help rehashing:
 		// -> Devide old hashTable into blocks:
 		//    -> Each thread gets its individual part of the old hash table to rehash
 		do{
 			// Catch Thread in this while loop during resize!
 		} while(resize_mutex);
-		printf("New HashTable found (%p), continue insert!\n",dbHash_oa);
+//		printf("New HashTable found (%p), continue insert!\n",dbHash_oa);
 	}
 
 	bucket = my_hash(current_new)-1;
@@ -295,13 +295,13 @@ char addKmer_oa(KmerBitBuffer current_new){
 
 // Running Hash-Stats is essential to calc the total number of nodes in the following adjacency list
 void hashStats_oa(){
-	int dif_kmer = 0;
-	int tot_num = 0;
+	uint32_t dif_kmer = 0;
+	uint32_t tot_num = 0;
 	uint32_t j, i;
 	j = INITHASHSIZE(bitnum);
 	KmerBitBuffer old = empty;
 	struct readEnd* readEnd;
-	int numEnds = 0;
+	uint32_t numEnds = 0;
 
 	printf("Max readID: %i\n",numreads);
 	readLenList = (int*)malloc(sizeof(int)*(numreads+1));
@@ -371,7 +371,7 @@ void hashStats_oa(){
 		}
 	}
 	graphSize = itemNum+1;
-	printf("hashTable contains %i (%.2f%%) different k-mers with a total number of %i\n",dif_kmer,((float)(dif_kmer*100))/j,tot_num);
+	printf("hashTable contains %i (%.2f%%) different k-mers with a total number of %i\n",dif_kmer,((float)(dif_kmer/j))*100,tot_num);
 	printf("Unique Sequences: %i\n",unique);
 	printf("Distinct Sequences: %i\n",distinct);
 	printf("Conunt >=255: %i\n",full);
