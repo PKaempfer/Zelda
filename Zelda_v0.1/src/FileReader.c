@@ -115,7 +115,7 @@ void finished(struct para* para){
 	if(para->readDB) free(para->readDB);
 	if(para->asemblyFolder) free(para->asemblyFolder);
 	free(para);
-	printf("No program Faults occurred\nTool terminated regularly!!!\n");
+	printf("Assembly Successful!!!\n");
 	exit(EXIT_SUCCESS);
 }
 
@@ -289,7 +289,7 @@ struct readFiles* readCMDmakeDB(int argc, char *argv[],int libnumTot){
 			files[libnum].rightReads = NULL;
 			files[libnum].leftReads = (char*)malloc(sizeof(char)*100);
 			strcpy(files[libnum].leftReads,argv[i+1]);
-			files[libnum].insertSize = 0;
+//			files[libnum].insertSize = 0;
 			libnum++;
 			i++;
 		}
@@ -397,7 +397,7 @@ void* mt_fileReaderDB(void* block){
 	int readLen=0;
 	uint64_t wPos = start;
 
-	printf("Thread: %i opens DB: %s (start: %ld / End: %ld)\n",pthr_id,hash_block.fasta,start, end);
+//	printf("Thread: %i opens DB: %s (start: %ld / End: %ld)\n",pthr_id,hash_block.fasta,start, end);
 
 	while(wPos < end){
 		fread(&readLen,sizeof(int),1,fasta);
@@ -416,7 +416,7 @@ void* mt_fileReaderDB(void* block){
 		new_mutex = old_mutex;
 		old_mutex = __sync_val_compare_and_swap(&fin_mutex,new_mutex,new_mutex+1);
 	} while(old_mutex != new_mutex);
-	printf("Thread finished job and reports Finished-Status\n");
+//	printf("Thread finished job and reports Finished-Status\n");
 
 	fclose(fasta);
 	free(readsequence);
@@ -519,6 +519,7 @@ struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* thread
 			files[i].rightReads[temp]='\0';
 			fread(&files[i].minInsert,sizeof(int),1,metaDB);
 			fread(&files[i].maxInsert,sizeof(int),1,metaDB);
+			fread(&files[i].avgInsert,sizeof(int),1,metaDB);
 			fread(&files[i].oriPE,sizeof(int),1,metaDB);
 			printf("MP/PE Library -> Insert: %i - %i\n",files[i].minInsert,files[i].maxInsert);
 			printf("\tLeftReads:  %s\n",files[i].leftReads);
@@ -588,7 +589,7 @@ struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* thread
 			rest_blocks--;
 		}
 		hash_block[i].end = blocksPos[1][blockend];
-		printf("Thread %i reads blocks %i -> %i\n",i,blockst,blockend);
+//		printf("Thread %i reads blocks %i -> %i\n",i,blockst,blockend);
 	    pthread_create(&threads[i], NULL, mt_fileReaderDB, (void*)&hash_block[i]);
 		blockst = blockend+1;
 	}

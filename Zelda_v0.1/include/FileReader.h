@@ -40,9 +40,10 @@ extern volatile int maxReadId;
 struct readFiles{
 	char *leftReads;		// path to the original left read sequence file
 	char *rightReads;		// path to the original right read sequence file, NULL if SE Lib
-	int insertSize;			// if PE Lib -> fragment length (avg -> start read 1 to start read 2)
+//	int insertSize;			// if PE Lib -> fragment length (avg -> start read 1 to start read 2)
 	int maxInsert;			// Maximum Insert size
 	int minInsert;			// Minimum Insert size
+	int avgInsert;			// Average Insert size
 	int oriPE;				// orientation of the PE reads (FR (Default), RF, FF) -> see macro definition
 	int libNum;				// ID of Lib
 	int startId;			// First read ID of this Lib

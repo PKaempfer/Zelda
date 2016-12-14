@@ -9,8 +9,8 @@ LINKFLAGS = -pthread -lrt -lm
 CFLAGS += -O1 -fno-strict-aliasing -Wno-sign-compare -Wno-comment #-Wno-unused-but-set-variable
 #CFLAGS += -g -O1 -Wno-sign-compare
 # Adress sanitizer seeks for memory leaeks in address room
-#CFLAGS += -fsanitize=address
-#CFLAGS += -fsanitize=leak
+CFLAGS += -fsanitize=address
+CFLAGS += -fsanitize=leak
 
 SOURCES =  src/DBGraph.c src/DBGraph_oa.c
 SOURCES += src/FileReader.c  src/kmer.c src/kmerHash.c src/kmerHash_oa.c src/readDB.c 

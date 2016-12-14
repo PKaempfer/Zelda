@@ -189,7 +189,7 @@ char addKmer128_oa(KmerBitBuffer current_new){
 //					printf("pth: %i != %i + %i\n",pthr_runN, resize_mutex, fin_mutex);
 //					sleep(1);
 				}
-				printf("CHECKPOINT: Init new hash table (%i = %i + %i)\n",pthr_runN, resize_mutex, fin_mutex);
+//				printf("CHECKPOINT: Init new hash table (%i = %i + %i)\n",pthr_runN, resize_mutex, fin_mutex);
 				// rehash all Keys -> do in parallel: rehash key -> set kmer -> memcpy
 				volatile struct hashkmer_oa* temp = resizeHashTable();
 				printf("CHECKPOINT: Hash table finished\n");

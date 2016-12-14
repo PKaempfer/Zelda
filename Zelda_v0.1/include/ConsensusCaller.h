@@ -96,7 +96,21 @@ struct Variation{
 	uint16_t ro;					/** Number of reads supporting the reference */
 	uint16_t len;					/** Length of truly different bases */
 	unsigned char type;			/** Type of alternative (snp, mnp, ins, del, complex) */
-	struct Variation* next;		/** Next Variation Position*/
+	struct Variation* next;			/** Next Variation Position*/
+};
+
+struct sequenceEdge{
+	int nextScaff;					/** ID of the next scaffold over a bridge*/
+	int insertLen;					/** Bridge Length insert of Ns */
+	char ori;						/** 0 -> same, 1 reverse, 2 reverse complement */
+};
+
+struct contigPart{
+	uint32_t startpos;
+	uint32_t endpos;
+	uint32_t startread;
+	uint32_t endread;
+	struct contigPart* next;
 };
 
 /** holder for an LPO sequence, its letters, and associated information */
@@ -110,8 +124,11 @@ struct Sequence{
 	char* name;						/** Name of Contig */
 	float avgCov;					/** Average Coverage of Contig*/
 	int nsource_seq;				/** Number of sequences in representing this PO graph */
+	char vflag;						/** 0 if free to use, 1 go ahead */
 	struct Variation* var;			/** Linked List of all Variations of the Contig/Scaffold */
 	struct Variation* lastvar;		/** Last Variation of the Contig/Scaffold */
+	struct sequenceEdge* seqEdge;	/** Edge to the next part of the scaffold connected by a bridge*/
+	struct contigPart* first;		/** First contig of a linked list with all contigs in this scaffold*/
 };
 
 struct POG{

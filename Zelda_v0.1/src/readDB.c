@@ -55,6 +55,8 @@ int makeDB(char* outDB, int blocks, struct readFiles* files){
 			printf("Read Paired-End Library (%i)\n",i);
 			printf("MinInsertSize: %i\n",files[i].minInsert);
 			printf("MaxInsertSize: %i\n",files[i].maxInsert);
+			files[i].avgInsert = (files[i].maxInsert + files[i].minInsert) / 2;
+			printf("MaxInsertSize: %i\n",files[i].maxInsert);
 			printf("PairedEnd Orientation: %s \n",peOri[files[i].oriPE]);
 
 			files[i].startId = readNum;
@@ -187,6 +189,7 @@ void writeDB(char* outDB, int blocks, struct readFiles* files){
 			fwrite(files[i].rightReads,sizeof(char),temp,db);
 			fwrite(&files[i].minInsert,sizeof(int),1,db);
 			fwrite(&files[i].maxInsert,sizeof(int),1,db);
+			fwrite(&files[i].avgInsert,sizeof(int),1,db);
 			fwrite(&files[i].oriPE,sizeof(int),1,db);
 		}
 		else{
@@ -239,8 +242,9 @@ struct reads* readDB(char* outDB){
 			files[i].rightReads[temp] = '\0';
 			fread(&files[i].minInsert,sizeof(int),1,metaDB);
 			fread(&files[i].maxInsert,sizeof(int),1,metaDB);
+			fread(&files[i].avgInsert,sizeof(int),1,metaDB);
 			fread(&files[i].oriPE,sizeof(int),1,metaDB);
-			printf("MatePair Library -> Insert: %i\n",files[i].insertSize);
+			printf("MatePair Library -> Insert: %i\n",files[i].avgInsert);
 			printf("\tLeftReads:  %s\n",files[i].leftReads);
 			printf("\tRightReads: %s\n",files[i].rightReads);
 			printf("\tMinInsertSize: %i\n",files[i].minInsert);

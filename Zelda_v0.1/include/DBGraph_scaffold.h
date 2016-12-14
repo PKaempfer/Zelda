@@ -63,6 +63,7 @@ struct scaffEdge{
 	int len;
 	int depth;
 	int targetJunction;
+	struct pathEdge* bridge;
 	struct scaffEdge* next;
 };
 
@@ -72,17 +73,21 @@ struct scaffold{
 	char type; 					// 0 -> Scaffold, 1 -> Singleton (unscaffolded contig)
 	int startJunction;
 	int endJunction;
+	int scaffoldID;
 	struct scaffEdge* first;
+	struct scaffold* next;
 };
 
 struct contigScaff{
 	int ID;
 	char sameside;				// 1 - if same side as start contig, 0 - otherwise
+	struct pathEdge* bridge;	// gets entire path information if the edge is a bridge, NULL otherwise
 };
 
 struct scaffold_set{
 	struct scaffold* scaff;
 	int num;
+	int numbridge;
 	int nummax;
 };
 
