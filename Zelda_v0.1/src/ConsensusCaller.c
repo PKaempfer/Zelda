@@ -1161,7 +1161,7 @@ void poa_variantCalling(struct Sequence* contig){
 	int i=0;
 	struct Letter_T* current = &Letters[contig->startLetter.dest];
 	struct LetterEdge* edge;
-	char* altPath = (char*)malloc(maxAltLen);
+	char* altPath = (char*)malloc(2*maxAltLen);
 	contig->var = NULL;
 	contig->lastvar = NULL;
 
@@ -2728,7 +2728,7 @@ static inline void resetLetters(struct Letter_T* Letters){
  * @return
  */
 struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffolding, struct para* para){
-	char verbose = 1;
+	char verbose = 0;
 	char verbose2 = 0;
 
 	struct scaffold_set* aS;
@@ -2844,9 +2844,6 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 				}
 				pog->contig[pog->contigNum].nsource_seq = 0;
 				pog->contig[pog->contigNum].length = 0;
-				sprintf(name,"Scaffold_%i_%i_%i_len:",i+1,aS->scaff[i].startJunction,aS->scaff[i].endJunction);
-				pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+10);
-				strcpy(pog->contig[pog->contigNum].name,name);
 				if(dir){
 					if(bread->sideflag) 	multidir = 3;
 					else					multidir = 0;
@@ -3002,6 +2999,10 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     		else{
     			printf("Path for this Junction not found\n Abort!\n");
     		}
+			sprintf(name,"Scaffold_%i_%i_%i_len:",i+1,aS->scaff[i].startJunction,breadID);
+			pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+10);
+			strcpy(pog->contig[pog->contigNum].name,name);
+
     		poa_consensus2(&pog->contig[pog->contigNum]);
     		if(verbose){
     			sprintf(dotPath,"%s/%s.dot",para->asemblyFolder,pog->contig[pog->contigNum].name);
