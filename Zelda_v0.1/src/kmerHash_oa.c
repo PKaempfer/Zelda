@@ -76,13 +76,14 @@ void freeHashTable_oa(){
 }
 
 volatile struct hashkmer_oa* resizeHashTable(){
+	char verbose = 0;
 	uint32_t i,j;
 	volatile struct hashkmer_oa* tempHash_oa;
-	hashStats_oa();
+	if(verbose) hashStats_oa();
 	bitnum++;
 	j = (uint32_t)INITHASHSIZE(bitnum);
-	printf("Set new bitnum: %i\n",bitnum);
-	printf("New size of Hash table: %i\n",j);
+	if(verbose) printf("Set new bitnum: %i\n",bitnum);
+	if(verbose) printf("New size of Hash table: %i\n",j);
 	tempHash_oa = (struct hashkmer_oa*)malloc(sizeof(struct hashkmer_oa)*j);
 	if(!tempHash_oa) return NULL;
 	for(i=0;i<j;i++){
@@ -110,7 +111,7 @@ volatile struct hashkmer_oa* resizeHashTable(){
 	}
 	free((void*)dbHash_oa);
 	expansionThreshold = INITHASHSIZE(bitnum);
-	printf("Create new HashTable of size: %i (expTreshold: %i)\n",j,expansionThreshold);
+	if(verbose) printf("Create new HashTable of size: %i (expTreshold: %i)\n",j,expansionThreshold);
 	return tempHash_oa;
 }
 
@@ -179,10 +180,10 @@ char addKmer128_oa(KmerBitBuffer current_new){
 				// There seems to be somehow a danger to end up in a deadlock in resize procedure!
 				// Command all threads to Stop or return if another thread already is doing this
 				if(!__sync_bool_compare_and_swap(&resize_mutex,0,1)){
-					printf("Already locked by other thread: Return and start new\n");
+//					printf("Already locked by other thread: Return and start new\n");
 					return 0;
 				}
-				printf("Hash table full: RESIZE!\n");
+//				printf("Hash table full: RESIZE!\n");
 
 				// Wait till all other threads report a stopped- or finished-state
 				while(pthr_runN != resize_mutex + fin_mutex){
@@ -192,13 +193,13 @@ char addKmer128_oa(KmerBitBuffer current_new){
 //				printf("CHECKPOINT: Init new hash table (%i = %i + %i)\n",pthr_runN, resize_mutex, fin_mutex);
 				// rehash all Keys -> do in parallel: rehash key -> set kmer -> memcpy
 				volatile struct hashkmer_oa* temp = resizeHashTable();
-				printf("CHECKPOINT: Hash table finished\n");
+//				printf("CHECKPOINT: Hash table finished\n");
 				if(!temp){
 					printf("Not able to reallocate memory for hash-table resize\nAbort!!!\n");
 					exit(1);
 				}
 				dbHash_oa = temp;
-				hashStats_oa();
+//				hashStats_oa();
 				resize_mutex = 0;
 				i=0;
 				bucket = my_hash(current_new)-1;
@@ -304,6 +305,10 @@ void hashStats_oa(){
 	uint32_t numEnds = 0;
 
 	printf("Max readID: %i\n",numreads);
+//	if(readLenList){
+//			free(readLenList);
+//			free(readStartList);
+//	}
 	readLenList = (int*)malloc(sizeof(int)*(numreads+1));
 	readStartList = (int*)malloc(sizeof(int)*(numreads+1));
 	int ID;
@@ -371,7 +376,7 @@ void hashStats_oa(){
 		}
 	}
 	graphSize = itemNum+1;
-	printf("hashTable contains %i (%.2f%%) different k-mers with a total number of %i\n",dif_kmer,((float)(dif_kmer/j))*100,tot_num);
+	printf("hashTable contains %i (%.2f%%) different k-mers with a total number of %i\n",dif_kmer,(((float)dif_kmer/j))*100,tot_num);
 	printf("Unique Sequences: %i\n",unique);
 	printf("Distinct Sequences: %i\n",distinct);
 	printf("Conunt >=255: %i\n",full);

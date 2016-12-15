@@ -248,121 +248,32 @@ void countKmers(){
 }
 
 void deleteComp(int start){
-	struct AdjListNode *Node;
+	struct AdjListNode *node;
+	struct LinkListNode *link;
 	int temp = start;
 	for(;start<tabindex;start++){
-		Node=graph->array[start].head;
-		while(Node){
-			graph->array[start].head=Node->next;
-			free(Node);
-			Node=graph->array[start].head;
+		node=graph->array[start].head;
+		while(node){
+			graph->array[start].head=node->next;
+			free(node);
+			node=graph->array[start].head;
 		}
-		Node=graph->array[start].tail;
-		while(Node){
-			graph->array[start].tail=Node->next;
-			free(Node);
-			Node=graph->array[start].tail;
+		node=graph->array[start].tail;
+		while(node){
+			graph->array[start].tail=node->next;
+			free(node);
+			node=graph->array[start].tail;
+		}
+		link = graph->array[start].Link;
+		while(link){
+			graph->array[start].Link = link->next;
+			free(link);
+			link = graph->array[start].Link;
 		}
 	}
 	tabindex=temp;
 }
 
-
-//void hashToTabDFS(){
-//    tabindex=1;
-//    int comp = 0;
-//    int oldIndex = 1;
-//    int delcomp = 0, delNode = 0;
-//
-//#ifdef UT_HASH
-//    struct hashTable *s, *t;
-//    s = (struct hashTable*)malloc(sizeof(struct hashTable));
-//    HASH_ITER(hhb, kmere, s, t){
-//    	if(!s->trans){
-//    		if(s->index==0){
-//    			s->index=tabindex;
-//    			tabindex++;
-//    		}
-//    		travDFS(s);
-//
-//    		if(tabindex-oldIndex<MINCOMP){
-//    			graph->V-=tabindex-oldIndex;
-//    			delNode += tabindex-oldIndex;
-//    			deleteComp(oldIndex);
-//    			delcomp++;
-//    		}
-//    		else{
-//    			comp ++;
-//    			printf("%i. Component, size: %i\n",comp,tabindex-oldIndex);
-//    		}
-//    		oldIndex =  tabindex;
-//
-//    	}
-//    }
-//    travDFS(NULL);
-//#else
-//
-//    if(sizeof(KmerBitBuffer)*8==64){
-////    	int j = INITHASHSIZE(bitnum);
-////    	int i;
-////    	for(i=0;i<j;i++){
-////    		if(dbHash_oa[i].kmer != empty && !dbHash_oa[i].trans){
-////        		if(dbHash_oa[i].index==0){
-////        			dbHash_oa[i].index = tabindex;
-////        			tabindex++;
-////
-////        		}
-////        		travDFS(&dbHash_oa[i]);
-////        		if(tabindex-oldIndex < MINCOMP){
-////        			graph->V -= tabindex - oldIndex;
-////        			delNode += tabindex - oldIndex;
-////        			deleteComp(oldIndex);
-////        			delcomp++;
-////        		}
-////        		else{
-////        			comp++;
-////        			printf("%i. Component, size: %i\n",comp,tabindex-oldIndex);
-////        		}
-////        		oldIndex = tabindex;
-////    		}
-////
-////    	}
-////    	travDFS(NULL);
-//    }
-//    else{
-//        // My Hash Lib
-//        struct hashkmer *s;
-//        setIter();
-//        while((s = iterKmer())){
-//        	if(!s->trans){
-//        		if(s->index==0){
-//        			s->index=tabindex;
-//        			tabindex++;
-//        		}
-//        		travDFS((struct hashTable*)s);
-//
-//        		if(tabindex-oldIndex<MINCOMP){
-//        			graph->V-=tabindex-oldIndex;
-//        			delNode += tabindex-oldIndex;
-//        			deleteComp(oldIndex);
-//        			delcomp++;
-//        		}
-//        		else{
-//        			comp ++;
-//        			printf("%i. Component, size: %i\n",comp,tabindex-oldIndex);
-//        		}
-//        		oldIndex =  tabindex;
-//
-//        	}
-//        }
-//        travDFS(NULL);
-//    }
-//
-//#endif
-//
-//    printf("%i Nodes in %i Components\n",tabindex-1,comp);
-//    printf("%i Nodes in %i Components deleted\n",delNode,delcomp);
-//}
 
 void addLinks(readID *ID, int index){
 	int i=0;

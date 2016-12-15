@@ -6,8 +6,8 @@ CFLAGS = -Wall -Wextra -I./include -I/usr/local/include #-mcpu=power8 -mcx16
 
 LINKFLAGS = -pthread -lrt -lm 
 
-CFLAGS += -O1 -fno-strict-aliasing -Wno-sign-compare -Wno-comment #-Wno-unused-but-set-variable
-#CFLAGS += -g -O1 -Wno-sign-compare
+#CFLAGS += -O1 -fno-strict-aliasing -Wno-sign-compare -Wno-comment #-Wno-unused-but-set-variable
+CFLAGS += -g -O1 -Wno-sign-compare
 # Adress sanitizer seeks for memory leaeks in address room
 CFLAGS += -fsanitize=address
 CFLAGS += -fsanitize=leak

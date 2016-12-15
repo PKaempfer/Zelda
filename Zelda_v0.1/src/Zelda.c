@@ -102,6 +102,7 @@ int main(int argc, char* argv[]) {
 	travToRedOVL_v2();
 	freeGraph();
 	labelGraph();
+//	countRemainingNodes();
 	if(dotdump) printRedDot("output/redGraph.dot");
 //	printRedGraph();
 //	exit(1);
@@ -113,17 +114,18 @@ int main(int argc, char* argv[]) {
 //	printRedGraph();
 //	printRedDot("output/redRedredGraph.dot");
 	do{
-		printf("Horizontal reduction\n");
+//		printf("Horizontal reduction\n");
 		reduceRedGraph();
-		printf("Vertical reduction\n");
+//		printf("Vertical reduction\n");
 	}while(verticalReduction());
 	printf("Write dot-File: Reduced_DBG.dot");
 	if(findotdump){
 		sprintf(tempPath,"%s/Reduced_DBG.dot",para->asemblyFolder);
 		printRedDot(tempPath);
 	}
-	countRemainingNodes();
 //	printRedGraph();
+	countRemainingNodes();
+
 	printf("CHECKPOINT: Reduce Graph (strong)\n");
 	if(dotdump){
 		sprintf(tempPath,"%s/redGraphBefore.list",para->asemblyFolder);
@@ -170,7 +172,7 @@ int main(int argc, char* argv[]) {
 
 	// Scaffolding
 	printf("CHECKPOINT: 7. Scaffolding\n");
-	printf("Re-read the input Database");
+	printf("Re-read the input Database\n");
 	struct reads* reads = readDB(para->readDB);
 	time(&start);
 	initScaff(G,reads);
@@ -185,13 +187,12 @@ int main(int argc, char* argv[]) {
 		sprintf(tempPath,"%s/scaffGraph.dot",para->asemblyFolder);
 		scaffGraphDot(G,reads,tempPath);
 	}
-	printf("Scaffolding finished, hopefully correctly ;-)\n");
 //		exit(1);
 //		No Scaffolding
 	time(&start);
 
 	printf("CHECKPOINT: 8. POA (Layout-Consensus)\n");
-	struct POG* contigs_pog = make_poaScaff(G,reads,1,para); // 3. Argument, scaffolding 1 - yes, 0 - no
+	struct POG* contigs_pog = make_poaScaff(G,reads,0,para); // 3. Argument, scaffolding 1 - yes, 0 - no
 	time(&stop);
 	printf("POA: %0.2f\n",difftime (stop,start));
 	printf("Wait after POA\n");
@@ -224,6 +225,7 @@ int main(int argc, char* argv[]) {
 //		poa_toDot("output/poa.dot");
 //		exit(1);
 	// Free Variations
+	poa_deleteVariant(contigs_pog);
 	if(contigs_pog) free_POG(contigs_pog);
 	freeDB(reads);
 	freeMyOvlList(G,S);

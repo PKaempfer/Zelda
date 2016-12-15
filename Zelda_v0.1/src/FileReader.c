@@ -383,7 +383,7 @@ void* mt_fileReaderDB(void* block){
 	uint64_t start = (uint64_t)hash_block.start;
 	uint64_t end = (uint64_t)hash_block.end;
 //	long len = end - start;
-	int pthr_id = hash_block.pthr_id;
+//	int pthr_id = hash_block.pthr_id;
 //	int pthr_num =  hash_block.pthr_num;
 
 	FILE* fasta = fopen(hash_block.fasta,"rb");

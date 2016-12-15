@@ -19,6 +19,9 @@ volatile int max_reprobes = 50;
 int maxRlen;
 int nK = 47;
 int dtSize;
+//int *readLenList = NULL;
+//int *readStartList = NULL;
+
 int *readLenList;
 int *readStartList;
 

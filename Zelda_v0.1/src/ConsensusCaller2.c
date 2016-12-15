@@ -125,7 +125,7 @@ static inline void poa_showMatrix(int row, int column, char* seq){
  * @param leftID	ID if the precursor read
  * @param rightID	ID of the successor read
  */
-void poa_catBackbone2(struct Sequence* contig, struct myovlList *G, struct reads* read, char* seq, int leftID, int rightID){
+void poa_catBackbone2(struct Sequence* contig, struct myovlList *G, char* seq, int leftID, int rightID){ // Parameter 3: struct reads* read
 	char verbose = 0;
 
 	struct bread* leftB;
@@ -476,7 +476,7 @@ int poa_searchEndPoint(int line, char* seq, int insNum, char backbone, char prin
 	return best_Letter;
 }
 
-struct pairAlign poa_backtrace(struct Sequence* contig, char* seq, struct Letter_T* current, int readID,char print_Message, char backbone){
+struct pairAlign poa_backtrace(struct Sequence* contig, char* seq, struct Letter_T* current,char print_Message, char backbone){ // Parameter 4:  int readID,
 	if(print_Message) printf("Start back tracing\n");
 	int j = strlen(seq);
 	int k;
@@ -886,7 +886,7 @@ void poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq
 
 	// 5. Make backtrace
 	int len = strlen(seq);
-	struct pairAlign align = poa_backtrace(contig,seq,current,read->ID,print_Message,backbone);
+	struct pairAlign align = poa_backtrace(contig,seq,current,print_Message,backbone); // Parameter 4: read->ID,
 
 	// 6. Connect to Matrix origin
 	poa_updateGraph(seq,&align,print_Message);

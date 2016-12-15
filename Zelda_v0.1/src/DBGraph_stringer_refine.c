@@ -23,7 +23,7 @@ void countRemainingNodes(){
 	int nodeNum100 = 0;
 	int nodeLen = 0;
 	int nodeLen100 = 0;
-	for(i=0;i<redGraph->V;i++){
+	for(i=1;i<=redGraph->V;i++){
 		if(redGraph->array[i].head || redGraph->array[i].tail || redGraph->array[i].headread){
 			nodeNum++;
 			nodeLen += redGraph->array[i].len;
@@ -41,7 +41,7 @@ void countRemainingNodes(){
 
 	int *nStat = (int*)malloc(sizeof(int)*(nodeNum+1));
 	int k=0;
-	for(i=0;i<redGraph->V;i++){
+	for(i=1;i<=redGraph->V;i++){
 		if(redGraph->array[i].head || redGraph->array[i].tail || redGraph->array[i].headread){
 			nStat[k++]=redGraph->array[i].len;
 		}
@@ -627,7 +627,7 @@ void ovlToString(struct myovlList *G, struct string_graph *S, char* pathAssembly
 			bread = read[i]->first;
 			while(bread){
 				lastbreadID = i;
-				len = 0;
+				len = read[i]->length;
 				firstbread = bread;
 				bID = bread->ID;
 				if(read[bID]->flag != CONTAINED && bread->sideflag==dir){

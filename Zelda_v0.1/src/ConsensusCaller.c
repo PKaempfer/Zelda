@@ -535,7 +535,7 @@ static inline void poa_LetterSizeCheck(){
  * @param read		The junction read representing the start of a contig
  * @param seq		Sequence of the junction read
  */
-void poa_initBackbone2(struct Sequence* contig, struct reads* read, char* seq){
+void poa_initBackbone2(struct Sequence* contig, char* seq){ //struct reads* read
 	int i;
 	uint32_t leftID;
 
@@ -581,7 +581,7 @@ void poa_initBackbone2(struct Sequence* contig, struct reads* read, char* seq){
 	printf("Number of set numNodes: %i\n",numNodes);
 }
 
-void poa_catBackbone(struct Sequence* contig, struct myovlList *G, struct reads* read, char* seq, int leftID, int rightID){
+void poa_catBackbone(struct Sequence* contig, struct myovlList *G, char* seq, int leftID, int rightID){ // Parameter :  struct reads* read,
 	struct bread* leftB;
 	struct bread* rightB;
 
@@ -947,6 +947,21 @@ static inline unsigned char poa_makeCigar(char* cigar, char* ref, char* alt){
 	return 0;
 }
 
+void poa_deleteVariant(struct POG* pog){
+	int i;
+	struct Variation* var;
+	for(i=0;i<pog->contigNum;i++){
+		var = pog->contig[i].var;
+		while(var){
+			pog->contig[i].var = var->next;
+			free(var->altSeq);
+			free(var->refSeq);
+			free(var);
+			var = pog->contig[i].var;
+		}
+	}
+}
+
 void poa_reportVariant(struct POG* pog, char* vcfFile, char* ref){
 	// Write Alternative to VCF
 	FILE* vcf = fopen(vcfFile,"w");
@@ -1024,7 +1039,6 @@ void poa_reportVariant(struct POG* pog, char* vcfFile, char* ref){
 //    fprintf(vcf,"##FORMAT=<ID=GQ,Number=1,Type=Float,Description=\"Genotype Quality, the Phred-scaled marginal (or unconditional) probability of the called genotype\">\n");
 //    fprintf(vcf,"##FORMAT=<ID=GL,Number=G,Type=Float,Description=\"Genotype Likelihood, log10-scaled likelihoods of the data given the called genotype for each possible genotype generated from the reference and alternate alleles given the sample ploidy\">\n");
     fprintf(vcf,"##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">\n");
-    fprintf(vcf,"##FORMAT=<ID=DP,Number=1,Type=Integer,Description=\"Read Depth\">\n");
     fprintf(vcf,"##FORMAT=<ID=RO,Number=1,Type=Integer,Description=\"Reference allele observation count\">\n");
     fprintf(vcf,"##FORMAT=<ID=QR,Number=1,Type=Integer,Description=\"Sum of quality of the reference observations\">\n");
     fprintf(vcf,"##FORMAT=<ID=AO,Number=A,Type=Integer,Description=\"Alternate allele observation count\">\n");
@@ -1056,6 +1070,8 @@ void poa_reportVariant(struct POG* pog, char* vcfFile, char* ref){
 		}
 	}
 
+	free(cigar);
+
 	fclose(vcf);
 }
 
@@ -1063,7 +1079,6 @@ void poa_recMainPath(struct Letter_T* currentLetter, struct Letter_T* endLetter,
 	char verbose = 0;
 	if(verbose) printf("Checkpoint recMainPath");
 	char* refSeq = (char*)malloc(maxAltLen);
-	char* cigar = (char*)malloc(2);
 	int refLen = 0;
 	int refCov = 100000;
 	struct LetterEdge* edge;
@@ -1128,7 +1143,6 @@ void poa_recMainPath(struct Letter_T* currentLetter, struct Letter_T* endLetter,
 	if(verbose) printf("\t%s\t%i\t%s\t%s\tDP:%i;AO:%i;RO:%i\n",contig->name,var->pos,var->refSeq,var->altSeq,var->dp,var->ao,var->ro);
 
 	free(refSeq);
-	free(cigar);
 	// walk main path to Letter is End of Alt Path
 	// call poa_reportVariant()
 }
@@ -1157,7 +1171,7 @@ void poa_recVariantPath(struct Letter_T* startLetter, int startPos, int len, cha
 }
 
 void poa_variantCalling(struct Sequence* contig){
-	int verbose = 0;
+//	int verbose = 0;
 	int i=0;
 	struct Letter_T* current = &Letters[contig->startLetter.dest];
 	struct LetterEdge* edge;
@@ -1187,6 +1201,7 @@ void poa_variantCalling(struct Sequence* contig){
 			break;
 		}
 	}
+	free(altPath);
 
 }
 
@@ -1261,6 +1276,7 @@ void poa_consensus2(struct Sequence* contig){
 	sprintf(contig->name,"%s%i",contig->name,contig->length);
 	poa_variantCalling(contig);
 	poa_avgCov(contig);
+	sprintf(contig->name,"%s_avgCov:%.2f",contig->name,contig->avgCov);
 	if(verbose) exit(1);
 }
 
@@ -1343,6 +1359,7 @@ void poa_consensus(struct Sequence* contig){
 void poa_printContigs(struct POG* pog, char* contigFile){
 	printf("CHECKPOINT: Write CorrectContigs in fasta\n");
 	FILE* correctContigs = fopen(contigFile,"w");
+	char hideEnds = 0;
 
 	int i,j,k;
 	int len;
@@ -1355,9 +1372,11 @@ void poa_printContigs(struct POG* pog, char* contigFile){
 			len = strlen(pog->contig[i].sequence);
 			fprintf(correctContigs,">%s\n",pog->contig[i].name);
 			j=0;
-			if(len>480){
-				j = 160;
-				len -= 160;
+			if(hideEnds){
+				if(len>480){
+					j = 160;
+					len -= 160;
+				}
 			}
 			for(;j<len;j+=80){
 				if(j+80 < len) fprintf(correctContigs,"%.80s\n",&pog->contig[i].sequence[j]);
@@ -1526,7 +1545,7 @@ struct POG* make_poa(struct myovlList* G, struct reads* reads){
        					strcpy(readseq,revreadseq);
        				}
 //       				poa_initBackbone(&contigs[contigNum],&reads[i],readseq);
-       				poa_initBackbone2(&pog->contig[pog->contigNum],&reads[i],readseq);
+       				poa_initBackbone2(&pog->contig[pog->contigNum],readseq); // parameter 2 ,&reads[i]
         			overhang = bread->overhang;
         			decompressReadSt(reads[breadID].seq,readseq,reads[breadID].len);
         			if(multidir%2==1 && G->read[breadID]->dir){
@@ -1537,7 +1556,7 @@ struct POG* make_poa(struct myovlList* G, struct reads* reads){
             			revReadSt(readseq,revreadseq);
             			strcpy(readseq,revreadseq);
         			}
-        			poa_catBackbone(&pog->contig[pog->contigNum],G,&reads[breadID],readseq,i,breadID);
+        			poa_catBackbone(&pog->contig[pog->contigNum],G,readseq,i,breadID); // Parameter 3: &reads[breadID],
         			internb = bread;
 //        			if(pog->contigNum == 4){
         				while(G->read[breadID]->flag != JUNCTION){
@@ -1578,7 +1597,7 @@ struct POG* make_poa(struct myovlList* G, struct reads* reads){
         		            			revReadSt(readseq,revreadseq);
         		            			strcpy(readseq,revreadseq);
         		        			}
-            						poa_catBackbone2(&pog->contig[pog->contigNum],G,&reads[breadID],readseq,oldbreadID,breadID);
+            						poa_catBackbone2(&pog->contig[pog->contigNum],G,readseq,oldbreadID,breadID); // Parameter 3 &reads[breadID]
     //        						poa_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts);
 //            						printf("Insert Number: %i in contig %i\n",inserts,pog->contigNum);
             						if(verbose) printf("ALINGING PROPER READ\n");
@@ -1714,6 +1733,7 @@ struct POG* make_poa(struct myovlList* G, struct reads* reads){
 //}
 
 void scaffold_stats(struct scaffold_set* aS){
+	char verbose = 1;
     int gesLen = 0;													// Sum over all scaffold length
 	int *nStat = (int*)malloc(sizeof(int)*aS->num);				// List of Scaffold length
 
@@ -1751,42 +1771,14 @@ void scaffold_stats(struct scaffold_set* aS){
 
 	struct scaffEdge* scaffEdge;
 	int startJunction;
-	printf("Scaffold Paths -> num: %i\n",anzlen);
-	printf("ScaffStat 1 !!!\n");
-	for(i=0;i<aS->num;i++){
-		if(aS->scaff[i].len < 200) continue;
-//		if(aS->scaff[i].first){
-			if(aS->scaff[i].first->targetJunction == paths[aS->scaff[i].first->ID].rightJunction){
-				startJunction = paths[aS->scaff[i].first->ID].leftJunction;
-			}
-			else{
-				startJunction = paths[aS->scaff[i].first->ID].rightJunction;
-			}
-			printf("Scaffold: %i (len: %i bp) Type: %i\n",i,aS->scaff[i].len,aS->scaff[i].type);
-			scaffEdge = aS->scaff[i].first;
-			printf(KRED"%i"KNRM,startJunction);
-			while(scaffEdge){
-				printf(" -> "KGRN"%i (%i) "KNRM,scaffEdge->ID,scaffEdge->len);
-				printf(" -> "KRED"%i"KNRM,scaffEdge->targetJunction);
-				scaffEdge = scaffEdge->next;
-			}
-			printf("\n");
-//		}
-//		else{
-//			printf("Scaffold: %i (len: %i bp)\n",i,aS->scaff[i].len);
-//			printf(KRED"%i"KNRM,aS->scaff[i].startJunction);
-//			printf(" -> "KGRN"%i"KNRM,aS->scaff[i].ID);
-//			printf(" -> "KRED"%i"KNRM,aS->);
-//
-//		}
 
-	}
-	printf("ScaffStat 2 !!!\n");
-	aS->numbridge = aS->num;
-	int bridgeJunction;
-	for(i=0;i<aS->numbridge;i++){
-		if(aS->scaff[i].len < 200) continue;
-//		if(aS->scaff[i].first){
+	if(verbose){
+		printf("Scaffold Paths -> num: %i\n",anzlen);
+		printf("ScaffStat:\n");
+		aS->numbridge = aS->num;
+		int bridgeJunction;
+		for(i=0;i<aS->numbridge;i++){
+			if(aS->scaff[i].len < 200) continue;
 			startJunction = aS->scaff[i].startJunction;
 			printf("Scaffold: %i (len: %i bp) Type: %i\n",i,aS->scaff[i].len,aS->scaff[i].type);
 			scaffEdge = aS->scaff[i].first;
@@ -1806,20 +1798,22 @@ void scaffold_stats(struct scaffold_set* aS){
 				scaffEdge = scaffEdge->next;
 			}
 			printf("\n");
+		}
 	}
 
-	printf("ScaffStat 3 !!!	\n");
+//	printf("ScaffStat 3 !!!	\n");
 	int scaffID;
 	int len;
+	int bridgeJunction;
 	struct scaffEdge* oldscaffEdge = NULL;
 	for(i=0;i<aS->numbridge;i++){
 		aS->scaff[i].next = NULL;
 		if(aS->scaff[i].len < 200 && i<aS->num) continue;
 		startJunction = aS->scaff[i].startJunction;
-		printf("Scaffold: %i (len: %i bp) Type: %i\n",i,aS->scaff[i].len,aS->scaff[i].type);
+//		printf("Scaffold: %i (len: %i bp) Type: %i\n",i,aS->scaff[i].len,aS->scaff[i].type);
 		scaffEdge = aS->scaff[i].first;
 		len = scaffEdge->len;
-		printf(KRED"%i"KNRM,startJunction);
+//		printf(KRED"%i"KNRM,startJunction);
 		scaffID = i;
 		while(scaffEdge){
 			if(scaffEdge != aS->scaff[i].first && scaffEdge->bridge){
@@ -1843,8 +1837,8 @@ void scaffold_stats(struct scaffold_set* aS){
 				break;
 			}
 			else{
-				printf(" -> "KGRN"%i"KNRM,scaffEdge->ID);
-				printf(" -> "KRED"%i"KNRM,scaffEdge->targetJunction);
+//				printf(" -> "KGRN"%i"KNRM,scaffEdge->ID);
+//				printf(" -> "KRED"%i"KNRM,scaffEdge->targetJunction);
 			}
 			if(scaffEdge->next && scaffEdge->next->bridge){
 				oldscaffEdge = scaffEdge;
@@ -1852,7 +1846,7 @@ void scaffold_stats(struct scaffold_set* aS){
 			scaffEdge = scaffEdge->next;
 			len += scaffEdge->len;
 		}
-		printf("\n");
+//		printf("\n");
 	}
 
 	printf("\n");
@@ -2370,7 +2364,7 @@ struct scaffold_set* scaffold_init2(){
     aS->nummax = 1000;
     aS->scaff = (struct scaffold*)malloc(sizeof(struct scaffold)*aS->nummax);
 
-    char verbose = 1;
+    char verbose = 0;
 
     int depth = 0;
     int len = 0;
@@ -2859,7 +2853,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
    					strcpy(readseq,revreadseq);
    				}
 //       			poa_initBackbone(&contigs[contigNum],&reads[i],readseq);
-   				poa_initBackbone2(&pog->contig[pog->contigNum],&reads[aS->scaff[i].startJunction],readseq);
+   				poa_initBackbone2(&pog->contig[pog->contigNum],readseq); // Parameter 2: &reads[aS->scaff[i].startJunction],
     			overhang = bread->overhang;
     			decompressReadSt(reads[breadID].seq,readseq,reads[breadID].len);
     			if(multidir%2==1 && G->read[breadID]->dir){
@@ -2870,7 +2864,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
         			revReadSt(readseq,revreadseq);
         			strcpy(readseq,revreadseq);
     			}
-    			poa_catBackbone(&pog->contig[pog->contigNum],G,&reads[breadID],readseq,startJunction,breadID);
+    			poa_catBackbone(&pog->contig[pog->contigNum],G,readseq,startJunction,breadID); // Parameter 3: &reads[breadID],
     			poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,overhang);
     			inserts++;
     			internb = bread;
@@ -2924,7 +2918,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 			            			revReadSt(readseq,revreadseq);
 			            			strcpy(readseq,revreadseq);
 			        			}
-	    						poa_catBackbone2(&pog->contig[pog->contigNum],G,&reads[breadID],readseq,oldbreadID,breadID);
+	    						poa_catBackbone2(&pog->contig[pog->contigNum],G,readseq,oldbreadID,breadID); // Parameter 3: &reads[breadID],
 	//        						poa_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts);
 	//            						printf("Insert Number: %i in contig %i\n",inserts,pog->contigNum);
 	    						if(verbose) printf("ALINING PROPER READ\n");
@@ -2977,7 +2971,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 			            			revReadSt(readseq,revreadseq);
 			            			strcpy(readseq,revreadseq);
 			        			}
-	    						poa_catBackbone2(&pog->contig[pog->contigNum],G,&reads[breadID],readseq,oldbreadID,breadID);
+	    						poa_catBackbone2(&pog->contig[pog->contigNum],G,readseq,oldbreadID,breadID); // Parameter 3: &reads[breadID],
 	//        						poa_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts);
 	//            						printf("Insert Number: %i in contig %i\n",inserts,pog->contigNum);
 	    						if(verbose2) printf("ALIGING PROPER READ\n");
@@ -3000,7 +2994,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     			printf("Path for this Junction not found\n Abort!\n");
     		}
 			sprintf(name,"Scaffold_%i_%i_%i_len:",i+1,aS->scaff[i].startJunction,breadID);
-			pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+10);
+			pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+100);
 			strcpy(pog->contig[pog->contigNum].name,name);
 
     		poa_consensus2(&pog->contig[pog->contigNum]);

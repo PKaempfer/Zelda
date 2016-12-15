@@ -56,7 +56,6 @@ int makeDB(char* outDB, int blocks, struct readFiles* files){
 			printf("MinInsertSize: %i\n",files[i].minInsert);
 			printf("MaxInsertSize: %i\n",files[i].maxInsert);
 			files[i].avgInsert = (files[i].maxInsert + files[i].minInsert) / 2;
-			printf("MaxInsertSize: %i\n",files[i].maxInsert);
 			printf("PairedEnd Orientation: %s \n",peOri[files[i].oriPE]);
 
 			files[i].startId = readNum;

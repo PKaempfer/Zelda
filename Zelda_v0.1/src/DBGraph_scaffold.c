@@ -254,7 +254,7 @@ void initScaff(struct myovlList* G, struct reads* reads){
     initAnnotation(G, reads);
 
     struct j_anno* j_anno;
-    paths = (struct path*)malloc(sizeof(struct path)*maxPathNum);
+//    paths = (struct path*)malloc(sizeof(struct path)*maxPathNum);
 
     for(i=1; i < G->V; i++){
     	if(G->read[i] && G->read[i]->flag == JUNCTION){
@@ -308,6 +308,9 @@ struct scaffold_set* contigs_init(struct myovlList* G){ //, struct reads* reads
     	aS->scaff[i-1].first->ID = paths[i].ID;
     	aS->scaff[i-1].first->targetJunction = paths[i].rightJunction;
     	aS->scaff[i-1].first->next = NULL;
+    	aS->scaff[i-1].first->bridge = NULL;
+    	aS->scaff[i-1].next = NULL;
+
     }
 
 //    statsScaff();
@@ -326,13 +329,13 @@ struct scaffold_set* contigs_init(struct myovlList* G){ //, struct reads* reads
     }
 
     printf("Number of components: %i\n",componentNum-1);
-    printf("Contigs treated as Scaffold Singletons\n");
+//    printf("Contigs treated as Scaffold Singletons\n");
     return aS;
 }
 
 void free_schaffoldSet(struct scaffold_set* aS){
 	struct scaffEdge* edge;
-    for(int i = 0; i < aS->numbridge; i++){
+    for(int i = 0; i < pathsNum-1; i++){
     	while(aS->scaff[i].first){
     		edge = aS->scaff[i].first->next;
     		if(aS->scaff[i].first->bridge) free(aS->scaff[i].first->bridge);

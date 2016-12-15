@@ -171,7 +171,7 @@ struct contigList* realBackbone2(struct myovlList* G, struct reads* reads);
 
 void poa_part_toDot(char* dotFile, struct Sequence* contig);
 
-void poa_catBackbone2(struct Sequence* contig, struct myovlList *G, struct reads* read, char* seq, int leftID, int rightID);
+void poa_catBackbone2(struct Sequence* contig, struct myovlList *G, char* seq, int leftID, int rightID); // Parameter 3 , struct reads* read
 
 void testFunct();
 
@@ -193,6 +193,8 @@ void poa_reportVariant(struct POG* pog, char* vcfFile, char* ref);
 void poa_consensus(struct Sequence* contig);
 
 void poa_printContigs(struct POG* pog, char* contigFile);
+
+void poa_deleteVariant(struct POG* contigs_pog);
 
 void free_POG(struct POG* contigs_pog);
 
