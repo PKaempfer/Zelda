@@ -1,0 +1,47 @@
+README
+
+ZELDA SOURCE 
+December 15 2016
+Philipp Kämpfer
+
+> SUMMARY
+        * A/ REQUIREMENTS
+        * B/ COMPILING INSTRUCTIONS
+	* C/ HOW TO RUN
+
+----------------------------------------------------------------------------------
+A/ REQUIREMENTS
+
+Zelda should function on any standard 64bit Linux environment with
+gcc and clang. A good amount of physical memory (16GB to start with, more is no luxury)
+is recommended. 
+
+----------------------------------------------------------------------------------
+B/ COMPILING INSTRUCTIONS
+
+Normally, with a GNU environment, just type:
+
+> make
+
+Zelda biniary can be found in the ./bin directory
+
+----------------------------------------------------------------------------------
+C/ HOW TO RUN
+
+Type
+
+> ./bin/Zelda -h 
+
+to get a help, how to use Zelda
+
+Example:
+
+> cd example
+> bash example.sh
+
+Runs a test assembly on the basis of a given Illumina HiSeq2500 dataset of the Enterobacteria phage lambda.
+Creates example/Lambda folder with DB and Assembly sub-folder.
+
+DB  	     Contains the input reads in a compressed database representation
+Assembly     All intermediate assembly files and the finished assembly in contigs.fasta/scaffolds.fasta
+
