@@ -77,13 +77,6 @@ int main(int argc, char* argv[]) {
 	sleep(sleeptime);
 	printf("Continue\n");
 
-//	printf("CHECKPOINT: Print Graph\n");
-//	printGraph();
-//	printf("CHECKPOINT: Write Dot-File\n");
-//	writeDot(NULL);
-//	printf("CHECKPOINT: Clean Hash Table\n");
-//	cleanGraph();
-
 	printf("CHECKPOINT: 4 Error Correction\n");
 	time(&start);
 	perfectErrorCorrection();// errorCorrection();
@@ -151,12 +144,6 @@ int main(int argc, char* argv[]) {
 		printRedGraphToFile(tempPath);
 	}
 
-
-//	testFunct();
-
-//	printRedGraph();
-//	printRedGraphToFile("./output/redGraph.list");
-//	exit(1);
 	printf("CHECKPOINT: 6. Stringer (Overlaps to String Graph):\n");
 	time(&start);
 	struct myovlList* G = initOVLgraph(numreads);
@@ -166,7 +153,6 @@ int main(int argc, char* argv[]) {
 	printf("Stringer: %0.2f\n",difftime (stop,start));
 	printf("Wait after Stringer\n");
 	sleep(sleeptime);
-	// exit for fixing the stringgraph bug
 	printf("CHECKPOINT: ContigWriter\n");
 
 
@@ -211,20 +197,6 @@ int main(int argc, char* argv[]) {
 	printf("Wait after FastaOut\n");
 	sleep(sleeptime);
 	printf("continue\n");
-// POG Correction (Partial-Order-Graph)
-//		struct POG* contigs_pog = make_poa(G,reads);
-//		struct POG* contigs_pog = make_poaScaff(G,reads,0);
-//		char* contigPath = "./output/correct_contigs.fasta";
-//		poa_printContigs(contigs_pog,contigPath);
-//		poa_toDot("output/poa.dot");
-	// Scaffolding
-//		struct POG* contigs_pog = make_poaScaff(G,reads,1);
-//		struct POG* contigs_pog = make_poa(G,reads);
-//		char* contigPath = "./output/correct_Scaffolds.fasta";
-//		poa_printContigs(contigs_pog,contigPath);
-//		poa_toDot("output/poa.dot");
-//		exit(1);
-	// Free Variations
 	poa_deleteVariant(contigs_pog);
 	if(contigs_pog) free_POG(contigs_pog);
 	freeDB(reads);

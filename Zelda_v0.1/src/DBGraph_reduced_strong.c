@@ -35,23 +35,6 @@ void collapseEdges_strong(int i, int dest, int up,int* nodeList, int nodenum){
 //	int templenb = blen;
 	int j;
 
-//	printf("ReadList of Ori %i (len: %i)\n",i,blen);
-//	while(bnode){
-//		printf("-> %i (ID: %i) flag: %i \n",bnode->pos,bnode->read->ID,bnode->flag);
-//		bnode = bnode->next;
-//	}
-//
-//	int j;
-//	for(j=0;j<nodenum*2;j+=2){
-//		alen = nodeList[j+1];
-//		anode = redGraph->array[nodeList[j]].headread;
-//		printf("ReadList of Dest %i (len: %i /ges: %i)\n",nodeList[j],redGraph->array[nodeList[j]].len,alen);
-//		while(anode){
-//			printf("-> %i (ID: %i) flag: %i \n",anode->pos,anode->read->ID,anode->flag);
-//			anode = anode->next;
-//		}
-//	}
-
 	if(up) j = 0;
 	else j = (nodenum-1) * 2;
 	bnode = redGraph->array[i].headread;
@@ -116,23 +99,6 @@ void collapseEdges_strong(int i, int dest, int up,int* nodeList, int nodenum){
 		}
 	}
 	redGraph->array[i].headread = NULL;
-
-//	bnode = redGraph->array[i].headread;
-//	printf("ReadList of Ori %i (len: %i)\n",i,blen);
-//	while(bnode){
-//		printf("-> %i (ID: %i) flag: %i \n",bnode->pos,bnode->read->ID,bnode->flag);
-//		bnode = bnode->next;
-//	}
-//	for(j=0;j<nodenum*2;j+=2){
-//		alen = nodeList[j+1];
-//		anode = redGraph->array[nodeList[j]].headread;
-//		printf("ReadList of Dest %i (len: %i /ges: %i)\n",nodeList[j],redGraph->array[nodeList[j]].len,alen);
-//		while(anode){
-//			printf("-> %i (ID: %i) flag: %i \n",anode->pos,anode->read->ID,anode->flag);
-//			anode = anode->next;
-//		}
-//	}
-//	printf("\nFIN\n\n");
 }
 
 static inline int* setDestList(int i, int dest, int ilen, int destlen, struct edge* shared, int up, int* list, int* listlen){

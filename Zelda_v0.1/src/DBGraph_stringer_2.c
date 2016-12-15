@@ -233,24 +233,6 @@ void downstreamTree(int i, struct partGraph* childReadIds){
 		}
 	//	 printf("\n");
 
-	//	struct edge *edge;
-	//	for(j=0;j<childReadIds->V;j++){
-	//		printf("Test for right edges for node: %i",childReadIds->array[j].ID);
-	//		printf("\nHead: ");
-	//		edge = childReadIds->array[j].head;
-	//		while(edge){
-	//			printf("->%i ",childReadIds->array[edge->dest].ID);
-	//			edge = edge->next;
-	//		}
-	//		printf("\nTail: ");
-	//		edge = childReadIds->array[j].tail;
-	//		while(edge){
-	//			printf("->%i ",childReadIds->array[edge->dest].ID);
-	//			edge = edge->next;
-	//		}
-	//		printf("\n");
-	//	}
-
 }
 
 
@@ -311,23 +293,7 @@ void upstreamTree(int i, struct partGraph* parentReadIds){
 //				printf("Edge depth: %i -> %i\n",parentReadIds->array[k].ID,parentReadIds->array[k].depth);
 				k++;
 			}
-//			else{
-////				printf("Else Casus(i,j,k,l: %i %i %i %i)\n",i,j,k,l);
-////				printf("2 Parent: -> %i\n",child->dest);
-//				for(l=0;l<k;l++){
-//					if(parentReadIds->array[l].ID == child->dest){
-//						newEdge = (struct edge*)malloc(sizeof(struct edge));
-//						newEdge->dest = l;
-//						newEdge->next = parentReadIds->array[j].tail;
-//						parentReadIds->array[j].tail = newEdge;
-//
-//						newEdge = (struct edge*)malloc(sizeof(struct edge));
-//						newEdge->dest = j;
-//						newEdge->next = parentReadIds->array[l].head;
-//						parentReadIds->array[l].head = newEdge;
-//					}
-//				}
-//			}
+
 			child = child->next;
 		}
 		j++;
@@ -348,23 +314,7 @@ void upstreamTree(int i, struct partGraph* parentReadIds){
 	}
 //	 printf("\n");
 
-//	struct edge *edge;
-//	for(j=0;j<parentReadIds->V;j++){
-//		printf("Test for right edges for node: %i",parentReadIds->array[j].ID);
-//		printf("\nHead: ");
-//		edge = parentReadIds->array[j].head;
-//		while(edge){
-//			printf("->%i ",parentReadIds->array[edge->dest].ID);
-//			edge = edge->next;
-//		}
-//		printf("\nTail: ");
-//		edge = parentReadIds->array[j].tail;
-//		while(edge){
-//			printf("->%i ",parentReadIds->array[edge->dest].ID);
-//			edge = edge->next;
-//		}
-//		printf("\n");
-//	}
+
 }
 
 void free_UpstreamTree(struct partGraph* parentReadIds){
@@ -1043,22 +993,6 @@ void downstreamTreeCon(int i, struct partGraph* childReadIds){
 	//				printf("Edge depth: %i -> %i\n",childReadIds->array[k].ID,childReadIds->array[k].depth);
 					k++;
 				}
-//				else{
-//	//				printf("Else Casus(i,j,k,l: %i %i %i %i)\n",i,j,k,l);
-//					for(l=0;l<k;l++){
-//						if(childReadIds->array[l].ID == child->dest){
-//							newEdge = (struct edge*)malloc(sizeof(struct edge));
-//							newEdge->dest = l;
-//							newEdge->next = childReadIds->array[j].tail;
-//							childReadIds->array[j].tail = newEdge;
-//
-//							newEdge = (struct edge*)malloc(sizeof(struct edge));
-//							newEdge->dest = j;
-//							newEdge->next = childReadIds->array[l].head;
-//							childReadIds->array[l].head = newEdge;
-//						}
-//					}
-//				}
 				child = child->next;
 			}
 			j++;
@@ -1078,23 +1012,7 @@ void downstreamTreeCon(int i, struct partGraph* childReadIds){
 		}
 	//	 printf("\n");
 
-	//	struct edge *edge;
-	//	for(j=0;j<childReadIds->V;j++){
-	//		printf("Test for right edges for node: %i",childReadIds->array[j].ID);
-	//		printf("\nHead: ");
-	//		edge = childReadIds->array[j].head;
-	//		while(edge){
-	//			printf("->%i ",childReadIds->array[edge->dest].ID);
-	//			edge = edge->next;
-	//		}
-	//		printf("\nTail: ");
-	//		edge = childReadIds->array[j].tail;
-	//		while(edge){
-	//			printf("->%i ",childReadIds->array[edge->dest].ID);
-	//			edge = edge->next;
-	//		}
-	//		printf("\n");
-	//	}
+
 
 }
 
