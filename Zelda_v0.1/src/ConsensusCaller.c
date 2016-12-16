@@ -2751,7 +2751,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 //				while(breadID != aS->scaff[i].endJunction){
 				while(breadID != finJunction){
 					if(G->read[breadID]->flag == JUNCTION){
-						printf("bread is a JUNCTION\n");
+						printf("bread (%i) is a JUNCTION (finjunction: %i)\n",breadID,finJunction);
 						scaffEdge = scaffEdge->next;
 						if(scaffEdge->bridge){
 
