@@ -2889,7 +2889,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     			printf("Scaffold %i has a connection\n",pog->contigNum);
     			pog->contig[pog->contigNum].seqEdge = (struct sequenceEdge*)malloc(sizeof(struct sequenceEdge));
 //    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[i].next->first->bridge->estLen;
-    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[aS->scaff[i].next]->first->bridge->estLen;
+    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[aS->scaff[i].next].first->bridge->estLen;
     			pog->contig[pog->contigNum].seqEdge->ori = 0;
     		}
     		else pog->contig[pog->contigNum].seqEdge = NULL;
