@@ -1751,8 +1751,8 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 	else pathedgeR2->junctionCon = 0;
 	// Is this correct?????
 	// Ori bit incoming: 0 if forward to original read, 1 if reverse
-	printf("First Flag in r1: %i\n",G->read[G->read[paths[r1path].rightJunction]->first->ID]->flag);
-	printf("First Flag in r2: %i\n",G->read[G->read[paths[r2path].rightJunction]->first->ID]->flag);
+//	printf("First Flag in r1: %i\n",G->read[G->read[paths[r1path].rightJunction]->first->ID]->flag);
+//	printf("First Flag in r2: %i\n",G->read[G->read[paths[r2path].rightJunction]->first->ID]->flag);
 
 
 	if(r1right)	pathedgeR1->junctionCon |= ((!G->read[paths[r1path].rightJunction]->first->sideflag) << 1);
