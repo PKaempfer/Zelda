@@ -2601,8 +2601,8 @@ static inline void resetLetters(struct Letter_T* Letters){
  * @return
  */
 struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffolding, struct para* para){
-	char verbose = 0;
-	char verbose2 = 0;
+	char verbose = 1;
+	char verbose2 = 1;
 
 	struct scaffold_set* aS;
 	if(scaffolding){
