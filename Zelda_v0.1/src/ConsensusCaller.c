@@ -2762,6 +2762,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 						}
 						internb = G->read[breadID]->first;
 						while(internb){
+							if(verbose) printf("Found bread: %i (FLAG: %i)\n",internb->ID,G->read[internb->ID]->flag);
 							if(G->read[internb->ID]->flag == CONTAINED){
 			        			decompressReadSt(reads[internb->ID].seq,readseq,reads[internb->ID].len);
 			        			if(multidir%2==1 && !G->read[internb->ID]->dir){
