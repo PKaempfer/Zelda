@@ -1600,7 +1600,7 @@ struct POG* make_poa(struct myovlList* G, struct reads* reads){
     return pog;
 }
 
-void scaffold_stats(struct scaffold_set* aS){
+struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 	char verbose = 1;
     int gesLen = 0;													// Sum over all scaffold length
 	int *nStat = (int*)malloc(sizeof(int)*aS->num);				// List of Scaffold length
@@ -1669,7 +1669,7 @@ void scaffold_stats(struct scaffold_set* aS){
 		}
 	}
 
-//	printf("ScaffStat 3 !!!	\n");
+	printf("ScaffStat 3 !!!	\n");
 	int scaffID;
 	int len;
 	int bridgeJunction;
@@ -1702,6 +1702,14 @@ void scaffold_stats(struct scaffold_set* aS){
 //				printf(" -> "KGRN"%i"KNRM,scaffEdge->ID);
 //				printf(" -> "KRED"%i"KNRM,scaffEdge->targetJunction);
 				aS->numbridge++;
+            	if(aS->numbridge == aS->nummax){
+            		aS->nummax *= 2;
+            		aS->scaff = (struct scaffold*)realloc(aS->scaff,sizeof(struct scaffold)*aS->nummax);
+            		if(!aS->scaff){
+            			printf("No realloc of struct scaffold possible\n Abort\n");
+            			exit(1);
+            		}
+            	}
 				break;
 			}
 			else{
@@ -1745,6 +1753,7 @@ void scaffold_stats(struct scaffold_set* aS){
 		}
 	}
 	free(nStat);
+	return aS;
 }
 
 
@@ -2604,7 +2613,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	}
 
 //	if(verbose)
-		scaffold_stats(aS);
+		aS = scaffold_stats(aS);
 //	exit(1);
 
     int i,j;
