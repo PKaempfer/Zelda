@@ -2756,7 +2756,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 
 						}
 						if(!scaffEdge){
-							printf("Catch: no more Edge, but not endJunction reached\nAbort\n");
+							printf("Catch: no more Edge on Junction : %i , but not endJunction reached\nAbort\n",breadID);
 							exit(1);
 						}
 						internb = G->read[breadID]->first;
