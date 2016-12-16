@@ -446,7 +446,7 @@ void scaffGraphDot(struct myovlList* G, struct reads* reads, char* dotfile){
 
 	// set bridges as dashed paths
 	printf("CHECKPOINT: Write ScaffGraph.dot (bridges)\n");
-	verbose = 1;
+	verbose = 0;
 	struct pathEdge* pathEdge;
 	int r1junc,r2junc;
 	int r1rev, r2rev;
@@ -1601,7 +1601,7 @@ void printPath(struct myovlList* G, struct reads* reads, int pathID){
 
 void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right, char r2right, int dist){
 //	printf("Set Virtual Bridge\n");
-	char verbose = 1;
+	char verbose = 0;
 	struct pathEdge* pathedgeR1;
 	struct pathEdge* pathedgeR2;
 	struct pathEdge* tempEdge;
@@ -1775,7 +1775,7 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 
 void buildBridge(struct myovlList* G, struct readFiles lib, struct reads* reads, int r1ID, char spurs, int r1path, int r2path, int oriPE){
 	// Look which side is spur? Try all of bit type is 0
-	char verbose = 1;
+	char verbose = 0;
 	int dist = 0;
 	int hitnum = 0;
 	struct pc_anno* r1anno = (struct pc_anno*)reads[r1ID].annotation;

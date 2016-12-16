@@ -25,6 +25,7 @@ void collapseEdges(int i, int dest,int ori, int up){
 	// First step -> Copy read information of the spur edge to the sibling edge
 	// a is true --> b is spur
 	// up -> nodes have a common parent; !up -> nodes have a common child
+	char verbose = 0;
 	struct ReadNode *anode, *abefnode,*bnode,*temp;
 	int alen,blen,abdiff;
 	struct KannteNode *kannte;
@@ -49,8 +50,8 @@ void collapseEdges(int i, int dest,int ori, int up){
 			kannte = bnode->read->headkannte;
 			while(kannte){
 				if(kannte->dest == i && kannte->pos == bnode->pos){
-					printf("Change ReadInfo at the edge\n");
-					printf("ID: %i (dir: %i)---> %i -> %i (Dest: %i -> %i, pos: %i -> %i) Up: %i\n",bnode->read->ID,bnode->dir,i,dest,kannte->dest,dest,kannte->pos,bnode->pos+abdiff,up);
+					if(verbose) printf("Change ReadInfo at the edge\n");
+					if(verbose) printf("ID: %i (dir: %i)---> %i -> %i (Dest: %i -> %i, pos: %i -> %i) Up: %i\n",bnode->read->ID,bnode->dir,i,dest,kannte->dest,dest,kannte->pos,bnode->pos+abdiff,up);
 					kannte->dest = dest;
 					kannte->pos = bnode->pos+abdiff;
 				}
