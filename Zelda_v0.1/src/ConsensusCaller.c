@@ -1719,7 +1719,7 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 //				printf(" -> "KRED"%i"KNRM,scaffEdge->targetJunction);
 			}
 			if(scaffEdge->next && scaffEdge->next->bridge){
-				oldscaffEdge = scaffEdge;
+				oldscaffEdge = scaffEdge->next;
 			}
 			scaffEdge = scaffEdge->next;
 			len += scaffEdge->len;
