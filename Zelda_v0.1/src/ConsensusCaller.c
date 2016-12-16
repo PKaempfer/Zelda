@@ -1719,7 +1719,7 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 //				printf(" -> "KRED"%i"KNRM,scaffEdge->targetJunction);
 			}
 			if(scaffEdge->next && scaffEdge->next->bridge){
-				oldscaffEdge = scaffEdge->next;
+				oldscaffEdge = scaffEdge;
 			}
 			scaffEdge = scaffEdge->next;
 			len += scaffEdge->len;
@@ -2697,6 +2697,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     			while(scaffEdge){
     				finJunction = scaffEdge->targetJunction;
     				scaffEdge = scaffEdge->next;
+    				printf("FinJunction: %i\n",finJunction);
     			}
     			scaffEdge = aS->scaff[i].first;
         		while(bread){
