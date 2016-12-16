@@ -1675,7 +1675,8 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 	int bridgeJunction;
 	struct scaffEdge* oldscaffEdge = NULL;
 	for(i=0;i<aS->numbridge;i++){
-		aS->scaff[i].next = NULL;
+//		aS->scaff[i].next = NULL;
+		aS->scaff[i].next = -1;
 		if(aS->scaff[i].len < 200 && i<aS->num) continue;
 		startJunction = aS->scaff[i].startJunction;
 //		printf("Scaffold: %i (len: %i bp) Type: %i\n",i,aS->scaff[i].len,aS->scaff[i].type);
@@ -1696,7 +1697,8 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 				aS->scaff[aS->numbridge].first = scaffEdge;
 				// Update old scaffEdge
 				aS->scaff[i].len = len - scaffEdge->len;
-				aS->scaff[i].next = &aS->scaff[aS->numbridge];
+//				aS->scaff[i].next = &aS->scaff[aS->numbridge];
+				aS->scaff[i].next = aS->numbridge;
 				oldscaffEdge->next = NULL;
 //				printf(" ..(%i)..> "KYEL"%i"KNRM,scaffEdge->bridge->estLen,bridgeJunction);
 //				printf(" -> "KGRN"%i"KNRM,scaffEdge->ID);
@@ -2883,10 +2885,11 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     		resetLetters(Letters);
     		numNodes = 0;
     		aS->scaff[i].scaffoldID = pog->contigNum;
-    		if(aS->scaff[i].next){
+    		if(aS->scaff[i].next>=0){
     			printf("Scaffold %i has a connection\n",pog->contigNum);
     			pog->contig[pog->contigNum].seqEdge = (struct sequenceEdge*)malloc(sizeof(struct sequenceEdge));
-    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[i].next->first->bridge->estLen;
+//    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[i].next->first->bridge->estLen;
+    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[aS->scaff[i].next]->first->bridge->estLen;
     			pog->contig[pog->contigNum].seqEdge->ori = 0;
     		}
     		else pog->contig[pog->contigNum].seqEdge = NULL;
@@ -2901,9 +2904,11 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 
     for(i=0;i<aS->numbridge;i++){
     	if(aS->scaff[i].len > MIN_SCAFF_LEN || i >= aS->num){
-    		if(aS->scaff[i].next){
-    			pog->contig[aS->scaff[i].scaffoldID].seqEdge->nextScaff = aS->scaff[i].next->scaffoldID;
-    			printf("Connect Scaffold %i with %i bp to scaffold %i\n",aS->scaff[i].scaffoldID,pog->contig[aS->scaff[i].scaffoldID].seqEdge->insertLen,aS->scaff[i].next->scaffoldID);
+    		if(aS->scaff[i].next >= 0){
+//    			pog->contig[aS->scaff[i].scaffoldID].seqEdge->nextScaff = aS->scaff[i].next->scaffoldID;
+    			pog->contig[aS->scaff[i].scaffoldID].seqEdge->nextScaff = aS->scaff[aS->scaff[i].next].scaffoldID;
+//    			printf("Connect Scaffold %i with %i bp to scaffold %i\n",aS->scaff[i].scaffoldID,pog->contig[aS->scaff[i].scaffoldID].seqEdge->insertLen,aS->scaff[i].next->scaffoldID);
+    			printf("Connect Scaffold %i with %i bp to scaffold %i\n",aS->scaff[i].scaffoldID,pog->contig[aS->scaff[i].scaffoldID].seqEdge->insertLen,aS->scaff[aS->scaff[i].next].scaffoldID);
     		}
     	}
     }

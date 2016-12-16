@@ -75,7 +75,7 @@ struct scaffold{
 	int endJunction;
 	int scaffoldID;
 	struct scaffEdge* first;
-	struct scaffold* next;
+	int next;
 };
 
 struct contigScaff{
