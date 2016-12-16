@@ -299,7 +299,7 @@ struct scaffold_set* contigs_init(struct myovlList* G){ //, struct reads* reads
     	aS->scaff[i-1].first->targetJunction = paths[i].rightJunction;
     	aS->scaff[i-1].first->next = NULL;
     	aS->scaff[i-1].first->bridge = NULL;
-    	aS->scaff[i-1].next -1;
+    	aS->scaff[i-1].next = -1;
 
     }
 

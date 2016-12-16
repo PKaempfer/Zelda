@@ -2755,7 +2755,6 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 						if(scaffEdge->bridge){
 
 						}
-
 						if(!scaffEdge){
 							printf("Catch: no more Edge, but not endJunction reached\nAbort\n");
 							exit(1);
