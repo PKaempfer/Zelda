@@ -434,7 +434,7 @@ int poa_searchEndPoint(int line, char* seq, int insNum, char backbone, char prin
 		exit(1);
 	}
 
-	if(best_Score < (len*SM1[0][0])*0.30){ //!backbone &&
+	if(best_Score < (len*SM1[0][0])*0.10){ //!backbone &&
 		if(!backbone) printf("Alignment %i -> Best Score of Matrix below threshold for Containment -> Alignment denied go to next (best Score: %i/%i)  \n",insNum,best_Score,len*SM1[0][0]);
 		else printf("Alignment %i -> Best Score of Matrix below threshold for PROPER -> Alignment denied go to next (best Score: %i/%i)  \n",insNum,best_Score,len*SM1[0][0]);
 //		poa_part_toDot("output/error.dot",contig);
@@ -464,7 +464,7 @@ int poa_searchEndPoint(int line, char* seq, int insNum, char backbone, char prin
 		else{
 			printf("CHECKPOINT: Print Matrix (row: %i, col: %i,overhang: %i)\n",len,line,overhang);
 			static int part = 0;
-			poa_showMatrix(len,line,seq);
+//			poa_showMatrix(len,line,seq);
 			char* dotFile = (char*)malloc(100);
 			sprintf(dotFile,"part_%i.dot",part);
 			printf("POA: %s\n",dotFile);

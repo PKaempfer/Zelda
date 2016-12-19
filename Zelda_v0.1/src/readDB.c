@@ -271,6 +271,8 @@ struct reads* readDB(char* outDB){
 	int readNumber;
 	fread(&readNumber,sizeof(int),1,metaDB);
 	printf("numreads: %i\n",numreads);
+	// TODO: my cause segfault
+	numreads = readNumber;
 
 	fclose(metaDB);
 
@@ -309,7 +311,12 @@ struct reads* readDB(char* outDB){
 }
 
 void freeDB(struct reads* reads){
-	for(int i=1;i<=numreads;i++){
+//	for(int i=1;i<=numreads;i++){
+//		free(reads[i].seq);
+//		if(reads[i].annotation) free(reads[i].annotation);
+//	}
+//	free(reads);
+	for(int i=0;i<numreads;i++){
 		free(reads[i].seq);
 		if(reads[i].annotation) free(reads[i].annotation);
 	}
