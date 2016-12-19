@@ -689,7 +689,8 @@ struct pairAlign poa_backtrace(struct Sequence* contig, char* seq, struct Letter
 			printf("Captured in infinite loop (j=%i), Abort\n",j);
 			free(refseq);
 			free(readseq);
-			return NULL;
+			align.current = NULL;
+			return align;
 			exit(1);
 			if(j==99) exit(1);
 		}
@@ -891,7 +892,7 @@ void poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq
 	// 5. Make backtrace
 	int len = strlen(seq);
 	struct pairAlign align = poa_backtrace(contig,seq,current,print_Message,backbone); // Parameter 4: read->ID,
-	if(!align){
+	if(!align.current){
 		poa_resetMatrix(line,len);
 		return;
 	}
