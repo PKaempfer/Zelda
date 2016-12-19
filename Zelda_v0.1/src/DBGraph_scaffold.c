@@ -1607,10 +1607,11 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 	struct pathEdge* pathedgeR2;
 	struct pathEdge* tempEdge;
 	int avgDist;
+	char breakB = 0;
 
 	if(r1right)	pathedgeR1 = paths[r1path].rightPath;
 	else pathedgeR1 = paths[r1path].leftPath;
-	while(pathedgeR1){
+	while(pathedgeR1 && !breakB){
 		if(pathedgeR1->ID == r2path){
 			// ToDo: Seek in Siblings
 			// Set new Parameter
@@ -1629,6 +1630,7 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 					pathedgeR1->counter++;
 					pathedgeR1->estLen = avgDist / pathedgeR1->counter;
 					if(verbose) printf("Update Bridge (Sibl!: BAD CASE): %i -> %i (dist: %i, avg: %i) Count: %i\n",r1path,r2path,dist,pathedgeR1->estLen,pathedgeR1->counter);
+					breakB = 1;
 					break;
 				}
 				tempEdge = tempEdge->sibl;
@@ -1637,9 +1639,10 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 		pathedgeR1 = pathedgeR1->next;
 	}
 
+	breakB = 0;
 	if(r2right)	pathedgeR2 = paths[r2path].rightPath;
 	else pathedgeR2 = paths[r2path].leftPath;
-	while(pathedgeR2){
+	while(pathedgeR2 && !breakB){
 		if(pathedgeR2->ID == r1path){
 			// ToDo: Seek in Siblings
 			// Set new Parameter
@@ -1658,6 +1661,7 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 					pathedgeR2->counter++;
 					pathedgeR2->estLen = avgDist / pathedgeR2->counter;
 					if(verbose) printf("Update Bridge (Sibl!: BAD CASE): %i -> %i (dist: %i, avg: %i) Count: %i\n",r2path,r1path,dist,pathedgeR2->estLen,pathedgeR2->counter);
+					breakB = 1;
 					break;
 				}
 				tempEdge = tempEdge->sibl;
