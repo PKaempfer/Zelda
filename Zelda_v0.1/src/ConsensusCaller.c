@@ -2295,7 +2295,8 @@ struct scaffold_set* scaffold_init2(){
         		// initial right
         		edge = paths[i].rightPath;
         		while(edge && !paths[edge->ID].flag && !edge->sibl){
-        			if(verbose) printf("(%i) Set right %i\n",i,edge->ID);
+        			if(verbose)
+        				printf("(%i) Set right %i\n",i,edge->ID);
         			right[relem].ID = edge->ID;
         			if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
         			else right[relem].sameside = 0;
