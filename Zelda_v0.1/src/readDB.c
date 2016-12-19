@@ -276,7 +276,7 @@ struct reads* readDB(char* outDB){
 
 	fclose(metaDB);
 
-	if(readDBFile) reads = (struct reads*)malloc(sizeof(struct reads)*(readNumber+1));
+	if(readDBFile) reads = (struct reads*)malloc(sizeof(struct reads)*(readNumber));
 	FILE* readDB = fopen(readDBFile,"rb");
 	if(!readDB){
 		printf("Can not open readDB!!!\nAbort\n");
