@@ -2300,7 +2300,10 @@ struct scaffold_set* scaffold_init2(){
         			right[relem].ID = edge->ID;
         			if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
         			else right[relem].sameside = 0;
-        			if(edge->junctionCon>=0) right[relem].bridge = edge;
+        			if(edge->junctionCon>=0){
+        				printf("\t--> is bridge\n");
+        				right[relem].bridge = edge;
+        			}
         			else right[relem].bridge = NULL;
         			relem++;
         			if(relem == rmaxelem){
