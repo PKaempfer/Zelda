@@ -986,7 +986,8 @@ int connectPathsInit(struct myovlList* G, struct readFiles* files, struct reads*
 
 void connectPathsPairwise3(){
 	int verbose = 0;
-	int verbosenew = 0;
+	int verbosenew = 1;
+	int verbosePath = 10066;
 	int printFinPath = 0;
 	int k,l;
 //	int depth;
@@ -1022,7 +1023,7 @@ void connectPathsPairwise3(){
 				pathEdge->next = NULL;
 				pathEdge->junctionCon = -1;
 				paths[finpathStack[l*PE]].leftPath = pathEdge;
-				if(verbosenew) printf("NEW PATH 1: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
+				if(verbosenew && pathEdge->ID == verbosePath) printf("NEW PATH 1: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
 				// pathEdge set to first element
 			}
 			else{
@@ -1060,7 +1061,7 @@ void connectPathsPairwise3(){
 						pathEdge->sibl = NULL;
 						lastEdge->sibl = pathEdge;
 						pathEdge->junctionCon = -1;
-						if(verbosenew) printf("NEW PATH 2: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
+						if(verbosenew && pathEdge->ID == verbosePath) printf("NEW PATH 2: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
 					}
 				}
 			}
@@ -1080,7 +1081,7 @@ void connectPathsPairwise3(){
 				pathEdge->sibl = NULL;
 				pathEdge->junctionCon = -1;
 				paths[finpathStack[l*PE]].rightPath = pathEdge;
-				if(verbosenew) printf("NEW PATH 3: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
+				if(verbosenew && pathEdge->ID == verbosePath) printf("NEW PATH 3: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
 				// pathEdge set to first element
 			}
 			else{
@@ -1118,7 +1119,7 @@ void connectPathsPairwise3(){
 						pathEdge->sibl = NULL;
 						lastEdge->sibl = pathEdge;
 						pathEdge->junctionCon = -1;
-						if(verbosenew) printf("NEW PATH 4: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
+						if(verbosenew && pathEdge->ID == verbosePath) printf("NEW PATH 4: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
 					}
 				}
 			}
@@ -1145,7 +1146,7 @@ void connectPathsPairwise3(){
 				pathEdge->sibl = NULL;
 				pathEdge->junctionCon = -1;
 				lastEdge->next = pathEdge;
-				if(verbosenew) printf("NEW PATH 5: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
+				if(verbosenew && pathEdge->ID == verbosePath) printf("NEW PATH 5: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
 			}
 			else{
 				pathEdge = pathEdge->next;
@@ -1180,7 +1181,7 @@ void connectPathsPairwise3(){
 						pathEdge->sibl = NULL;
 						pathEdge->junctionCon = -1;
 						lastEdge->sibl = pathEdge;
-						if(verbosenew) printf("NEW PATH 6: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
+						if(verbosenew && pathEdge->ID == verbosePath) printf("NEW PATH 6: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
 					}
 				}
 			}
@@ -1214,7 +1215,7 @@ void connectPathsPairwise3(){
 				pathEdge->next = NULL;
 				pathEdge->junctionCon = -1;
 				paths[finpathStack[l*PE]].leftPath = pathEdge;
-				if(verbosenew) printf("NEW PATH 7: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
+				if(verbosenew && pathEdge->ID == verbosePath) printf("NEW PATH 7: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
 				// pathEdge set to first element
 			}
 			else{
@@ -1253,7 +1254,7 @@ void connectPathsPairwise3(){
 						pathEdge->sibl = NULL;
 						pathEdge->junctionCon = -1;
 						lastEdge->sibl = pathEdge;
-						if(verbosenew) printf("NEW PATH 8: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
+						if(verbosenew && pathEdge->ID == verbosePath) printf("NEW PATH 8: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
 					}
 				}
 			}
@@ -1278,7 +1279,7 @@ void connectPathsPairwise3(){
 				pathEdge->next = NULL;
 				pathEdge->junctionCon = -1;
 				paths[finpathStack[l*PE]].rightPath = pathEdge;
-				if(verbosenew) printf("NEW PATH 9: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
+				if(verbosenew && pathEdge->ID == verbosePath) printf("NEW PATH 9: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
 				// pathEdge set to first element
 			}
 			else{
@@ -1317,7 +1318,7 @@ void connectPathsPairwise3(){
 						pathEdge->sibl = NULL;
 						pathEdge->junctionCon = -1;
 						lastEdge->sibl = pathEdge;
-						if(verbosenew) printf("NEW PATH 10: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
+						if(verbosenew && pathEdge->ID == verbosePath) printf("NEW PATH 10: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
 					}
 				}
 			}
@@ -1346,7 +1347,7 @@ void connectPathsPairwise3(){
 				pathEdge->sibl = NULL;
 				pathEdge->junctionCon = -1;
 				lastEdge->next = pathEdge;
-				if(verbosenew) printf("NEW PATH 11: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
+				if(verbosenew && pathEdge->ID == verbosePath) printf("NEW PATH 11: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
 //				printfinPathStack();
 			}
 			else{
@@ -1383,7 +1384,7 @@ void connectPathsPairwise3(){
 						pathEdge->sibl = NULL;
 						pathEdge->junctionCon = -1;
 						lastEdge->sibl = pathEdge;
-						if(verbosenew) printf("NEW PATH 12: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
+						if(verbosenew && pathEdge->ID == verbosePath) printf("NEW PATH 12: \t -> %i -> %i :path: %i (depth: %i), target junction: %i\n",l,k,pathEdge->ID,pathEdge->depth,pathEdge->targetJunction);
 					}
 				}
 			}
