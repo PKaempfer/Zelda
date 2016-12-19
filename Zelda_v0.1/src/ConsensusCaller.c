@@ -2676,6 +2676,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     int oldbreadID;
     int inserts = 0;
     int finJunction;
+    char runB = 1;
 //    struct scaffEdge* scaffedge;
 //    struct bread* counterbread;
 
@@ -2685,6 +2686,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     int startJunction;
     for(i=0;i<aS->numbridge;i++){
     	if(aS->scaff[i].len > MIN_SCAFF_LEN || i >= aS->num){
+    		runB = 1;
     		scaffEdge = aS->scaff[i].first;
     		printf("FirstEdge: %i\n",scaffEdge->ID);
     		startJunction = aS->scaff[i].startJunction;
@@ -2754,11 +2756,11 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
         			strcpy(readseq,revreadseq);
     			}
     			poa_catBackbone(&pog->contig[pog->contigNum],G,readseq,startJunction,breadID); // Parameter 3: &reads[breadID],
-    			poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,overhang);
+    			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,overhang);
     			inserts++;
     			internb = bread;
 //				while(breadID != aS->scaff[i].endJunction){
-				while(breadID != finJunction){
+				while(runB && breadID != finJunction){
 					if(G->read[breadID]->flag == JUNCTION){
 						printf("bread (%i) is a JUNCTION (finjunction: %i)\n",breadID,finJunction);
 						scaffEdge = scaffEdge->next;
@@ -2786,7 +2788,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 			        			if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 			        			if(verbose) printf("Read: %s\n",readseq);
 	//            						printf("Insert Number: %i in contig %i\n",inserts,pog->contigNum);
-			        			poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[internb->ID],readseq,0,inserts,0);
+			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[internb->ID],readseq,0,inserts,0);
 	    						inserts++;
 							}
 							internb = internb->next;
@@ -2813,7 +2815,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	    						if(verbose) printf("ALINING PROPER READ\n");
 	    						if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 			        			if(verbose) printf("Read: %s\n",readseq);
-	    						poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,nextoverhang);
+			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,nextoverhang);
 	//        						if(inserts == 290585)	poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,4077);
 	//        						else poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,1);
 	    						inserts++;
@@ -2866,7 +2868,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	    						if(verbose2) printf("ALIGING PROPER READ\n");
 	    						if(verbose2) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 			        			if(verbose2) printf("Read: %s\n",readseq);
-	    						poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,nextoverhang);
+			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,nextoverhang);
 	//        						if(inserts == 290585)	poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,4077);
 	//        						else poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,1);
 	    						inserts++;

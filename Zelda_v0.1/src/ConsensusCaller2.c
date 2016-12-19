@@ -830,7 +830,7 @@ void poa_handleErrors(){
  * @param seq		Is the read sequence to align
  * @param backbone	Is a boolean value if the read was proper, than it is set as new reference point for the area in the PO-graph for the next read alignment
  */
-void poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq, char backbone, int insNum, int overhang){
+char poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq, char backbone, int insNum, int overhang){
 	static char print_align = 0;
 	static char print_Message = 0;
 	static struct Letter_T** new_letters = NULL;
@@ -869,7 +869,7 @@ void poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq
 	end_num = poa_fillMatrix(new_num,new_letters,seq,end_node,end_letters,overhang);
 
 	if(end_num < 0){
-		return;
+		return 0;
 	}
 
 	clock_gettime(CLOCK_MONOTONIC, &ts_finish);
@@ -884,7 +884,7 @@ void poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq
 	// 4. Search best Alignmet end Point
 	clock_gettime(CLOCK_MONOTONIC, &ts_start);
 	int best_Letter = poa_searchEndPoint(line,seq,insNum,backbone,print_align,overhang,contig);
-	if(!best_Letter) return;
+	if(!best_Letter) return 0;
 	else current = alMatrix_Letter[best_Letter];
 	int ID = current-Letters;
 	if(ID < 0) ID *= -1;
@@ -894,7 +894,7 @@ void poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq
 	struct pairAlign align = poa_backtrace(contig,seq,current,print_Message,backbone); // Parameter 4: read->ID,
 	if(!align.current){
 		poa_resetMatrix(line,len);
-		return;
+		return 0;
 	}
 
 	// 6. Connect to Matrix origin
@@ -928,4 +928,5 @@ void poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq
 
 	free(readseq);
 	free(refseq);
+	return 1;
 }
