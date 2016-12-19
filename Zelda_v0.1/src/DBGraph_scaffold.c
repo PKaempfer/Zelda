@@ -1623,7 +1623,7 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 		}
 		if(pathedgeR1->sibl){
 			tempEdge = pathedgeR1->sibl;
-			while(tempEdge != pathedgeR1){
+			while(tempEdge && tempEdge != pathedgeR1){
 				if(tempEdge->ID == r2path){
 					pathedgeR1 = tempEdge;
 					avgDist = (pathedgeR1->counter * pathedgeR1->estLen) + dist;
@@ -1654,7 +1654,7 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 		}
 		if(pathedgeR2->sibl){
 			tempEdge = pathedgeR2->sibl;
-			while(tempEdge != pathedgeR2){
+			while(tempEdge && tempEdge != pathedgeR2){
 				if(tempEdge->ID == r1path){
 					pathedgeR2 = tempEdge;
 					avgDist = (pathedgeR2->counter * pathedgeR2->estLen) + dist;
