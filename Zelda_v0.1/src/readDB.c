@@ -276,7 +276,7 @@ struct reads* readDB(char* outDB){
 
 	fclose(metaDB);
 
-	if(readDBFile) reads = (struct reads*)malloc(sizeof(struct reads)*(readNumber));
+	if(readDBFile) reads = (struct reads*)malloc(sizeof(struct reads)*(readNumber+1));
 	FILE* readDB = fopen(readDBFile,"rb");
 	if(!readDB){
 		printf("Can not open readDB!!!\nAbort\n");
@@ -316,7 +316,7 @@ void freeDB(struct reads* reads){
 //		if(reads[i].annotation) free(reads[i].annotation);
 //	}
 //	free(reads);
-	for(int i=0;i<numreads;i++){
+	for(int i=0;i<=numreads;i++){
 		if(reads[i].len){
 			free(reads[i].seq);
 			if(reads[i].annotation) free(reads[i].annotation);
