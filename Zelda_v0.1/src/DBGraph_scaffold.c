@@ -1706,9 +1706,9 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 		}
 		else{
 			paths[r1path].rightPath = pathedgeR1;
-			pathedgeR1->next = NULL;
-			pathedgeR1->next = NULL;
 		}
+		pathedgeR1->next = NULL;
+		pathedgeR1->next = NULL;
 	}
 	else{
 		pathedgeR2->targetJunction = paths[r1path].rightJunction;
@@ -1722,9 +1722,9 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 		}
 		else{
 			paths[r1path].leftPath = pathedgeR1;
-			pathedgeR1->next = NULL;
-			pathedgeR1->next = NULL;
 		}
+		pathedgeR1->next = NULL;
+		pathedgeR1->next = NULL;
 	}
 
 	if(r2right){
@@ -1739,9 +1739,9 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 		}
 		else{
 			paths[r2path].rightPath = pathedgeR2;
-			pathedgeR2->next = NULL;
-			pathedgeR2->next = NULL;
 		}
+		pathedgeR2->next = NULL;
+		pathedgeR2->next = NULL;
 	}
 	else{
 		pathedgeR1->targetJunction = paths[r2path].rightJunction;
@@ -1755,9 +1755,9 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 		}
 		else{
 			paths[r2path].leftPath = pathedgeR2;
-			pathedgeR2->next = NULL;
-			pathedgeR2->next = NULL;
 		}
+		pathedgeR2->next = NULL;
+		pathedgeR2->next = NULL;
 	}
 
 	// Junction Connection:
