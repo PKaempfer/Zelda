@@ -2265,7 +2265,7 @@ struct scaffold_set* scaffold_init2(){
         		if(j || ((paths[i].scaffflag & 32) && (paths[i].scaffflag & 2))){
         			continue;
         		}
-//        		if(verbose)
+        		if(verbose)
         			printf("\t NEW SCAFFOLD --> Startpath: %i\n",i);
         		paths[i].flag++;
         		// initial left
@@ -2275,7 +2275,7 @@ struct scaffold_set* scaffold_init2(){
         		relem = 0;
         		edge = paths[i].leftPath;
         		while(edge && !paths[edge->ID].flag && !edge->sibl){
-//        			if(verbose)
+        			if(verbose)
         				printf("(%i) Set left %i\n",i,edge->ID);
         			left[lelem].ID = edge->ID;
         			if(edge->targetJunction == paths[edge->ID].leftJunction) left[lelem].sameside = 1;
@@ -2299,7 +2299,7 @@ struct scaffold_set* scaffold_init2(){
         		// initial right
         		edge = paths[i].rightPath;
         		while(edge && !paths[edge->ID].flag && !edge->sibl){
-//        			if(verbose)
+        			if(verbose)
         				printf("(%i) Set right %i\n",i,edge->ID);
         			right[relem].ID = edge->ID;
         			if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
@@ -2610,8 +2610,8 @@ static inline void resetLetters(struct Letter_T* Letters){
  * @return
  */
 struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffolding, struct para* para){
-	char verbose = 1;
-	char verbose2 = 1;
+	char verbose = 0;
+	char verbose2 = 0;
 
 	struct scaffold_set* aS;
 	if(scaffolding){

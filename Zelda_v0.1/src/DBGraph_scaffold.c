@@ -1693,9 +1693,12 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 		pathedgeR2->targetJunction = paths[r1path].leftJunction;
 //		pathedgeR2->targetJunction = paths[r1path].rightJunction;
 		if(paths[r1path].rightPath){
+			tempEdge = paths[r1path].rightPath;
+			while(tempEdge->sibl){
+				tempEdge = tempEdge->sibl;
+			}
+			tempEdge->sibl = pathedgeR1;
 			if(verbose) printf("R1 right: Multiple Virtual Edges\n");
-			return;
-			exit(1);
 		}
 		else{
 			paths[r1path].rightPath = pathedgeR1;
@@ -1706,9 +1709,12 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 	else{
 		pathedgeR2->targetJunction = paths[r1path].rightJunction;
 		if(paths[r1path].leftPath){
+			tempEdge = paths[r1path].leftPath;
+			while(tempEdge->sibl){
+				tempEdge = tempEdge->sibl;
+			}
+			tempEdge->sibl = pathedgeR1;
 			if(verbose) printf("R1 left: Multiple Virtual Edges\n");
-			return;
-			exit(1);
 		}
 		else{
 			paths[r1path].leftPath = pathedgeR1;
@@ -1720,9 +1726,12 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 	if(r2right){
 		pathedgeR1->targetJunction = paths[r2path].leftJunction;
 		if(paths[r2path].rightPath){
+			tempEdge = paths[r2path].rightPath;
+			while(tempEdge->sibl){
+				tempEdge = tempEdge->sibl;
+			}
+			tempEdge->sibl = pathedgeR2;
 			if(verbose) printf("R2 right: Multiple Virtual Edges\n");
-			return;
-			exit(1);
 		}
 		else{
 			paths[r2path].rightPath = pathedgeR2;
@@ -1733,9 +1742,12 @@ void setVirtualBridge(struct myovlList* G, int r1path, int r2path, char r1right,
 	else{
 		pathedgeR1->targetJunction = paths[r2path].rightJunction;
 		if(paths[r2path].leftPath){
+			tempEdge = paths[r2path].leftPath;
+			while(tempEdge->sibl){
+				tempEdge = tempEdge->sibl;
+			}
+			tempEdge->sibl = pathedgeR2;
 			if(verbose) printf("R2 left: Multiple Virtual Edges\n");
-			return;
-			exit(1);
 		}
 		else{
 			paths[r2path].leftPath = pathedgeR2;
