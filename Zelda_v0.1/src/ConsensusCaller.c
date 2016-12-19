@@ -2265,7 +2265,8 @@ struct scaffold_set* scaffold_init2(){
         		if(j || ((paths[i].scaffflag & 32) && (paths[i].scaffflag & 2))){
         			continue;
         		}
-        		if(verbose) printf("\t NEW SCAFFOLD\n");
+//        		if(verbose)
+        			printf("\t NEW SCAFFOLD --> Startpath: %i\n",i);
         		paths[i].flag++;
         		// initial left
         		lpos = 0;
