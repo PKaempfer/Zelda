@@ -2907,8 +2907,6 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	    			poa_toDot(dotPath);
 	    		}
 
-	    		resetLetters(Letters);
-	    		numNodes = 0;
 	    		aS->scaff[i].scaffoldID = pog->contigNum;
 	    		if(aS->scaff[i].next>=0){
 	    			printf("Scaffold %i has a connection\n",pog->contigNum);
@@ -2922,6 +2920,9 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	    		else pog->contig[pog->contigNum].vflag = 0;
 	    		pog->contigNum++;
 			}
+    		resetLetters(Letters);
+    		numNodes = 0;
+
 
     		printf("Matrix time:    %.3f s\n",(float)sumMatrix/1000000000);
     		printf("Backtrace time: %.3f s\n",(float)sumTrace/1000000000);

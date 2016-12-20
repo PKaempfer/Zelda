@@ -206,6 +206,7 @@ void poa_catBackbone2(struct Sequence* contig, struct myovlList *G, char* seq, i
  * @return			Returns the number of rows in the Matrix from the beginning of the left overlapping read to the end of the right one.
  */
 int poa_align_prepro(struct Sequence* contig, int len, int overhang){
+	char verbose = 0;
 //	printf("CHECKPOINT: Graph_prepro\n");
 
 	struct Letter_T* current = &Letters[contig->readleft];
@@ -246,7 +247,7 @@ int poa_align_prepro(struct Sequence* contig, int len, int overhang){
 
 	while(new_num && depth <= len + overhang + 50){
 //		printf("Go deeper: %i\n",depth);
-		if(new_num >= 90) printf("Graph breadth > 100\n");
+		if(verbose && new_num >= 90) printf("Graph breadth > 100\n");
 		memcpy(old_letters,new_letters,sizeof(struct Letter_T)*new_num);
 		old_num = new_num;
 		new_num = 0;
@@ -478,6 +479,7 @@ int poa_searchEndPoint(int line, char* seq, int insNum, char backbone, char prin
 
 struct pairAlign poa_backtrace(struct Sequence* contig, char* seq, struct Letter_T* current,char print_Message, char backbone){ // Parameter 4:  int readID,
 	if(print_Message) printf("Start back tracing\n");
+	char suspectVerbose = 0;
 	int j = strlen(seq);
 	int k;
 	struct LetterEdge* edge;
@@ -686,7 +688,7 @@ struct pairAlign poa_backtrace(struct Sequence* contig, char* seq, struct Letter
 		else leftbool = 0;
 		if(!nextbool){
 			// TODO: Circumvent in another way!!! Not just return NULL and break the contig
-			printf("Captured in infinite loop (j=%i), Abort\n",j);
+			if(suspectVerbose) printf("Captured in infinite loop (j=%i), Abort\n",j);
 			free(refseq);
 			free(readseq);
 			align.current = NULL;
