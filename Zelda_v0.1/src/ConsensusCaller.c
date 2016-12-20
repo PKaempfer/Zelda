@@ -1115,7 +1115,7 @@ void poa_recMainPath(struct Letter_T* currentLetter, struct Letter_T* endLetter,
 void poa_recVariantPath(struct Letter_T* startLetter, int startPos, int len, char* seq, struct LetterEdge* edge, int cov, struct Sequence* contig){
 	// Include Path counting
 	struct Letter_T* current = &Letters[edge->dest];
-	if(len>20) printf("--> Very Long Variation (%i)\n",len);
+	if(len>20) printf("--> Very Long Variation (%i) at pos: %i\n",len,startPos);
 	// IF current is Consensus Path call poa_recMainPath()
 	if(current->vFlag) poa_recMainPath(startLetter,current,startPos,len,seq,cov,contig);
 	// ELSE next not flagged go deeper
