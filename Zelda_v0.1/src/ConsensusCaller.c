@@ -539,7 +539,7 @@ void poa_initBackbone2(struct Sequence* contig, char* seq){ //struct reads* read
 		poa_LetterSizeCheck();
 	}
 	contig->readright = numNodes-1;
-	printf("Number of set numNodes: %i\n",numNodes);
+//	printf("Number of set numNodes: %i\n",numNodes);
 }
 
 void poa_catBackbone(struct Sequence* contig, struct myovlList *G, char* seq, int leftID, int rightID){ // Parameter :  struct reads* read,
@@ -1132,7 +1132,8 @@ void poa_recVariantPath(struct Letter_T* startLetter, int startPos, int len, cha
 }
 
 void poa_variantCalling(struct Sequence* contig){
-//	int verbose = 0;
+	int verbose = 1;
+	printf("CHECKPOINT: Variation Calling!\n");
 	int i=0;
 	struct Letter_T* current = &Letters[contig->startLetter.dest];
 	struct LetterEdge* edge;
