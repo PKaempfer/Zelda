@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <sys/resource.h>
 #include "ConsensusCaller.h"
 #include "DBGraph_scaffold.h"
 #include "readDB.h"
@@ -1114,6 +1115,7 @@ void poa_recMainPath(struct Letter_T* currentLetter, struct Letter_T* endLetter,
 void poa_recVariantPath(struct Letter_T* startLetter, int startPos, int len, char* seq, struct LetterEdge* edge, int cov, struct Sequence* contig){
 	// Include Path counting
 	struct Letter_T* current = &Letters[edge->dest];
+	if(len>20) printf("--> Very Long Variation (%i)\n",len);
 	// IF current is Consensus Path call poa_recMainPath()
 	if(current->vFlag) poa_recMainPath(startLetter,current,startPos,len,seq,cov,contig);
 	// ELSE next not flagged go deeper
@@ -1133,6 +1135,7 @@ void poa_recVariantPath(struct Letter_T* startLetter, int startPos, int len, cha
 
 void poa_variantCalling(struct Sequence* contig){
 	int verbose = 1;
+	int varNum = 0;
 	printf("CHECKPOINT: Variation Calling!\n");
 	int i=0;
 	struct Letter_T* current = &Letters[contig->startLetter.dest];
@@ -1147,6 +1150,10 @@ void poa_variantCalling(struct Sequence* contig){
 			while(edge){
 				if(!edge->vFlag && edge->counter > 2){
 					altPath[0] = current->letter;
+					varNum++;
+					if(varNum%100==0){
+						printf("Number of Variants on this path: %i\n",varNum);
+					}
 					poa_recVariantPath(current,i,1,altPath,edge,edge->counter,contig);
 				}
 				edge = edge->next;
@@ -1236,6 +1243,9 @@ void poa_consensus2(struct Sequence* contig){
 	contig->sequence = seq;
 	contig->length = strlen(seq);
 	sprintf(contig->name,"%s%i",contig->name,contig->length);
+	struct rusage r_usage;
+	getrusage(RUSAGE_SELF,&r_usage);
+	printf("Memory usage: %ld bytes\n",r_usage.ru_maxrss);
 	poa_variantCalling(contig);
 	poa_avgCov(contig);
 	sprintf(contig->name,"%s_avgCov:%.2f",contig->name,contig->avgCov);
