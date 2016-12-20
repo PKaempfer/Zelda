@@ -314,8 +314,8 @@ void freeDB(struct reads* reads){
 	for(int i=0;i<=numreads;i++){
 		if(reads[i].len){
 			free(reads[i].seq);
-			if(reads[i].annotation) free(reads[i].annotation);
 		}
+		if(reads[i].annotation) free(reads[i].annotation);
 	}
 	free(reads);
 }

@@ -1329,6 +1329,7 @@ void poa_consensus(struct Sequence* contig){
 }
 
 void poa_printContigs(struct POG* pog, char* contigFile){
+	char verbose = 0;
 	printf("CHECKPOINT: Write CorrectContigs in fasta\n");
 	FILE* correctContigs = fopen(contigFile,"w");
 	char hideEnds = 0;
@@ -1356,7 +1357,7 @@ void poa_printContigs(struct POG* pog, char* contigFile){
 			}
 			nextID = i;
 			while(pog->contig[nextID].seqEdge){
-				printf("Write Fasta Over Bridge\n");
+				if(verbose) printf("Write Fasta Over Bridge\n");
 				j = len;
 				insert = pog->contig[nextID].seqEdge->insertLen;
 				if(insert<10) insert = 10;
@@ -1367,9 +1368,9 @@ void poa_printContigs(struct POG* pog, char* contigFile){
 					fprintf(correctContigs,"N");
 					if(j%80==0) fprintf(correctContigs,"\n");
 				}
-				printf("Write Fasta Behind Bridge\n");
+				if(verbose)printf("Write Fasta Behind Bridge\n");
 				lenNew = strlen(pog->contig[nextID].sequence);
-				printf("Write Fasta Behind Bridge (len: %i)\n",lenNew);
+				if(verbose) printf("Write Fasta Behind Bridge (len: %i)\n",lenNew);
 				len += lenNew;
 				k=0;
 				if(insert < 0) k = insert*-1;
@@ -2935,7 +2936,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 //    			pog->contig[aS->scaff[i].scaffoldID].seqEdge->nextScaff = aS->scaff[i].next->scaffoldID;
     			pog->contig[aS->scaff[i].scaffoldID].seqEdge->nextScaff = aS->scaff[aS->scaff[i].next].scaffoldID;
 //    			printf("Connect Scaffold %i with %i bp to scaffold %i\n",aS->scaff[i].scaffoldID,pog->contig[aS->scaff[i].scaffoldID].seqEdge->insertLen,aS->scaff[i].next->scaffoldID);
-    			printf("Connect Scaffold %i with %i bp to scaffold %i\n",aS->scaff[i].scaffoldID,pog->contig[aS->scaff[i].scaffoldID].seqEdge->insertLen,aS->scaff[aS->scaff[i].next].scaffoldID);
+    			if(verbose) printf("Connect Scaffold %i with %i bp to scaffold %i\n",aS->scaff[i].scaffoldID,pog->contig[aS->scaff[i].scaffoldID].seqEdge->insertLen,aS->scaff[aS->scaff[i].next].scaffoldID);
     		}
     	}
     }
