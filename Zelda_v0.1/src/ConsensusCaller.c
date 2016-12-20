@@ -2895,7 +2895,8 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     		else{
     			printf("Path for this Junction not found\n Abort!\n");
     		}
-			sprintf(name,"Scaffold_%i_%i_%i_len:",i+1,aS->scaff[i].startJunction,breadID);
+			sprintf(name,"Scaffold_%i_%i_%i_len: (PathsFraction: %.2f)\n",i+1,aS->scaff[i].startJunction,breadID,(float)numNodes/(float)aS->scaff[i].len);
+
 			pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+100);
 			strcpy(pog->contig[pog->contigNum].name,name);
 
