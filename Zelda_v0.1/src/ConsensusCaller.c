@@ -1040,7 +1040,7 @@ void poa_reportVariant(struct POG* pog, char* vcfFile, char* ref){
 void poa_recMainPath(struct Letter_T* currentLetter, struct Letter_T* endLetter, int startPos, int altLen, char* altSeq, int altCov, struct Sequence* contig){
 	char verbose = 0;
 	if(verbose) printf("Checkpoint recMainPath");
-	char* refSeq = (char*)malloc(maxAltLen);
+	char* refSeq = (char*)malloc(maxAltLen*2);
 	int refLen = 0;
 	int refCov = 100000;
 	struct LetterEdge* edge;
