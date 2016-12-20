@@ -2895,31 +2895,33 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     		else{
     			printf("Path for this Junction not found\n Abort!\n");
     		}
-			sprintf(name,"Scaffold_%i_%i_%i_len: (PathsFraction: %.2f)\n",i+1,aS->scaff[i].startJunction,breadID,(float)numNodes/(float)aS->scaff[i].len);
+    		printf("PathsFraction: %.2f\n",(float)numNodes/(float)aS->scaff[i].len);
+			sprintf(name,"Scaffold_%i_%i_%i_len:",i+1,aS->scaff[i].startJunction,breadID);
+			if((float)numNodes/(float)aS->scaff[i].len < 2){
+				pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+100);
+				strcpy(pog->contig[pog->contigNum].name,name);
 
-			pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+100);
-			strcpy(pog->contig[pog->contigNum].name,name);
+	    		poa_consensus2(&pog->contig[pog->contigNum]);
+	    		if(verbose){
+	    			sprintf(dotPath,"%s/%s.dot",para->asemblyFolder,pog->contig[pog->contigNum].name);
+	    			poa_toDot(dotPath);
+	    		}
 
-    		poa_consensus2(&pog->contig[pog->contigNum]);
-    		if(verbose){
-    			sprintf(dotPath,"%s/%s.dot",para->asemblyFolder,pog->contig[pog->contigNum].name);
-    			poa_toDot(dotPath);
-    		}
-
-    		resetLetters(Letters);
-    		numNodes = 0;
-    		aS->scaff[i].scaffoldID = pog->contigNum;
-    		if(aS->scaff[i].next>=0){
-    			printf("Scaffold %i has a connection\n",pog->contigNum);
-    			pog->contig[pog->contigNum].seqEdge = (struct sequenceEdge*)malloc(sizeof(struct sequenceEdge));
-//    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[i].next->first->bridge->estLen;
-    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[aS->scaff[i].next].first->bridge->estLen;
-    			pog->contig[pog->contigNum].seqEdge->ori = 0;
-    		}
-    		else pog->contig[pog->contigNum].seqEdge = NULL;
-    		if(i >= aS->num) pog->contig[pog->contigNum].vflag = 1;
-    		else pog->contig[pog->contigNum].vflag = 0;
-    		pog->contigNum++;
+	    		resetLetters(Letters);
+	    		numNodes = 0;
+	    		aS->scaff[i].scaffoldID = pog->contigNum;
+	    		if(aS->scaff[i].next>=0){
+	    			printf("Scaffold %i has a connection\n",pog->contigNum);
+	    			pog->contig[pog->contigNum].seqEdge = (struct sequenceEdge*)malloc(sizeof(struct sequenceEdge));
+	//    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[i].next->first->bridge->estLen;
+	    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[aS->scaff[i].next].first->bridge->estLen;
+	    			pog->contig[pog->contigNum].seqEdge->ori = 0;
+	    		}
+	    		else pog->contig[pog->contigNum].seqEdge = NULL;
+	    		if(i >= aS->num) pog->contig[pog->contigNum].vflag = 1;
+	    		else pog->contig[pog->contigNum].vflag = 0;
+	    		pog->contigNum++;
+			}
 
     		printf("Matrix time:    %.3f s\n",(float)sumMatrix/1000000000);
     		printf("Backtrace time: %.3f s\n",(float)sumTrace/1000000000);
