@@ -849,7 +849,7 @@ long double variant_qualaty(int n,int k){
     return (-10 * log10((ans*(pow(wrong,k)*pow(right,n-k)))));
 }
 
-#define maxAltLen 100
+#define maxAltLen 10
 
 static inline unsigned char poa_makeCigar(char* cigar, char* ref, char* alt){
 	unsigned char numM = 0;
