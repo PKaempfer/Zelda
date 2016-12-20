@@ -311,7 +311,7 @@ struct reads* readDB(char* outDB){
 }
 
 void freeDB(struct reads* reads){
-	for(int i=0;i<=numreads;i++){
+	for(int i=0;i<numreads;i++){
 		if(reads[i].len){
 			free(reads[i].seq);
 		}
