@@ -29,7 +29,7 @@
 #include "ConsensusCaller.h"
 
 int main(int argc, char* argv[]) {
-	char findotdump = 1;
+	char findotdump = 0;
 	char dotdump = 0;
 	char sleeptime = 0;
 	time_t start,stop;
