@@ -252,7 +252,7 @@ struct reads* readDB(char* outDB){
 		}
 		else{
 			printf("SingleEnd Library\n");
-			printf("\tLeftReads:  %s\n",files[i].leftReads);
+			printf("\tReads:  %s\n",files[i].leftReads);
 		}
 	}
 
@@ -314,8 +314,9 @@ void freeDB(struct reads* reads){
 	for(int i=0;i<numreads;i++){
 		if(reads[i].len){
 			free(reads[i].seq);
+			if(reads[i].annotation) free(reads[i].annotation);
 		}
-		if(reads[i].annotation) free(reads[i].annotation);
+
 	}
 	free(reads);
 }

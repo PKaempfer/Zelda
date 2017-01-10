@@ -1416,201 +1416,201 @@ int findLeftMostJunction(int i){
 }
 
 
-struct POG* make_poa(struct myovlList* G, struct reads* reads){
-	// Take junction read -> transform to POG nodes and edges
-	// concatenate the overhangs of the proper flagged reads to the POG
-	char verbose = 0;
-    int i,j;
-    int breadID;
-    struct bread* bread;
-    struct bread* internb;
-    printf("MaxReadLen: %i\n",maxReadLen);
-    char* readseq = (char*)malloc(sizeof(char)*(maxReadLen+1));
-    char* revreadseq = (char*)malloc(maxReadLen+1);
-    char* name = (char*)malloc(1000);
-
-//    Sequence_T *contigs = (Sequence_T*)malloc(sizeof(Sequence_T) * max_contigNum);
-//    LPOnodes = (LPOLetter_T*)malloc(sizeof(LPOLetter_T)*maxNodes);
-
-    // Init Graph structure
-    struct POG* pog = (struct POG*)malloc(sizeof(struct POG));
-    pog->contigNum = 0;
-    pog->maxNum = 100;
-    pog->contig = (struct Sequence*)malloc(sizeof(struct Sequence)*pog->maxNum);
-    if(!Letters) Letters = (struct Letter_T*)malloc(sizeof(struct Letter_T)*maxNumNodes);
-    for(i=0;i<maxNumNodes;i++){
-    	Letters[i].left = NULL;
-    	Letters[i].right = NULL;
-    	Letters[i].junction = 0;
-//    	Letters[i].source.next = NULL;
-    	Letters[i].score = 0;
-    	Letters[i].vFlag = 0;
-    }
-
-    // Init Matrix (5 x maxreaden * maxreadlen)
-    // E.g. for maxReadLen = 100 -> 500 x 100 matrix (50,000 array)
-    alMatrix = (int**)malloc(sizeof(int*)*(maxReadLen*MATRIX_MAX_BR+1)); // Convention that the aligning part of the graph do not contain more than 5*maxReadLen nodes
-    alMatrix_Letter = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*(maxReadLen*MATRIX_MAX_BR+1));
-    for(i=0;i<=maxReadLen*MATRIX_MAX_BR;i++){
-    	alMatrix[i]=(int*)malloc(sizeof(int)*(maxReadLen+1));
-    	alMatrix_Letter[i] = NULL;
-    	for(j=0;j<=maxReadLen;j++){
-//    		alMatrix[i][j] = (i+j) * GAP_PENALTY;
-    		alMatrix[i][j] = j * GAP_PENALTY;
-    	}
-    }
-
-    int dir;
-    int bdir;
-    int overhang;
-    int nextoverhang;
-    int multidir;
-    int oldbreadID;
-    int inserts = 0;
-    struct bread* counterbread;
-
-    for(i=1; i < G->V; i++){
-    	if(G->read[i] && G->read[i]->flag == JUNCTION){
-//    		printf("JUNCTION found\n");
-			dir=G->read[i]->dir;
-    		bread = G->read[i]->first;
-    		while(bread){
-				breadID = bread->ID;
-    			if(bread && G->read[breadID]->flag != CONTAINED && bread->dest && !bread->dest->flag && bread->dest->len >= MIN_CONTIG_LEN){
-
-    				// Flag the other side of the unique path as already used, to not report the reverse path
-    				counterbread =  G->read[bread->dest->ID]->first;
-    				while(counterbread){
-    					if(counterbread->dest && counterbread->dest->ID == i){
-    						printf("Flag reverse path\n");
-    						counterbread->dest->flag = 1;
-    						break;
-    					}
-    					counterbread = counterbread->next;
-    				}
-
-   					printf("Contig Path found: %i -> %i (len: %i) Dir: %i Side: %i\n",i,bread->dest->ID,bread->dest->len,dir,bread->sideflag);
-//    				// ContigList is full, resize List
-    				if(pog->contigNum == pog->maxNum){
-    					printf("ContigList full, Realloc memory\n");
-    					pog->contig = (struct Sequence*)realloc(pog->contig,sizeof(struct Sequence)*(pog->maxNum*2));
-    					pog->maxNum *= 2;
-    				}
-    				pog->contig[pog->contigNum].nsource_seq = 0;
-    				pog->contig[pog->contigNum].length = 0;
-    				sprintf(name,"%i_%i_%i_%i",bread->dest->pathID,pog->contigNum,i,bread->dest->ID);
-    				pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+10);
-    				strcpy(pog->contig[pog->contigNum].name,name);
-    				if(dir){
-    					if(bread->sideflag) 	multidir = 3;
-    					else					multidir = 0;
-    				}
-    				else{
-    					if(bread->sideflag)		multidir = 1;
-    					else					multidir = 2;
-    				}
-    				// IF (multidir % 2 == 1) THAN turn b-reads (dir==1) ELSE turn b-reads (dir==0)
-    				// IF (multidir > 1) THAN turn a-read
-    				bdir = bread->sideflag;
-       				decompressReadSt(reads[i].seq,readseq,reads[i].len);
-       				if(multidir>1){
-       					revReadSt(readseq,revreadseq);
-       					strcpy(readseq,revreadseq);
-       				}
-//       				poa_initBackbone(&contigs[contigNum],&reads[i],readseq);
-       				poa_initBackbone2(&pog->contig[pog->contigNum],readseq); // parameter 2 ,&reads[i]
-        			overhang = bread->overhang;
-        			decompressReadSt(reads[breadID].seq,readseq,reads[breadID].len);
-        			if(multidir%2==1 && G->read[breadID]->dir){
-        				revReadSt(readseq,revreadseq);
-        				strcpy(readseq,revreadseq);
-        			}
-        			if(multidir%2==0 && !G->read[breadID]->dir){
-            			revReadSt(readseq,revreadseq);
-            			strcpy(readseq,revreadseq);
-        			}
-        			poa_catBackbone(&pog->contig[pog->contigNum],G,readseq,i,breadID); // Parameter 3: &reads[breadID],
-        			internb = bread;
-//        			if(pog->contigNum == 4){
-        				while(G->read[breadID]->flag != JUNCTION){
-        					internb = G->read[breadID]->first;
-        					while(internb){
-        						if(G->read[internb->ID]->flag == CONTAINED){
-        		        			decompressReadSt(reads[internb->ID].seq,readseq,reads[internb->ID].len);
-        		        			if(multidir%2==1 && !G->read[internb->ID]->dir){
-        		        				revReadSt(readseq,revreadseq);
-        		        				strcpy(readseq,revreadseq);
-        		        			}
-        		        			if(multidir%2==0 && G->read[internb->ID]->dir){
-        		            			revReadSt(readseq,revreadseq);
-        		            			strcpy(readseq,revreadseq);
-        		        			}
-        		        			if(verbose) printf("ALINGING CONTAINED READ\n");
-        		        			if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
-        		        			if(verbose) printf("Read: %s\n",readseq);
-//            						printf("Insert Number: %i in contig %i\n",inserts,pog->contigNum);
-        		        			poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[internb->ID],readseq,0,inserts,0);
-//        		        			inserts++;
-        						}
-        						internb = internb->next;
-        					}
-        					internb = G->read[breadID]->first;
-        					while(internb){
-        						if(internb->sideflag == bdir && G->read[internb->ID]->flag != CONTAINED){
-        							nextoverhang = internb->overhang;
-        			    			overhang += internb->overhang;
-        			    			oldbreadID = breadID;
-        			    			breadID = internb->ID;
-        		        			decompressReadSt(reads[breadID].seq,readseq,reads[breadID].len);
-        		        			if(multidir%2==1 && G->read[breadID]->dir){
-        		        				revReadSt(readseq,revreadseq);
-        		        				strcpy(readseq,revreadseq);
-        		        			}
-        		        			if(multidir%2==0 && !G->read[breadID]->dir){
-        		            			revReadSt(readseq,revreadseq);
-        		            			strcpy(readseq,revreadseq);
-        		        			}
-            						poa_catBackbone2(&pog->contig[pog->contigNum],G,readseq,oldbreadID,breadID); // Parameter 3 &reads[breadID]
-    //        						poa_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts);
-//            						printf("Insert Number: %i in contig %i\n",inserts,pog->contigNum);
-            						if(verbose) printf("ALINGING PROPER READ\n");
-            						if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
-        		        			if(verbose) printf("Read: %s\n",readseq);
-            						poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,nextoverhang);
-    //        						if(inserts == 290585)	poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,4077);
-    //        						else poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,1);
-            						inserts++;
-    //        						if(inserts == 2) return pog;
-        							break;
-        						}
-        						internb = internb->next;
-        					}
-        				}
+//struct POG* make_poa(struct myovlList* G, struct reads* reads){
+//	// Take junction read -> transform to POG nodes and edges
+//	// concatenate the overhangs of the proper flagged reads to the POG
+//	char verbose = 0;
+//    int i,j;
+//    int breadID;
+//    struct bread* bread;
+//    struct bread* internb;
+//    printf("MaxReadLen: %i\n",maxReadLen);
+//    char* readseq = (char*)malloc(sizeof(char)*(maxReadLen+1));
+//    char* revreadseq = (char*)malloc(maxReadLen+1);
+//    char* name = (char*)malloc(1000);
+//
+////    Sequence_T *contigs = (Sequence_T*)malloc(sizeof(Sequence_T) * max_contigNum);
+////    LPOnodes = (LPOLetter_T*)malloc(sizeof(LPOLetter_T)*maxNodes);
+//
+//    // Init Graph structure
+//    struct POG* pog = (struct POG*)malloc(sizeof(struct POG));
+//    pog->contigNum = 0;
+//    pog->maxNum = 100;
+//    pog->contig = (struct Sequence*)malloc(sizeof(struct Sequence)*pog->maxNum);
+//    if(!Letters) Letters = (struct Letter_T*)malloc(sizeof(struct Letter_T)*maxNumNodes);
+//    for(i=0;i<maxNumNodes;i++){
+//    	Letters[i].left = NULL;
+//    	Letters[i].right = NULL;
+//    	Letters[i].junction = 0;
+////    	Letters[i].source.next = NULL;
+//    	Letters[i].score = 0;
+//    	Letters[i].vFlag = 0;
+//    }
+//
+//    // Init Matrix (5 x maxreaden * maxreadlen)
+//    // E.g. for maxReadLen = 100 -> 500 x 100 matrix (50,000 array)
+//    alMatrix = (int**)malloc(sizeof(int*)*(maxReadLen*MATRIX_MAX_BR+1)); // Convention that the aligning part of the graph do not contain more than 5*maxReadLen nodes
+//    alMatrix_Letter = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*(maxReadLen*MATRIX_MAX_BR+1));
+//    for(i=0;i<=maxReadLen*MATRIX_MAX_BR;i++){
+//    	alMatrix[i]=(int*)malloc(sizeof(int)*(maxReadLen+1));
+//    	alMatrix_Letter[i] = NULL;
+//    	for(j=0;j<=maxReadLen;j++){
+////    		alMatrix[i][j] = (i+j) * GAP_PENALTY;
+//    		alMatrix[i][j] = j * GAP_PENALTY;
+//    	}
+//    }
+//
+//    int dir;
+//    int bdir;
+//    int overhang;
+//    int nextoverhang;
+//    int multidir;
+//    int oldbreadID;
+//    int inserts = 0;
+//    struct bread* counterbread;
+//
+//    for(i=1; i < G->V; i++){
+//    	if(G->read[i] && G->read[i]->flag == JUNCTION){
+////    		printf("JUNCTION found\n");
+//			dir=G->read[i]->dir;
+//    		bread = G->read[i]->first;
+//    		while(bread){
+//				breadID = bread->ID;
+//    			if(bread && G->read[breadID]->flag != CONTAINED && bread->dest && !bread->dest->flag && bread->dest->len >= MIN_CONTIG_LEN){
+//
+//    				// Flag the other side of the unique path as already used, to not report the reverse path
+//    				counterbread =  G->read[bread->dest->ID]->first;
+//    				while(counterbread){
+//    					if(counterbread->dest && counterbread->dest->ID == i){
+//    						printf("Flag reverse path\n");
+//    						counterbread->dest->flag = 1;
+//    						break;
+//    					}
+//    					counterbread = counterbread->next;
+//    				}
+//
+//   					printf("Contig Path found: %i -> %i (len: %i) Dir: %i Side: %i\n",i,bread->dest->ID,bread->dest->len,dir,bread->sideflag);
+////    				// ContigList is full, resize List
+//    				if(pog->contigNum == pog->maxNum){
+//    					printf("ContigList full, Realloc memory\n");
+//    					pog->contig = (struct Sequence*)realloc(pog->contig,sizeof(struct Sequence)*(pog->maxNum*2));
+//    					pog->maxNum *= 2;
+//    				}
+//    				pog->contig[pog->contigNum].nsource_seq = 0;
+//    				pog->contig[pog->contigNum].length = 0;
+//    				sprintf(name,"%i_%i_%i_%i",bread->dest->pathID,pog->contigNum,i,bread->dest->ID);
+//    				pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+10);
+//    				strcpy(pog->contig[pog->contigNum].name,name);
+//    				if(dir){
+//    					if(bread->sideflag) 	multidir = 3;
+//    					else					multidir = 0;
+//    				}
+//    				else{
+//    					if(bread->sideflag)		multidir = 1;
+//    					else					multidir = 2;
+//    				}
+//    				// IF (multidir % 2 == 1) THAN turn b-reads (dir==1) ELSE turn b-reads (dir==0)
+//    				// IF (multidir > 1) THAN turn a-read
+//    				bdir = bread->sideflag;
+//       				decompressReadSt(reads[i].seq,readseq,reads[i].len);
+//       				if(multidir>1){
+//       					revReadSt(readseq,revreadseq);
+//       					strcpy(readseq,revreadseq);
+//       				}
+////       				poa_initBackbone(&contigs[contigNum],&reads[i],readseq);
+//       				poa_initBackbone2(&pog->contig[pog->contigNum],readseq); // parameter 2 ,&reads[i]
+//        			overhang = bread->overhang;
+//        			decompressReadSt(reads[breadID].seq,readseq,reads[breadID].len);
+//        			if(multidir%2==1 && G->read[breadID]->dir){
+//        				revReadSt(readseq,revreadseq);
+//        				strcpy(readseq,revreadseq);
 //        			}
-//        			if(pog->contigNum == 4)	poa_consensus(&pog->contig[pog->contigNum]);
-        			poa_consensus(&pog->contig[pog->contigNum]);
-    				pog->contigNum++;
-    				printf("Matrix time:    %.3f s\n",(float)sumMatrix/1000000000);
-    				printf("Backtrace time: %.3f s\n",(float)sumTrace/1000000000);
-    				poa_toDot("output/poa.dot");
-//    				exit(1);
-    			}
-    			bread = bread->next;
-    		}
-    	}
-    }
-
-    free(readseq);
-    free(revreadseq);
-    free(name);
-
-    for(i=0;i<=maxReadLen*MATRIX_MAX_BR;i++){
-    	free(alMatrix[i]);
-    }
-    free(alMatrix);
-
-    return pog;
-}
+//        			if(multidir%2==0 && !G->read[breadID]->dir){
+//            			revReadSt(readseq,revreadseq);
+//            			strcpy(readseq,revreadseq);
+//        			}
+//        			poa_catBackbone(&pog->contig[pog->contigNum],G,readseq,i,breadID); // Parameter 3: &reads[breadID],
+//        			internb = bread;
+////        			if(pog->contigNum == 4){
+//        				while(G->read[breadID]->flag != JUNCTION){
+//        					internb = G->read[breadID]->first;
+//        					while(internb){
+//        						if(G->read[internb->ID]->flag == CONTAINED){
+//        		        			decompressReadSt(reads[internb->ID].seq,readseq,reads[internb->ID].len);
+//        		        			if(multidir%2==1 && !G->read[internb->ID]->dir){
+//        		        				revReadSt(readseq,revreadseq);
+//        		        				strcpy(readseq,revreadseq);
+//        		        			}
+//        		        			if(multidir%2==0 && G->read[internb->ID]->dir){
+//        		            			revReadSt(readseq,revreadseq);
+//        		            			strcpy(readseq,revreadseq);
+//        		        			}
+//        		        			if(verbose) printf("ALINGING CONTAINED READ\n");
+//        		        			if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
+//        		        			if(verbose) printf("Read: %s\n",readseq);
+////            						printf("Insert Number: %i in contig %i\n",inserts,pog->contigNum);
+//        		        			poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[internb->ID],readseq,0,inserts,0);
+////        		        			inserts++;
+//        						}
+//        						internb = internb->next;
+//        					}
+//        					internb = G->read[breadID]->first;
+//        					while(internb){
+//        						if(internb->sideflag == bdir && G->read[internb->ID]->flag != CONTAINED){
+//        							nextoverhang = internb->overhang;
+//        			    			overhang += internb->overhang;
+//        			    			oldbreadID = breadID;
+//        			    			breadID = internb->ID;
+//        		        			decompressReadSt(reads[breadID].seq,readseq,reads[breadID].len);
+//        		        			if(multidir%2==1 && G->read[breadID]->dir){
+//        		        				revReadSt(readseq,revreadseq);
+//        		        				strcpy(readseq,revreadseq);
+//        		        			}
+//        		        			if(multidir%2==0 && !G->read[breadID]->dir){
+//        		            			revReadSt(readseq,revreadseq);
+//        		            			strcpy(readseq,revreadseq);
+//        		        			}
+//            						poa_catBackbone2(&pog->contig[pog->contigNum],G,readseq,oldbreadID,breadID); // Parameter 3 &reads[breadID]
+//    //        						poa_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts);
+////            						printf("Insert Number: %i in contig %i\n",inserts,pog->contigNum);
+//            						if(verbose) printf("ALINGING PROPER READ\n");
+//            						if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
+//        		        			if(verbose) printf("Read: %s\n",readseq);
+//            						poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,nextoverhang);
+//    //        						if(inserts == 290585)	poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,4077);
+//    //        						else poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,1);
+//            						inserts++;
+//    //        						if(inserts == 2) return pog;
+//        							break;
+//        						}
+//        						internb = internb->next;
+//        					}
+//        				}
+////        			}
+////        			if(pog->contigNum == 4)	poa_consensus(&pog->contig[pog->contigNum]);
+//        			poa_consensus(&pog->contig[pog->contigNum]);
+//    				pog->contigNum++;
+//    				printf("Matrix time:    %.3f s\n",(float)sumMatrix/1000000000);
+//    				printf("Backtrace time: %.3f s\n",(float)sumTrace/1000000000);
+//    				poa_toDot("output/poa.dot");
+////    				exit(1);
+//    			}
+//    			bread = bread->next;
+//    		}
+//    	}
+//    }
+//
+//    free(readseq);
+//    free(revreadseq);
+//    free(name);
+//
+//    for(i=0;i<=maxReadLen*MATRIX_MAX_BR;i++){
+//    	free(alMatrix[i]);
+//    }
+//    free(alMatrix);
+//
+//    return pog;
+//}
 
 struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 	char verbose = 1;
@@ -2643,6 +2643,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     int breadID;
     struct bread* bread;
     struct bread* internb;
+    struct bread* backread;
     printf("MaxReadLen: %i\n",maxReadLen);
     char* readseq = (char*)malloc(sizeof(char)*(maxReadLen+1));
     char* revreadseq = (char*)malloc(maxReadLen+1);
@@ -2684,6 +2685,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     int bdir;
     int overhang;
     int nextoverhang;
+    int backoverhang;
     int multidir;
     int oldbreadID;
     int inserts = 0;
@@ -2758,6 +2760,19 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 //       			poa_initBackbone(&contigs[contigNum],&reads[i],readseq);
    				poa_initBackbone2(&pog->contig[pog->contigNum],readseq); // Parameter 2: &reads[aS->scaff[i].startJunction],
     			overhang = bread->overhang;
+    			// Backoverhang outsourcen
+    			backread = G->read[bread->ID]->first;
+    			backoverhang = 0;
+    			while(backread){
+    				if(backread->ID == startJunction){
+    					backoverhang = backread->overhang;
+    					break;
+    				}
+    				backread = backread->next;
+    			}
+    			if(!backread){
+    				printf("No Backread found to the StartJunction: Abort!\n");
+    			}
     			decompressReadSt(reads[breadID].seq,readseq,reads[breadID].len);
     			if(multidir%2==1 && G->read[breadID]->dir){
     				revReadSt(readseq,revreadseq);
@@ -2768,7 +2783,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
         			strcpy(readseq,revreadseq);
     			}
     			poa_catBackbone(&pog->contig[pog->contigNum],G,readseq,startJunction,breadID); // Parameter 3: &reads[breadID],
-    			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,overhang);
+    			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,overhang,backoverhang);
     			inserts++;
     			internb = bread;
 //				while(breadID != aS->scaff[i].endJunction){
@@ -2800,7 +2815,20 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 			        			if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 			        			if(verbose) printf("Read: %s\n",readseq);
 	//            						printf("Insert Number: %i in contig %i\n",inserts,pog->contigNum);
-			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[internb->ID],readseq,0,inserts,0);
+				    			// Backoverhang outsourcen
+			        			backread = G->read[internb->ID]->first;
+				    			backoverhang = 0;
+				    			while(backread){
+				    				if(backread->ID == breadID){
+				    					backoverhang = backread->overhang;
+				    					break;
+				    				}
+				    				backread = backread->next;
+				    			}
+				    			if(!backread){
+				    				printf("No Backread found: Abort!\n");
+				    			}
+			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[internb->ID],readseq,0,inserts,0,backoverhang);
 	    						inserts++;
 							}
 							internb = internb->next;
@@ -2810,6 +2838,19 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 							if(internb->dest && internb->dest->pathID == scaffEdge->ID){
 								nextoverhang = internb->overhang;
 				    			overhang += internb->overhang;
+				    			// Backoverhang outsourcen
+				    			backread = G->read[internb->ID]->first;
+				    			backoverhang = 0;
+				    			while(backread){
+				    				if(backread->ID == breadID){
+				    					backoverhang = backread->overhang;
+				    					break;
+				    				}
+				    				backread = backread->next;
+				    			}
+				    			if(!backread){
+				    				printf("No Backread found: Abort!\n");
+				    			}
 				    			oldbreadID = breadID;
 				    			breadID = internb->ID;
 			        			decompressReadSt(reads[breadID].seq,readseq,reads[breadID].len);
@@ -2827,7 +2868,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	    						if(verbose) printf("ALINING PROPER READ\n");
 	    						if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 			        			if(verbose) printf("Read: %s\n",readseq);
-			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,nextoverhang);
+			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,nextoverhang,backoverhang);
 	//        						if(inserts == 290585)	poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,4077);
 	//        						else poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,1);
 	    						inserts++;
@@ -2853,7 +2894,20 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 			        			if(verbose2) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 			        			if(verbose2) printf("Read: %s\n",readseq);
 	//            						printf("Insert Number: %i in contig %i\n",inserts,pog->contigNum);
-			        			poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[internb->ID],readseq,0,inserts,0);
+				    			// Backoverhang outsourcen
+				    			backread = G->read[internb->ID]->first;
+				    			backoverhang = 0;
+				    			while(backread){
+				    				if(backread->ID == breadID){
+				    					backoverhang = backread->overhang;
+				    					break;
+				    				}
+				    				backread = backread->next;
+				    			}
+				    			if(!backread){
+				    				printf("No Backread found: Abort!\n");
+				    			}
+			        			poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[internb->ID],readseq,0,inserts,0,backoverhang);
 	    						inserts++;
 							}
 							internb = internb->next;
@@ -2863,6 +2917,19 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 							if(internb->sideflag == bdir && G->read[internb->ID]->flag != CONTAINED){
 								nextoverhang = internb->overhang;
 				    			overhang += internb->overhang;
+				    			// Backoverhang outsourcen
+				    			backread = G->read[internb->ID]->first;
+				    			backoverhang = 0;
+				    			while(backread){
+				    				if(backread->ID == breadID){
+				    					backoverhang = backread->overhang;
+				    					break;
+				    				}
+				    				backread = backread->next;
+				    			}
+				    			if(!backread){
+				    				printf("No Backread found: Abort!\n");
+				    			}
 				    			oldbreadID = breadID;
 				    			breadID = internb->ID;
 			        			decompressReadSt(reads[breadID].seq,readseq,reads[breadID].len);
@@ -2880,7 +2947,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	    						if(verbose2) printf("ALIGING PROPER READ\n");
 	    						if(verbose2) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 			        			if(verbose2) printf("Read: %s\n",readseq);
-			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,nextoverhang);
+			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,nextoverhang,backoverhang);
 	//        						if(inserts == 290585)	poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,4077);
 	//        						else poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,1);
 	    						inserts++;

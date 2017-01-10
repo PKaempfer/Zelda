@@ -180,7 +180,7 @@ int poa_align_prepro(struct Sequence* contig, int len, int overhang);
 
 void poa_heuristic_align(struct Sequence* contig, struct reads* read, char* seq, char backbone, int insNum);
 
-char poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq, char backbone, int insNum, int overhang);
+char poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq, char backbone, int insNum, int overhang, int backoverhang);
 
 struct POG* make_poa(struct myovlList* G, struct reads* reads);
 

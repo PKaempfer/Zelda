@@ -18,7 +18,7 @@
 #include "kmer.h"
 
 
-#define H_RANGE 200
+#define H_RANGE 3
 
 /**
  * Function returns the maximum of all given integer values
@@ -290,7 +290,7 @@ int poa_align_prepro(struct Sequence* contig, int len, int overhang){
  * @param seq			Sequence of the read which is actually aligned to the graph
  * @return				returns the number of the alignment starts; Nodes in the alignment ring
  */
-int poa_initMatrix(struct Letter_T* current, struct Letter_T** new_letters, char* seq){
+int poa_initMatrix(struct Letter_T* current, struct Letter_T** new_letters, char* seq, char fullMatrix){
 	char verbose = 0;
 	int j,k;
 	int mat_end;
@@ -299,12 +299,17 @@ int poa_initMatrix(struct Letter_T* current, struct Letter_T** new_letters, char
 	int new_num = 0;
 	struct Letter_T* start_node = current;
 
+	int range;
+	if(!fullMatrix) range = H_RANGE;
+	else range = len;
+
 	do{
 		// TODO Think about possibility of non-having a right edge of the contig->readleft
 		new_letters[new_num++] = current;
 
 		best_sc = 0;
-		mat_end = _min(len,H_RANGE);
+		if(!fullMatrix) mat_end = _min(len,range);
+		else mat_end = len;
 		for(j=1;j<=mat_end;j++){
 			// k is pos in seq, j-1, because j==0 is first gap position;
 			k = j-1;
@@ -325,7 +330,7 @@ int poa_initMatrix(struct Letter_T* current, struct Letter_T** new_letters, char
 	return new_num;
 }
 
-int poa_fillMatrix(int new_num, struct Letter_T** new_letters, char* seq,struct Letter_T* end_node , struct Letter_T** end_letters, int overhang){
+int poa_fillMatrix(int new_num, struct Letter_T** new_letters, char* seq,struct Letter_T* end_node , struct Letter_T** end_letters, int overhang, int backoverhang, char fullMatrix){
 	int j,k;
 	int depth = 1;
 	int id;
@@ -341,6 +346,10 @@ int poa_fillMatrix(int new_num, struct Letter_T** new_letters, char* seq,struct 
 	int old_num = 0;
 	static struct Letter_T** old_letters = NULL;
 	if(!old_letters) old_letters = (struct Letter_T**)malloc(sizeof(struct Letter_T)*10000);
+
+	int range;
+	if(!fullMatrix) range = H_RANGE;
+	else range = len;
 
 	while(new_num && depth <= maxReadLen + overhang + 50){
 //		printf("Go deeper: %i\n",depth);
@@ -379,8 +388,18 @@ int poa_fillMatrix(int new_num, struct Letter_T** new_letters, char* seq,struct 
 					}
 					current = &Letters[edge->dest];
 
-					mat_st = _max(1,(left->score-(H_RANGE-1)));
-					mat_end = _min(len,(left->score+(H_RANGE+1)));
+					if(!fullMatrix){
+						if(depth<=backoverhang*2) mat_st = 1;
+						else mat_st = _max(1,(left->score-(range-1)));
+						mat_end = _min(len,(left->score+(range+1)));
+					}
+					else{
+						mat_st = 1;
+						mat_end = len;
+					}
+
+
+//					printf("Best Scoring field of precursor node: %i (Score: %i)\n",left->score,left->ml[left->score]);
 					best_sc = 0;
 					for(j=mat_st;j<=mat_end;j++){
 						// k is pos in seq, j-1, because j==0 is first gap position;
@@ -408,7 +427,7 @@ int poa_fillMatrix(int new_num, struct Letter_T** new_letters, char* seq,struct 
 
 }
 
-int poa_searchEndPoint(int line, char* seq, int insNum, char backbone, char print_align, int overhang, struct Sequence* contig){
+int poa_searchEndPoint(int line, char* seq, int insNum, char backbone, char print_align, int overhang, struct Sequence* contig, char fullMatrix){
 	int i,j;
 
 	int len = strlen(seq);
@@ -434,6 +453,9 @@ int poa_searchEndPoint(int line, char* seq, int insNum, char backbone, char prin
 		printf("Matrix End was not calculated\n");
 		exit(1);
 	}
+
+	if(!fullMatrix && best_Score < (len*SM1[0][0])*0.98)
+		return -1;
 
 	if(best_Score < (len*SM1[0][0])*0.10){ //!backbone &&
 		if(!backbone) printf("Alignment %i -> Best Score of Matrix below threshold for Containment -> Alignment denied go to next (best Score: %i/%i)  \n",insNum,best_Score,len*SM1[0][0]);
@@ -832,12 +854,15 @@ void poa_handleErrors(){
  * @param seq		Is the read sequence to align
  * @param backbone	Is a boolean value if the read was proper, than it is set as new reference point for the area in the PO-graph for the next read alignment
  */
-char poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq, char backbone, int insNum, int overhang){
+char poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq, char backbone, int insNum, int overhang, int backoverhang){
+	char verbose = 0;
 	static char print_align = 0;
 	static char print_Message = 0;
 	static struct Letter_T** new_letters = NULL;
 	int new_num = 0;
 	static struct Letter_T** end_letters = NULL;
+	static int numFull = 0;
+	static int numPart = 0;
 	int end_num = 0;
 
 	if(!new_letters){
@@ -853,40 +878,98 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq
 //	int i;
 //	int j;
 
-	// 1. Alignemnt matrix size definition and line assignment to the poa Nodes
-	int line = poa_align_prepro(contig,strlen(seq),overhang);
-	if(print_Message) printf("Build SW-Matrix of read: %i\n",read->ID);
+	char fullMatrix = 0;
+	int line;
+	struct Letter_T* current;
+	struct Letter_T* end_node;
+	int best_Letter;
+	while(1){
+		new_num = 0;
+		end_num = 0;
+		// 1. Alignemnt matrix size definition and line assignment to the poa Nodes
+		line = poa_align_prepro(contig,strlen(seq),overhang);
+		if(print_Message) printf("Build SW-Matrix of read: %i\n",read->ID);
 
 
-	// 2. Initialize matrix Rows the form the first line(s) of the initial matrix before filling
-	struct Letter_T* current = &Letters[contig->readleft];
-	clock_gettime(CLOCK_MONOTONIC, &ts_start);
-	new_num = poa_initMatrix(current, new_letters, seq);
+		// 2. Initialize matrix Rows the form the first line(s) of the initial matrix before filling
+		current = &Letters[contig->readleft];
+		clock_gettime(CLOCK_MONOTONIC, &ts_start);
+		new_num = poa_initMatrix(current, new_letters, seq,fullMatrix);
 
-//	if(print_Message) printf("Number of alternative start positions given by an alignment ring: %i\n",new_num);
-//	if(print_Message) printf("Number of nodes used in partial graph: %i\n",line);
+	//	if(print_Message) printf("Number of alternative start positions given by an alignment ring: %i\n",new_num);
+	//	if(print_Message) printf("Number of nodes used in partial graph: %i\n",line);
 
-	// 3. Fill the Alignment Matrix
-	struct Letter_T* end_node = &Letters[contig->readright];
-	end_num = poa_fillMatrix(new_num,new_letters,seq,end_node,end_letters,overhang);
+		// 3. Fill the Alignment Matrix (Most Time Consuming Part of the entire tool)
+		end_node = &Letters[contig->readright];
+		end_num = poa_fillMatrix(new_num,new_letters,seq,end_node,end_letters,overhang,backoverhang,fullMatrix);
 
-	if(end_num < 0){
+		if(end_num < 0){
+			return 0;
+		}
+
+		clock_gettime(CLOCK_MONOTONIC, &ts_finish);
+		sumMatrix += (((ts_finish.tv_sec * 1000000000) + ts_finish.tv_nsec) - ((ts_start.tv_sec * 1000000000) + ts_start.tv_nsec));
+
+		if(new_num){
+			memcpy(&end_letters[end_num],new_letters,sizeof(struct Letter_T)*new_num);
+			end_num += new_num;
+		}
+		if(print_Message) printf("Number of alternative ends: %i\n",end_num);
+
+		// 4. Search best Alignmet end Point
+		clock_gettime(CLOCK_MONOTONIC, &ts_start);
+		best_Letter = poa_searchEndPoint(line,seq,insNum,backbone,print_align,overhang,contig,fullMatrix);
+		if(best_Letter>=0){
+			numPart++;
+			break;
+		}
+		else{
+			fullMatrix=1;
+			poa_resetMatrix(line,strlen(seq));
+			numFull++;
+			if(verbose) printf("NumFull: %i (Part: %i)\n",numFull,numPart);
+		}
+
+	}
+
+//	// 1. Alignemnt matrix size definition and line assignment to the poa Nodes
+//	int line = poa_align_prepro(contig,strlen(seq),overhang);
+//	if(print_Message) printf("Build SW-Matrix of read: %i\n",read->ID);
+//
+//
+//	// 2. Initialize matrix Rows the form the first line(s) of the initial matrix before filling
+//	struct Letter_T* current = &Letters[contig->readleft];
+//	clock_gettime(CLOCK_MONOTONIC, &ts_start);
+//	new_num = poa_initMatrix(current, new_letters, seq);
+//
+////	if(print_Message) printf("Number of alternative start positions given by an alignment ring: %i\n",new_num);
+////	if(print_Message) printf("Number of nodes used in partial graph: %i\n",line);
+//
+//	// 3. Fill the Alignment Matrix (Most Time Consuming Part of the entire tool)
+//	struct Letter_T* end_node = &Letters[contig->readright];
+//	end_num = poa_fillMatrix(new_num,new_letters,seq,end_node,end_letters,overhang);
+//
+//	if(end_num < 0){
+//		return 0;
+//	}
+//
+//	clock_gettime(CLOCK_MONOTONIC, &ts_finish);
+//	sumMatrix += (((ts_finish.tv_sec * 1000000000) + ts_finish.tv_nsec) - ((ts_start.tv_sec * 1000000000) + ts_start.tv_nsec));
+//
+//	if(new_num){
+//		memcpy(&end_letters[end_num],new_letters,sizeof(struct Letter_T)*new_num);
+//		end_num += new_num;
+//	}
+//	if(print_Message) printf("Number of alternative ends: %i\n",end_num);
+//
+//	// 4. Search best Alignmet end Point
+//	clock_gettime(CLOCK_MONOTONIC, &ts_start);
+//	int best_Letter = poa_searchEndPoint(line,seq,insNum,backbone,print_align,overhang,contig,1);
+	//___________________________
+	if(!best_Letter){
+		if(verbose) printf("No Best Letter -> Return!\n");
 		return 0;
 	}
-
-	clock_gettime(CLOCK_MONOTONIC, &ts_finish);
-	sumMatrix += (((ts_finish.tv_sec * 1000000000) + ts_finish.tv_nsec) - ((ts_start.tv_sec * 1000000000) + ts_start.tv_nsec));
-
-	if(new_num){
-		memcpy(&end_letters[end_num],new_letters,sizeof(struct Letter_T)*new_num);
-		end_num += new_num;
-	}
-	if(print_Message) printf("Number of alternative ends: %i\n",end_num);
-
-	// 4. Search best Alignmet end Point
-	clock_gettime(CLOCK_MONOTONIC, &ts_start);
-	int best_Letter = poa_searchEndPoint(line,seq,insNum,backbone,print_align,overhang,contig);
-	if(!best_Letter) return 0;
 	else current = alMatrix_Letter[best_Letter];
 	int ID = current-Letters;
 	if(ID < 0) ID *= -1;
@@ -917,8 +1000,10 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq
 
 	// Show Alignment
 	if(print_Message) printf("Alignment Done\n");
-//	print_align = 1;
+//	if(fullMatrix) print_align = 1;
+//	else print_align = 0;
 	if(print_align){
+		printf("Overhang: %i --> Backoverhang: %i\n",overhang,backoverhang);
 		poa_showAlignment(readseq,refseq,length);
 //		char* out = (char*)malloc(100);
 //		sprintf(out,"output/error/Aln_%i.dot",insNum);
