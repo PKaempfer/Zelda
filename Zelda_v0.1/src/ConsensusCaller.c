@@ -989,7 +989,7 @@ void poa_reportVariant(struct POG* pog, char* vcfFile, char* ref){
 //    fprintf(vcf,"##INFO=<ID=ODDS,Number=1,Type=Float,Description=\"The log odds ratio of the best genotype combination to the second-best.\">\n");
 //    fprintf(vcf,"##INFO=<ID=GTI,Number=1,Type=Integer,Description=\"Number of genotyping iterations required to reach convergence or bailout.\">\n");
     fprintf(vcf,"##INFO=<ID=TYPE,Number=A,Type=String,Description=\"The type of allele, either snp, mnp, ins, del, or complex.\">\n");
-    fprintf(vcf,"##INFO=<ID=CIGAR,Number=A,Type=String,Description=\"The extended CIGAR representation of each alternate allele, with the exception that '=' is replaced by 'M' to ease VCF parsing.  Note that INDEL alleles do not have the first matched base (which is provided by default, per the spec) referred to by the CIGAR.\">\n");
+    fprintf(vcf,"##INFO=<ID=CIGAR,Number=A,Type=String,Description=\"The extended CIGAR representation of each alternate allele, with the exception that '=' is replaced by 'M' to ease VCF parsing.\">\n");
 //    fprintf(vcf,"##INFO=<ID=NUMALT,Number=1,Type=Integer,Description=\"Number of unique non-reference alleles in called genotypes at this position.\">\n");
 //    fprintf(vcf,"##INFO=<ID=MEANALT,Number=A,Type=Float,Description=\"Mean number of unique non-reference allele observations per sample with the corresponding alternate alleles.\">\n");
     fprintf(vcf,"##INFO=<ID=LEN,Number=A,Type=Integer,Description=\"allele length\">\n");
@@ -2621,7 +2621,7 @@ static inline void resetLetters(struct Letter_T* Letters){
  * Same implementation of the pao algorithms but graph touring over the paths instead of the junctions. Spanning junctions of scaffolds span over
  * @return
  */
-struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffolding, struct para* para){
+struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffolding, struct para* para, char heuristic){
 	char verbose = 0;
 	char verbose2 = 0;
 
@@ -2783,7 +2783,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
         			strcpy(readseq,revreadseq);
     			}
     			poa_catBackbone(&pog->contig[pog->contigNum],G,readseq,startJunction,breadID); // Parameter 3: &reads[breadID],
-    			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,overhang,backoverhang);
+    			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,heuristic,inserts,overhang,backoverhang);
     			inserts++;
     			internb = bread;
 //				while(breadID != aS->scaff[i].endJunction){
@@ -2828,7 +2828,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 				    			if(!backread){
 				    				printf("No Backread found: Abort!\n");
 				    			}
-			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[internb->ID],readseq,0,inserts,0,backoverhang);
+			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[internb->ID],readseq,0,heuristic,inserts,0,backoverhang);
 	    						inserts++;
 							}
 							internb = internb->next;
@@ -2868,7 +2868,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	    						if(verbose) printf("ALINING PROPER READ\n");
 	    						if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 			        			if(verbose) printf("Read: %s\n",readseq);
-			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,nextoverhang,backoverhang);
+			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,heuristic,inserts,nextoverhang,backoverhang);
 	//        						if(inserts == 290585)	poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,4077);
 	//        						else poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,1);
 	    						inserts++;
@@ -2907,7 +2907,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 				    			if(!backread){
 				    				printf("No Backread found: Abort!\n");
 				    			}
-			        			poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[internb->ID],readseq,0,inserts,0,backoverhang);
+			        			poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[internb->ID],readseq,0,heuristic,inserts,0,backoverhang);
 	    						inserts++;
 							}
 							internb = internb->next;
@@ -2947,7 +2947,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	    						if(verbose2) printf("ALIGING PROPER READ\n");
 	    						if(verbose2) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 			        			if(verbose2) printf("Read: %s\n",readseq);
-			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,inserts,nextoverhang,backoverhang);
+			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,heuristic,inserts,nextoverhang,backoverhang);
 	//        						if(inserts == 290585)	poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,4077);
 	//        						else poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,1);
 	    						inserts++;

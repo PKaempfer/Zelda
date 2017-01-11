@@ -205,7 +205,7 @@ void poa_catBackbone2(struct Sequence* contig, struct myovlList *G, char* seq, i
  * @param len		The lengt of the read, that is aligned to the poa graph. This length defines the length of the matrix rows.
  * @return			Returns the number of rows in the Matrix from the beginning of the left overlapping read to the end of the right one.
  */
-int poa_align_prepro(struct Sequence* contig, int len, int overhang){
+static inline int poa_align_prepro(struct Sequence* contig, int len, int overhang){
 	char verbose = 0;
 //	printf("CHECKPOINT: Graph_prepro\n");
 
@@ -290,7 +290,7 @@ int poa_align_prepro(struct Sequence* contig, int len, int overhang){
  * @param seq			Sequence of the read which is actually aligned to the graph
  * @return				returns the number of the alignment starts; Nodes in the alignment ring
  */
-int poa_initMatrix(struct Letter_T* current, struct Letter_T** new_letters, char* seq, char fullMatrix){
+static inline int poa_initMatrix(struct Letter_T* current, struct Letter_T** new_letters, char* seq, char fullMatrix){
 	char verbose = 0;
 	int j,k;
 	int mat_end;
@@ -330,7 +330,7 @@ int poa_initMatrix(struct Letter_T* current, struct Letter_T** new_letters, char
 	return new_num;
 }
 
-int poa_fillMatrix(int new_num, struct Letter_T** new_letters, char* seq,struct Letter_T* end_node , struct Letter_T** end_letters, int overhang, int backoverhang, char fullMatrix){
+static inline int poa_fillMatrix(int new_num, struct Letter_T** new_letters, char* seq,struct Letter_T* end_node , struct Letter_T** end_letters, int overhang, int backoverhang, char fullMatrix){
 	int j,k;
 	int depth = 1;
 	int id;
@@ -427,7 +427,7 @@ int poa_fillMatrix(int new_num, struct Letter_T** new_letters, char* seq,struct 
 
 }
 
-int poa_searchEndPoint(int line, char* seq, int insNum, char backbone, char print_align, int overhang, struct Sequence* contig, char fullMatrix){
+static inline int poa_searchEndPoint(int line, char* seq, int insNum, char backbone, char print_align, int overhang, struct Sequence* contig, char fullMatrix){
 	int i,j;
 
 	int len = strlen(seq);
@@ -499,7 +499,7 @@ int poa_searchEndPoint(int line, char* seq, int insNum, char backbone, char prin
 	return best_Letter;
 }
 
-struct pairAlign poa_backtrace(struct Sequence* contig, char* seq, struct Letter_T* current,char print_Message, char backbone){ // Parameter 4:  int readID,
+static inline struct pairAlign poa_backtrace(struct Sequence* contig, char* seq, struct Letter_T* current,char print_Message, char backbone){ // Parameter 4:  int readID,
 	if(print_Message) printf("Start back tracing\n");
 	char suspectVerbose = 0;
 	int j = strlen(seq);
@@ -742,7 +742,7 @@ struct pairAlign poa_backtrace(struct Sequence* contig, char* seq, struct Letter
 	return align;
 }
 
-void poa_updateGraph(char* seq, struct pairAlign* align, char print_Message){
+static inline void poa_updateGraph(char* seq, struct pairAlign* align, char print_Message){
 	// --> 6. BEGINN Connect to matrix origin
 	// Connect to matrix origin
 	int j = align->j;
@@ -854,7 +854,7 @@ void poa_handleErrors(){
  * @param seq		Is the read sequence to align
  * @param backbone	Is a boolean value if the read was proper, than it is set as new reference point for the area in the PO-graph for the next read alignment
  */
-char poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq, char backbone, int insNum, int overhang, int backoverhang){
+char poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq, char backbone, char heuristic, int insNum, int overhang, int backoverhang){
 	char verbose = 0;
 	static char print_align = 0;
 	static char print_Message = 0;
@@ -878,7 +878,8 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq
 //	int i;
 //	int j;
 
-	char fullMatrix = 0;
+	char fullMatrix;
+	fullMatrix = !heuristic;
 	int line;
 	struct Letter_T* current;
 	struct Letter_T* end_node;

@@ -32,6 +32,7 @@ int main(int argc, char* argv[]) {
 	char findotdump = 0;
 	char dotdump = 0;
 	char sleeptime = 0;
+	char heuristic = 1;
 	time_t start,stop;
 
 	struct para* para = readCMDline(argc, argv);
@@ -178,7 +179,9 @@ int main(int argc, char* argv[]) {
 	time(&start);
 
 	printf("CHECKPOINT: 8. POA (Layout-Consensus)\n");
-	struct POG* contigs_pog = make_poaScaff(G,reads,1,para); // 3. Argument, scaffolding 1 - yes, 0 - no
+	// 3. Argument, scaffolding 1 - yes, 0 - no
+	// boolean heuristic parameter decides whether heuristic alignments methods are used or not
+	struct POG* contigs_pog = make_poaScaff(G,reads,1,para,heuristic);
 	time(&stop);
 	printf("POA: %0.2f\n",difftime (stop,start));
 	printf("Wait after POA\n");
