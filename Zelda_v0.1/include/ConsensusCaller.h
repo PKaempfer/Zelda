@@ -80,7 +80,7 @@ struct Letter_T {
 //	struct LetterSource_S source;	/** SOURCE SEQ POSITION(S) */
 	struct Letter_T* align_ring; 	/** CIRCULAR LIST OF ALIGNED POSITIONS */
 	uint16_t counter;				/** Number reads supporting this letter (number of sources)  */
-	int* ml;						/** Line of Alignment matrix between the local PO graph and the new sequence*/
+	int16_t* ml;						/** Line of Alignment matrix between the local PO graph and the new sequence*/
 	int score;						/** SCORE FOR BALANCING PARTIAL ORDER EFFECTS ON MATRIX NEUTRALITY */
 	unsigned char letter;					/** THE ACTUAL RESIDUE CODE! */
 	char junction;
@@ -150,7 +150,7 @@ extern uint32_t numNodes;
 // For ConsensusCaller2 -> Temporary delete when merged
 extern uint32_t maxNumNodes;
 //int alMatrix[100*20+1][120];
-extern int** alMatrix;
+extern int16_t** alMatrix;
 extern int *alMatrix_Best;
 extern struct Letter_T** alMatrix_Letter;
 extern struct timespec ts_start;

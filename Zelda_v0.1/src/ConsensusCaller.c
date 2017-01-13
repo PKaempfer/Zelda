@@ -460,7 +460,7 @@ struct Letter_T* Letters     =      NULL;
 uint32_t          numNodes    =         0;	// Current number of elements in LPOLetter_T array
 uint32_t          maxNumNodes =   1000000;	// Initial max size of LPOLetter_T array
 
-int **alMatrix = NULL;
+int16_t **alMatrix = NULL;
 //int alMatrix[100*20+1][120];
 struct Letter_T** alMatrix_Letter = NULL;
 
@@ -2675,8 +2675,8 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 
     // Init Matrix (5 x maxreaden * maxreadlen)
     // E.g. for maxReadLen = 100 -> 500 x 100 matrix (50,000 array)
-    int data[maxReadLen*MATRIX_MAX_BR+1][maxReadLen+1];
-    alMatrix = (int**)malloc(sizeof(int*)*(maxReadLen*MATRIX_MAX_BR+1)); // Convention that the aligning part of the graph do not contain more than 5*maxReadLen nodes
+    int16_t data[maxReadLen*MATRIX_MAX_BR+1][maxReadLen+1];
+    alMatrix = (int16_t**)malloc(sizeof(int16_t*)*(maxReadLen*MATRIX_MAX_BR+1)); // Convention that the aligning part of the graph do not contain more than 5*maxReadLen nodes
     alMatrix_Letter = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*(maxReadLen*MATRIX_MAX_BR+1));
     for(i=0;i<=maxReadLen*MATRIX_MAX_BR;i++){
     	alMatrix[i] = &data[i][0];
