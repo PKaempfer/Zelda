@@ -2625,10 +2625,11 @@ static inline void resetLetters(struct Letter_T* Letters){
 struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffolding, struct para* para, char heuristic){
 	char verbose = 0;
 	char verbose2 = 0;
-
+#ifdef TIMEM
 	struct timespec consenusSt;
 	struct timespec consenusEnd;
 	static long consensusTime = 0;
+#endif
 
 	struct scaffold_set* aS;
 	if(scaffolding){
@@ -2687,8 +2688,6 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     		alMatrix[i][j] = j * GAP_PENALTY;
     	}
     }
-
-
 
     int dir;
     int bdir;
@@ -2977,12 +2976,14 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 			if((float)numNodes/(float)aS->scaff[i].len < 2){
 				pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+100);
 				strcpy(pog->contig[pog->contigNum].name,name);
-
+#ifdef TIMEM
 				clock_gettime(CLOCK_MONOTONIC, &consenusSt);
+#endif
 				poa_consensus2(&pog->contig[pog->contigNum]);
+#ifdef TIMEM
 	    		clock_gettime(CLOCK_MONOTONIC, &consenusEnd);
 	    		consensusTime += (((consenusEnd.tv_sec * 1000000000) + consenusEnd.tv_nsec) - ((consenusSt.tv_sec * 1000000000) + consenusSt.tv_nsec));
-
+#endif
 	    		if(verbose){
 	    			sprintf(dotPath,"%s/%s.dot",para->asemblyFolder,pog->contig[pog->contigNum].name);
 	    			poa_toDot(dotPath);
@@ -3004,11 +3005,12 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     		resetLetters(Letters);
     		numNodes = 0;
 
-
+#ifdef TIMEM
     		printf("Matrix time:    %.3f s\n",(float)sumMatrix/1000000000);
     		printf("Backtrace time: %.3f s\n",(float)sumTrace/1000000000);
     		printf("Consensus time: %.3f s\n",(float)consensusTime/1000000000);
     		printf("Align time:     %.3f s\n",(float)alignmentTime/1000000000);
+#endif
     	}
     }
 

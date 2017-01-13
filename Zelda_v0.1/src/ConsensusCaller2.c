@@ -961,8 +961,9 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 		// 1. Alignemnt matrix size definition and line assignment to the poa Nodes
 		line = poa_align_prepro(contig,seqlen,overhang);
 		if(print_Message) printf("Build SW-Matrix of read: %i\n",read->ID);
-
+#ifdef TIMEM
 		clock_gettime(CLOCK_MONOTONIC, &ts_start);
+#endif
 		// 2. Initialize matrix Rows the form the first line(s) of the initial matrix before filling
 		current = &Letters[contig->readleft];
 		if(verbose) printf("Full?: %i (current: %p -> %i)\n",(int)fullMatrix,current->ml,current->ml[0]);
@@ -978,10 +979,10 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 		if(end_num < 0){
 			return 0;
 		}
-
+#ifdef TIMEM
 		clock_gettime(CLOCK_MONOTONIC, &ts_finish);
 		sumMatrix += (((ts_finish.tv_sec * 1000000000) + ts_finish.tv_nsec) - ((ts_start.tv_sec * 1000000000) + ts_start.tv_nsec));
-
+#endif
 		if(new_num){
 			memcpy(&end_letters[end_num],new_letters,sizeof(struct Letter_T)*new_num);
 			end_num += new_num;
@@ -996,10 +997,14 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 		}
 		else{
 			fullMatrix=1;
+#ifdef TIMEM
 			clock_gettime(CLOCK_MONOTONIC, &alignmentSt);
+#endif
 			poa_resetMatrix(line,seqlen);
+#ifdef TIMEM
 			clock_gettime(CLOCK_MONOTONIC, &alignmentEnd);
 			alignmentTime += (((alignmentEnd.tv_sec * 1000000000) + alignmentEnd.tv_nsec) - ((alignmentSt.tv_sec * 1000000000) + alignmentSt.tv_nsec));
+#endif
 			numFull++;
 			if(verbose)
 				printf("NumFull: %i (Part: %i)\n",numFull,numPart);
@@ -1016,7 +1021,9 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 	if(ID < 0) ID *= -1;
 
 	// 5. Make backtrace
+#ifdef TIMEM
 	clock_gettime(CLOCK_MONOTONIC, &ts_start);
+#endif
 	struct pairAlign align = poa_backtrace(contig,seq,current,print_Message,backbone,seqlen); // Parameter 4: read->ID,
 	if(!align.current){
 		poa_resetMatrix(line,seqlen);
@@ -1030,9 +1037,10 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 	int length = align.len;
 //	j = align.j;
 	current = align.current;
-
+#ifdef TIMEM
 	clock_gettime(CLOCK_MONOTONIC, &ts_finish);
 	sumTrace += (((ts_finish.tv_sec * 1000000000) + ts_finish.tv_nsec) - ((ts_start.tv_sec * 1000000000) + ts_start.tv_nsec));
+#endif
 
 	if(backbone){
 		contig->readright = ID;
@@ -1051,11 +1059,14 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 //		poa_part_toDot(out,contig);
 //		free(out);
 	}
-
+#ifdef TIMEM
 	clock_gettime(CLOCK_MONOTONIC, &alignmentSt);
+#endif
 	poa_resetMatrix(line,seqlen);
+#ifdef TIMEM
 	clock_gettime(CLOCK_MONOTONIC, &alignmentEnd);
 	alignmentTime += (((alignmentEnd.tv_sec * 1000000000) + alignmentEnd.tv_nsec) - ((alignmentSt.tv_sec * 1000000000) + alignmentSt.tv_nsec));
+#endif
 
 	free(readseq);
 	free(refseq);
