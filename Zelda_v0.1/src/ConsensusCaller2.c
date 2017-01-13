@@ -238,7 +238,7 @@ static inline int poa_align_prepro(struct Sequence* contig, int len, int overhan
 			}
 			current->ml = alMatrix[line++];
 			new_letters[new_num++] = current;
-			current->junction = 1;
+//			current->junction = 1;
 //		}
 //		else break;
 		if(current->align_ring && current->align_ring != start_node){
@@ -250,7 +250,7 @@ static inline int poa_align_prepro(struct Sequence* contig, int len, int overhan
 //	printf("Alternative Starts: %i\n",line-1);
 
 	struct LetterEdge* edge;
-	int depth = 0;
+	int depth = 1;
 
 //	if(overhang >= 30) printf("Wide range overhang could cause a problem\n");
 
@@ -314,6 +314,7 @@ static inline int poa_initMatrix(struct Letter_T* current, struct Letter_T** new
 	do{
 		// TODO Think about possibility of non-having a right edge of the contig->readleft
 		new_letters[new_num++] = current;
+//		new_letters[new_num++]->junction--;
 
 		best_sc = 0;
 		if(!fullMatrix) mat_end = _min(len,range);
@@ -328,6 +329,7 @@ static inline int poa_initMatrix(struct Letter_T* current, struct Letter_T** new
 //			current->ml[j] = _max((_max((current->ml[j-1]+GAP_PENALTY),(alMatrix[0][j-1] + SM1[codes[current->letter]][codes[seq[k]]]))),(alMatrix[0][j]+GAP_PENALTY));
 //			current->ml[j] = max_func2(current->ml[j-1]+GAP_PENALTY,alMatrix[0][j-1] + SM1[codes[current->letter]][codes[seq[k]]],alMatrix[0][j]+GAP_PENALTY);
 			if(current->ml[best_sc] < current->ml[j]) best_sc = j;
+
 		}
 		current->score = best_sc;
 
@@ -447,17 +449,18 @@ static inline int poa_fillMatrix(int new_num, struct Letter_T** new_letters, uns
 						// k is pos in seq, j-1, because j==0 is first gap position;
 						k = j-1;
 						// Smith-Waterman Scoring function: Best of itself, left, diagonal, top
-						if(rightbool%2==0){
-							current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
-
-						}
-						else{
-//							if(current->ml[j] <= left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]) current->ml[j] = left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]];
-//							else{
-//								printf("%i > %i (at i: %i ,j: %i)\n",current->ml[j],left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]],depth,j);
-//							}
-							current->ml[j] = max_func2((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
-						}
+						current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
+//						if(rightbool%2==0){
+//							current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
+//
+//						}
+//						else{
+////							if(current->ml[j] <= left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]) current->ml[j] = left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]];
+////							else{
+////								printf("%i > %i (at i: %i ,j: %i)\n",current->ml[j],left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]],depth,j);
+////							}
+//							current->ml[j] = max_func2((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
+//						}
 //						current->ml[j] = _max((_max((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]))),(left->ml[j]+GAP_PENALTY));
 //						current->ml[j] = max_func2((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
 //						if(current->ml[j] <= left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]) current->ml[j] = left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]];
@@ -895,10 +898,10 @@ static inline void poa_resetMatrix(int line, int len){
 	// free the letters and set matrix to 0
 	int i,j;
 	for(i=1;i<line;i++){
-//		alMatrix_Letter[i]->ml = NULL;
+		alMatrix_Letter[i]->ml = NULL;
 		alMatrix_Letter[i]->score = 0;
-		if(alMatrix_Letter[i]==0) printf("Junction WRONGGGG\n");
-//		alMatrix_Letter[i]->junction = 0;
+		if(alMatrix_Letter[i]->junction!=0) printf("Junction WRONGGGG in line: %i\n",i);
+		alMatrix_Letter[i]->junction = 0;
 		for(j=1;j<=len;j++){
 			alMatrix[i][j] = j * GAP_PENALTY;
 		}
@@ -998,7 +1001,7 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 			clock_gettime(CLOCK_MONOTONIC, &alignmentEnd);
 			alignmentTime += (((alignmentEnd.tv_sec * 1000000000) + alignmentEnd.tv_nsec) - ((alignmentSt.tv_sec * 1000000000) + alignmentSt.tv_nsec));
 			numFull++;
-//			if(verbose)
+			if(verbose)
 				printf("NumFull: %i (Part: %i)\n",numFull,numPart);
 		}
 
