@@ -461,6 +461,7 @@ uint32_t          numNodes    =         0;	// Current number of elements in LPOL
 uint32_t          maxNumNodes =   1000000;	// Initial max size of LPOLetter_T array
 
 int **alMatrix = NULL;
+//int alMatrix[100*20+1][120];
 struct Letter_T** alMatrix_Letter = NULL;
 
 /**
@@ -2625,6 +2626,10 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	char verbose = 0;
 	char verbose2 = 0;
 
+	struct timespec consenusSt;
+	struct timespec consenusEnd;
+	static long consensusTime = 0;
+
 	struct scaffold_set* aS;
 	if(scaffolding){
 		printf("Checkpoint: Init Scaffold Correction\n");
@@ -2670,16 +2675,20 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 
     // Init Matrix (5 x maxreaden * maxreadlen)
     // E.g. for maxReadLen = 100 -> 500 x 100 matrix (50,000 array)
+    int data[maxReadLen*MATRIX_MAX_BR+1][maxReadLen+1];
     alMatrix = (int**)malloc(sizeof(int*)*(maxReadLen*MATRIX_MAX_BR+1)); // Convention that the aligning part of the graph do not contain more than 5*maxReadLen nodes
     alMatrix_Letter = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*(maxReadLen*MATRIX_MAX_BR+1));
     for(i=0;i<=maxReadLen*MATRIX_MAX_BR;i++){
-    	alMatrix[i]=(int*)malloc(sizeof(int)*(maxReadLen+1));
+    	alMatrix[i] = &data[i][0];
+//    	alMatrix[i]=(int*)malloc(sizeof(int)*(maxReadLen+1));
     	alMatrix_Letter[i] = NULL;
     	for(j=0;j<=maxReadLen;j++){
 //    		alMatrix[i][j] = (i+j) * GAP_PENALTY;
     		alMatrix[i][j] = j * GAP_PENALTY;
     	}
     }
+
+
 
     int dir;
     int bdir;
@@ -2783,7 +2792,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
         			strcpy(readseq,revreadseq);
     			}
     			poa_catBackbone(&pog->contig[pog->contigNum],G,readseq,startJunction,breadID); // Parameter 3: &reads[breadID],
-    			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,heuristic,inserts,overhang,backoverhang);
+    			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],(unsigned char*)readseq,1,heuristic,inserts,overhang,backoverhang);
     			inserts++;
     			internb = bread;
 //				while(breadID != aS->scaff[i].endJunction){
@@ -2828,7 +2837,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 				    			if(!backread){
 				    				printf("No Backread found: Abort!\n");
 				    			}
-			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[internb->ID],readseq,0,heuristic,inserts,0,backoverhang);
+			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[internb->ID],(unsigned char*)readseq,0,heuristic,inserts,0,backoverhang);
 	    						inserts++;
 							}
 							internb = internb->next;
@@ -2868,7 +2877,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	    						if(verbose) printf("ALINING PROPER READ\n");
 	    						if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 			        			if(verbose) printf("Read: %s\n",readseq);
-			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,heuristic,inserts,nextoverhang,backoverhang);
+			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],(unsigned char*)readseq,1,heuristic,inserts,nextoverhang,backoverhang);
 	//        						if(inserts == 290585)	poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,4077);
 	//        						else poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,1);
 	    						inserts++;
@@ -2907,7 +2916,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 				    			if(!backread){
 				    				printf("No Backread found: Abort!\n");
 				    			}
-			        			poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[internb->ID],readseq,0,heuristic,inserts,0,backoverhang);
+			        			poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[internb->ID],(unsigned char*)readseq,0,heuristic,inserts,0,backoverhang);
 	    						inserts++;
 							}
 							internb = internb->next;
@@ -2947,7 +2956,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	    						if(verbose2) printf("ALIGING PROPER READ\n");
 	    						if(verbose2) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 			        			if(verbose2) printf("Read: %s\n",readseq);
-			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,heuristic,inserts,nextoverhang,backoverhang);
+			        			runB = poa_heuristic_align2(&pog->contig[pog->contigNum],&reads[breadID],(unsigned char*)readseq,1,heuristic,inserts,nextoverhang,backoverhang);
 	//        						if(inserts == 290585)	poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,4077);
 	//        						else poa_heuristic_align(&pog->contig[pog->contigNum],&reads[breadID],readseq,1,1);
 	    						inserts++;
@@ -2969,7 +2978,11 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 				pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+100);
 				strcpy(pog->contig[pog->contigNum].name,name);
 
-	    		poa_consensus2(&pog->contig[pog->contigNum]);
+				clock_gettime(CLOCK_MONOTONIC, &consenusSt);
+				poa_consensus2(&pog->contig[pog->contigNum]);
+	    		clock_gettime(CLOCK_MONOTONIC, &consenusEnd);
+	    		consensusTime += (((consenusEnd.tv_sec * 1000000000) + consenusEnd.tv_nsec) - ((consenusSt.tv_sec * 1000000000) + consenusSt.tv_nsec));
+
 	    		if(verbose){
 	    			sprintf(dotPath,"%s/%s.dot",para->asemblyFolder,pog->contig[pog->contigNum].name);
 	    			poa_toDot(dotPath);
@@ -2994,6 +3007,8 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 
     		printf("Matrix time:    %.3f s\n",(float)sumMatrix/1000000000);
     		printf("Backtrace time: %.3f s\n",(float)sumTrace/1000000000);
+    		printf("Consensus time: %.3f s\n",(float)consensusTime/1000000000);
+    		printf("Align time:     %.3f s\n",(float)alignmentTime/1000000000);
     	}
     }
 
@@ -3016,10 +3031,10 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     free(readseq);
     free(revreadseq);
     free(name);
-    if(verbose)printf("Free Alignment Matrix\n");
-    for(i=0;i<=maxReadLen*MATRIX_MAX_BR;i++){
-    	free(alMatrix[i]);
-    }
+//    if(verbose)printf("Free Alignment Matrix\n");
+//    for(i=0;i<=maxReadLen*MATRIX_MAX_BR;i++){
+//    	free(alMatrix[i]);
+//    }
     free(alMatrix);
     if(verbose)printf("Free DotPath\n");
     free(dotPath);
@@ -3028,6 +3043,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 }
 
 void free_POG(struct POG* contigs_pog){
+
 	int i;
 	struct Letter_T* current;
 	struct LetterEdge* edge;

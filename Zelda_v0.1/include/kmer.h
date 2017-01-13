@@ -23,7 +23,7 @@
 #define ABS(a)       ( ((a) < (0)) ? (-(a)) : (a) )
 #define INITHASHSIZE(a) pow(2,a) + max_reprobes // initial 1 MBuckets / 20 bit
 
-#define OB -1
+#define OB 4
 #define AB 0
 #define CB 1
 #define GB 2
@@ -55,7 +55,7 @@ static const readID  DEL_READ_END =  0x7FFFFFFF;  // 0111 1111 1111 1111
 static const char TRANS_MASK  = 0x03;
 static const KmerBitBuffer  FLAGS_ENDPOS_DISABLE = 0x7FFFFFFF;  // 0111 1111 1111 1111 1111 1111 1111 1111
 
-static const int codes[256] = {
+static const unsigned char codes[256] = {
   OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB,
   OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB,
   OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB,
@@ -74,7 +74,7 @@ static const int codes[256] = {
   OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB, OB
 };
 
-static const int compcodes[52] = {
+static const char compcodes[52] = {
 		'T', 'N', 'G', 'N', 'N', 'N', 'C', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'A',
 		'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N',
 		'T', 'N', 'G', 'N', 'N', 'N', 'C', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'A'

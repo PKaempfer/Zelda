@@ -335,12 +335,12 @@ char* compressRead(char* read){
 			current = 0;
 			j--;
 		}
-		if(codes[(int)read[i]]==-1){
+		if(codes[(unsigned char)read[i]]==4){
 			free(compRead);
 			return NULL;
 		}
 		current = current << 2;
-		current |= codes[(int)read[i]];
+		current |= codes[(unsigned char)read[i]];
 	}
 
 	while(i%4!=0){

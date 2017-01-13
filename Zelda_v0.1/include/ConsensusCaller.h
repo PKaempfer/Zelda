@@ -34,7 +34,7 @@
 //								 {1, 1, 1, 2, 1},	// T
 //								 {1, 1, 1, 1, 2}	// -
 //};
-static const int SM1[5][5] = 	{
+static const char SM1[5][5] = 	{
 								 {1, -1, -1, -1, -1},	// A
 								 {-1, 1, -1, -1, -1},	// C
 								 {-1, -1, 1, -1, -1},	// G
@@ -82,7 +82,7 @@ struct Letter_T {
 	uint16_t counter;				/** Number reads supporting this letter (number of sources)  */
 	int* ml;						/** Line of Alignment matrix between the local PO graph and the new sequence*/
 	int score;						/** SCORE FOR BALANCING PARTIAL ORDER EFFECTS ON MATRIX NEUTRALITY */
-	char letter;					/** THE ACTUAL RESIDUE CODE! */
+	unsigned char letter;					/** THE ACTUAL RESIDUE CODE! */
 	char junction;
 	char vFlag;
 };
@@ -149,13 +149,15 @@ extern struct Letter_T* Letters;
 extern uint32_t numNodes;
 // For ConsensusCaller2 -> Temporary delete when merged
 extern uint32_t maxNumNodes;
-extern int **alMatrix;
+//int alMatrix[100*20+1][120];
+extern int** alMatrix;
 extern int *alMatrix_Best;
 extern struct Letter_T** alMatrix_Letter;
 extern struct timespec ts_start;
 extern struct timespec ts_finish;
 extern long sumMatrix;
 extern long sumTrace;
+extern long alignmentTime;
 
 void buildBackBone(struct myovlList* ovlgraph, struct string_graph* S, struct reads* reads);
 
@@ -180,7 +182,7 @@ void testFunct();
 
 void poa_heuristic_align(struct Sequence* contig, struct reads* read, char* seq, char backbone, int insNum);
 
-char poa_heuristic_align2(struct Sequence* contig, struct reads* read, char* seq, char backbone, char heuristic, int insNum, int overhang, int backoverhang);
+char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned char* seq, char backbone, char heuristic, int insNum, int overhang, int backoverhang);
 
 struct POG* make_poa(struct myovlList* G, struct reads* reads);
 
