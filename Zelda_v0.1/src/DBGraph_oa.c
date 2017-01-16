@@ -82,14 +82,14 @@ void hashToTabDFS_oa(){
 }
 
 void travDFS_oa(uint32_t i){
-	static uint32_t upStacksize=1024;
-	static uint32_t downStacksize=1024;
+	static uint32_t upStacksize=1024*256;
+	static uint32_t downStacksize=1024*256;
 	uint32_t down = 0;
 	uint32_t up = 0;
 	static uint32_t* downStack = NULL;
 	static uint32_t* upStack = NULL;
-	if(!downStack) downStack = (uint32_t*)malloc(sizeof(uint32_t)*1024);
-	if(!upStack) upStack = (uint32_t*)malloc(sizeof(uint32_t)*1024);
+	if(!downStack) downStack = (uint32_t*)malloc(sizeof(uint32_t)*downStacksize);
+	if(!upStack) upStack = (uint32_t*)malloc(sizeof(uint32_t)*upStacksize);
 
 	if(i == EMPTYBUCKET){
 		printf("Free all intermediate stacks\n");

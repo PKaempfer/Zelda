@@ -220,6 +220,7 @@ static inline int poa_align_prepro(struct Sequence* contig, int len, int overhan
 	int new_num = 0;
 	static struct Letter_T** old_letters = NULL;
 	int old_num = 0;
+	struct Letter_T** temp;
 
 	if(!new_letters){
 		new_letters = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*1000); // Max breadth of graph = 100
@@ -258,6 +259,9 @@ static inline int poa_align_prepro(struct Sequence* contig, int len, int overhan
 //		printf("Go deeper: %i\n",depth);
 		if(verbose && new_num >= 90) printf("Graph breadth > 100\n");
 		memcpy(old_letters,new_letters,sizeof(struct Letter_T)*new_num);
+//		temp = old_letters;
+//		old_letters = new_letters;
+//		new_letters = temp;
 		old_num = new_num;
 		new_num = 0;
 
@@ -358,6 +362,7 @@ static inline int poa_fillMatrix(int new_num, struct Letter_T** new_letters, uns
 	struct LetterEdge* edge;
 	struct Letter_T* left;
 	struct Letter_T* current;
+	struct Letter_T** temp;
 	int old_num = 0;
 	static struct Letter_T** old_letters = NULL;
 	if(!old_letters) old_letters = (struct Letter_T**)malloc(sizeof(struct Letter_T)*10000);
@@ -369,6 +374,9 @@ static inline int poa_fillMatrix(int new_num, struct Letter_T** new_letters, uns
 	while(new_num && depth <= maxReadLen + overhang + 50){
 //		printf("Go deeper: %i\n",depth);
 		memcpy(old_letters,new_letters,sizeof(struct Letter_T)*new_num);
+//		temp = old_letters;
+//		old_letters = new_letters;
+//		new_letters = temp;
 		old_num = new_num;
 		new_num = 0;
 
@@ -490,6 +498,10 @@ static inline int poa_fillMatrix(int new_num, struct Letter_T** new_letters, uns
 		// Limit number of fields in matrix to compute. Give a maximum distance from the diagonal (e.g. 5bp)
 		depth++;
 	}
+
+//	if(depth%2==0){
+//		memcpy(old_letters,new_letters,sizeof(struct Letter_T)*new_num);
+//	}
 
 	return end_num;
 
@@ -903,7 +915,8 @@ static inline void poa_resetMatrix(int line, int len){
 		if(alMatrix_Letter[i]->junction!=0) printf("Junction WRONGGGG in line: %i\n",i);
 		alMatrix_Letter[i]->junction = 0;
 		for(j=1;j<=len;j++){
-			alMatrix[i][j] = j * GAP_PENALTY;
+//			alMatrix[i][j] = j * GAP_PENALTY;
+			alMatrix[i][j] = -100;
 		}
 	}
 }
