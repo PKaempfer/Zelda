@@ -324,16 +324,23 @@ struct scaffold_set* contigs_init(struct myovlList* G){ //, struct reads* reads
 }
 
 void free_schaffoldSet(struct scaffold_set* aS){
+	char verbose = 0;
 	struct scaffEdge* edge;
-    for(int i = 0; i < pathsNum-1; i++){
+    for(int i = 0; i < aS->numbridge; i++){
+    	if(verbose) printf("Loop: %i (%i)\n",i,aS->numbridge);
     	while(aS->scaff[i].first){
+    		if(verbose) printf("-> Free First: \n");
     		edge = aS->scaff[i].first->next;
+    		if(verbose) printf("\t -> take edge: \n");
     		if(aS->scaff[i].first->bridge) free(aS->scaff[i].first->bridge);
+    		if(verbose) printf("\t -> free bridge: \n");
     		free(aS->scaff[i].first);
+    		if(verbose) printf("\t -> free first: \n");
     		aS->scaff[i].first = edge;
+    		if(verbose) printf("  -> Go Next: \n");
     	}
     }
-
+    if(verbose) printf("FREE STRUCT\n");
 	free(aS->scaff);
 	free(aS);
 }

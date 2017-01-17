@@ -2640,7 +2640,6 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 		aS = contigs_init(G); // ,reads
 	}
 
-//	if(verbose)
 		aS = scaffold_stats(aS);
 //	exit(1);
 
@@ -2691,7 +2690,6 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     	for(j=0;j<=maxReadLen;j++){
 //    		alMatrix[i][j] = (i+j) * GAP_PENALTY;
     		alMatrix[i][j] = j * GAP_PENALTY;
-    		printf("%i-%i -> %p\n",i,j,&data[i][j]);
     	}
     }
 
@@ -3020,6 +3018,9 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     	}
     }
 
+    printf("POG Finisched\n");
+    verbose = 1;
+
     for(i=0;i<aS->numbridge;i++){
     	if(aS->scaff[i].len > MIN_SCAFF_LEN || i >= aS->num){
     		if(aS->scaff[i].next >= 0){
@@ -3031,6 +3032,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     	}
     }
 
+    printf("Scaff Finisched\n");
 
     // _________ Scaffold Consensus Calling
     if(verbose)printf("Free ScaffoldsSet\n");
