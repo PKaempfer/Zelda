@@ -32,7 +32,6 @@
 
 #define MIN_CONTIG_LEN 100
 #define MIN_SCAFF_LEN 200
-#define MATRIX_MAX_BR 20
 
 static char status_char[] = { 'W', 'C', 'S', 'P', 'J' };
 struct timespec ts_start;
@@ -2677,6 +2676,12 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     // Init Matrix (5 x maxreaden * maxreadlen)
     // E.g. for maxReadLen = 100 -> 500 x 100 matrix (50,000 array)
     int16_t data[maxReadLen*MATRIX_MAX_BR+1][maxReadLen+1];
+//    for(i=0;i<=maxReadLen*MATRIX_MAX_BR;i++){
+//    	for(j=0;j<=maxReadLen;j++){
+//    		data2[i][j] = j * GAP_PENALTY;
+//    	}
+//    }
+
     alMatrix = (int16_t**)malloc(sizeof(int16_t*)*(maxReadLen*MATRIX_MAX_BR+1)); // Convention that the aligning part of the graph do not contain more than 5*maxReadLen nodes
     alMatrix_Letter = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*(maxReadLen*MATRIX_MAX_BR+1));
     for(i=0;i<=maxReadLen*MATRIX_MAX_BR;i++){
@@ -2686,6 +2691,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     	for(j=0;j<=maxReadLen;j++){
 //    		alMatrix[i][j] = (i+j) * GAP_PENALTY;
     		alMatrix[i][j] = j * GAP_PENALTY;
+    		printf("%i-%i -> %p\n",i,j,&data[i][j]);
     	}
     }
 

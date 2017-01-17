@@ -17,7 +17,7 @@
 #include "readDB.h"
 
 #define GAP_PENALTY  -1
-
+#define MATRIX_MAX_BR 20
 #define TIMEM
 
 // Substitution Matrix 1 		  A, C, G, T, -
@@ -44,6 +44,8 @@ static const char SM1[5][5] = 	{
 };
 
 static const char* const varType[] = {"snp\0", "mnp\0", "ins\0", "del\0", "complex\0"};
+
+//int16_t data2[maxReadLen*MATRIX_MAX_BR+1][maxReadLen+1];
 
 struct contig{
 	int len;

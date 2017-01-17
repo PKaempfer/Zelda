@@ -911,22 +911,25 @@ static inline void poa_resetMatrix(int line, int len){
 	int i,j;
 	static int* nullLine = NULL;
 	if(!nullLine){
-		nullLine = (int*)malloc(sizeof(int)*1000);
-		for(j=0;j<1000;j++){
+		nullLine = (int*)malloc(sizeof(int)*10000);
+		for(j=0;j<10000;j++){
 			nullLine[j]=-100;
 		}
 	}
 	for(i=1;i<line;i++){
 		alMatrix_Letter[i]->ml = NULL;
 		alMatrix_Letter[i]->score = 0;
-		if(alMatrix_Letter[i]->junction!=0) printf("Junction WRONGGGG in line: %i\n",i);
-		alMatrix_Letter[i]->junction = 0;
-		memcpy(&alMatrix[i][1],nullLine,len);
-//		for(j=1;j<=len;j++){
-////			alMatrix[i][j] = j * GAP_PENALTY;
-//			alMatrix[i][j] = -100;
-//		}
+		if(alMatrix_Letter[i]->junction!=0){
+			printf("Junction WRONGGGG in line: %i\n",i);
+			alMatrix_Letter[i]->junction = 0;
+		}
+//		memcpy(&alMatrix[i][1],nullLine,sizeof(int)*len);
+		for(j=1;j<=len;j++){
+//			alMatrix[i][j] = j * GAP_PENALTY;
+			alMatrix[i][j] = -100;
+		}
 	}
+//	memcpy(&alMatrix[0][0],data2[][])
 }
 
 void poa_handleErrors(){
