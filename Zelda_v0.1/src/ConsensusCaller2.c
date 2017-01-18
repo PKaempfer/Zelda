@@ -913,7 +913,7 @@ static inline void poa_resetMatrix(int line, int len){
 	if(!nullLine){
 		nullLine = (int*)malloc(sizeof(int)*10000);
 		for(j=0;j<10000;j++){
-			nullLine[j]=-100;
+			nullLine[j] = (j+1) * GAP_PENALTY;;
 		}
 	}
 	for(i=1;i<line;i++){
@@ -923,11 +923,11 @@ static inline void poa_resetMatrix(int line, int len){
 			printf("Junction WRONGGGG in line: %i\n",i);
 			alMatrix_Letter[i]->junction = 0;
 		}
-//		memcpy(&alMatrix[i][1],nullLine,sizeof(int)*len);
-		for(j=1;j<=len;j++){
-//			alMatrix[i][j] = j * GAP_PENALTY;
-			alMatrix[i][j] = -100;
-		}
+		memcpy(&alMatrix[i][1],nullLine,sizeof(int16_t)*len);
+//		for(j=1;j<=len;j++){
+////			alMatrix[i][j] = j * GAP_PENALTY;
+//			alMatrix[i][j] = -100;
+//		}
 	}
 //	memcpy(&alMatrix[0][0],data2[][])
 }
