@@ -328,10 +328,11 @@ static inline int poa_initMatrix(struct Letter_T* current, struct Letter_T** new
 		for(j=1;j<=mat_end;j++){
 			// k is pos in seq, j-1, because j==0 is first gap position;
 			k = j-1;
-			current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(alMatrix[0][j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(alMatrix[0][j]+GAP_PENALTY));
+//			current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(alMatrix[0][j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(alMatrix[0][j]+GAP_PENALTY));
 //			printf("%i -> %i (j: %i)/n",current->ml[j],current->ml[j-1],j);
 //			current->ml[j] = _max((_max((current->ml[j-1]+GAP_PENALTY),(alMatrix[0][j-1] + SM1[codes[current->letter]][codes[seq[k]]]))),(alMatrix[0][j]+GAP_PENALTY));
 //			current->ml[j] = max_func2(current->ml[j-1]+GAP_PENALTY,alMatrix[0][j-1] + SM1[codes[current->letter]][codes[seq[k]]],alMatrix[0][j]+GAP_PENALTY);
+			current->ml[j] = _max((current->ml[j]),(j*GAP_PENALTY + SM1[codes[current->letter]][codes[seq[k]]]));
 			if(current->ml[best_sc] < current->ml[j]) best_sc = j;
 
 		}
@@ -444,8 +445,8 @@ static inline int poa_fillMatrix(int new_num, struct Letter_T** new_letters, uns
 //							else{
 //								printf("%i > %i (at i: %i ,j: %i)\n",current->ml[j],left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]],depth,j);
 //							}
-							current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
-//							current->ml[j] = max_func2((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
+//							current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
+							current->ml[j] = max_func2((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
 						}
 //						current->ml[j] = _max((_max((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]))),(left->ml[j]+GAP_PENALTY));
 //						current->ml[j] = max_func2((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
