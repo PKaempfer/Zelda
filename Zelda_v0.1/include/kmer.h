@@ -43,7 +43,7 @@ typedef uint32_t readID;
 extern int maxRlen;
 extern int nK;
 extern int dtSize;
-extern int *readLenList;
+extern int16_t *readLenList;
 extern int *readStartList;
 
 extern volatile int max_reprobes; 	// max number of occupied table entries before resizing the hash table

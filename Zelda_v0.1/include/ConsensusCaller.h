@@ -152,9 +152,9 @@ extern struct Letter_T* Letters;
 extern uint32_t numNodes;
 // For ConsensusCaller2 -> Temporary delete when merged
 extern uint32_t maxNumNodes;
-//int alMatrix[100*20+1][120];
 extern int16_t** alMatrix;
 extern int *alMatrix_Best;
+extern int alignedReads;
 extern struct Letter_T** alMatrix_Letter;
 extern struct timespec ts_start;
 extern struct timespec ts_finish;

@@ -20,7 +20,6 @@ extern volatile unsigned char fin_mutex;
 extern unsigned char pthr_runN;
 
 struct readEnd{
-	int32_t len;
 	readID read;
 	volatile struct readEnd* next;
 };
@@ -37,7 +36,7 @@ void createHashTable_oa();
 
 void freeHashTable_oa();
 
-char addReadEnd_oa(KmerBitBuffer, readID, int, int32_t);
+char addReadEnd_oa(KmerBitBuffer, readID, char, int32_t);
 
 #ifdef TYPE128
 char addKmer128_oa(KmerBitBuffer); // 128 bit (dwCAS)

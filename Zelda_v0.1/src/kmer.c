@@ -20,7 +20,7 @@ int maxRlen;
 int nK = 47;
 int dtSize;
 
-int *readLenList;
+int16_t *readLenList;
 int *readStartList;
 
 KmerBitBuffer toBuffer(char* read){

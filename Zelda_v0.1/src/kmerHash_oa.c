@@ -115,12 +115,16 @@ volatile struct hashkmer_oa* resizeHashTable(){
 	return tempHash_oa;
 }
 
-char addReadEnd_oa(KmerBitBuffer current_new, readID read, int end, int32_t readlen){
+char addReadEnd_oa(KmerBitBuffer current_new, readID read, char end, int32_t readlen){
 	uint32_t bucket;
 	struct readEnd* new_readEnd = (struct readEnd*)malloc(sizeof(struct readEnd));
 	new_readEnd->next = NULL;
 	new_readEnd->read = setID(read,end);
-	new_readEnd->len = readlen;
+	if(end){
+		readLenList[read] = readlen;
+		readStartList[read] = 0;
+	}
+//	new_readEnd->len = readlen;
 
 	bucket = my_hash(current_new);
 	int i=0;
@@ -301,17 +305,9 @@ void hashStats_oa(){
 	uint32_t j, i;
 	j = INITHASHSIZE(bitnum);
 	KmerBitBuffer old = empty;
-	struct readEnd* readEnd;
-	uint32_t numEnds = 0;
 
 	printf("Max readID: %i\n",numreads);
-//	if(readLenList){
-//			free(readLenList);
-//			free(readStartList);
-//	}
-	readLenList = (int*)malloc(sizeof(int)*(numreads+1));
-	readStartList = (int*)malloc(sizeof(int)*(numreads+1));
-	int ID;
+
 	int unique = 0;
 	int full = 0;
 	int maxcount = 0;
@@ -321,8 +317,6 @@ void hashStats_oa(){
 	int setchainlen = 0;
 	int usetchainlen = 0;
 	int chain=0;
-	int end = 0;
-	int endLen = 0;
 
 	itemNum = 0;
 	for(i=0;i<j;i++){
@@ -332,32 +326,8 @@ void hashStats_oa(){
 				chain = 1;
 			}
 			setchainlen++;
-
 			itemNum++;
 			old = (KmerBitBuffer)dbHash_oa[i].kmer;
-			readEnd = (struct readEnd*)dbHash_oa[i].ends;
-			if(readEnd){
-				end++;
-				// Set read length to the global list
-				if((readEnd->read & SET_READ_END)){
-					ID = readEnd->read & DEL_READ_END;
-					readLenList[ID] = readEnd->len;
-					readStartList[ID] = 0;
-				}
-				endLen++;
-				numEnds++;
-				while(readEnd->next){
-					endLen++;
-					numEnds++;
-					readEnd = (struct readEnd*)readEnd->next;
-					// Set read length to the global list
-					if((readEnd->read & SET_READ_END)){
-						ID = readEnd->read & DEL_READ_END;
-						readLenList[ID] = readEnd->len;
-						readStartList[ID] = 0;
-					}
-				}
-			}
 			dif_kmer++;
 			tot_num += dbHash_oa[i].count;
 			if(dbHash_oa[i].count==1) unique++;
@@ -381,10 +351,8 @@ void hashStats_oa(){
 	printf("Distinct Sequences: %i\n",distinct);
 	printf("Conunt >=255: %i\n",full);
 	printf("MaxCount: %i\n",maxcount);
-	printf("Totnumber of read end kmers: %i\n",numEnds);
 	printf("GraphSize: %i\n",graphSize);
 	printf("SetChains: %i (avglen: %.2f)\n",setchains,(float)setchainlen/setchains);
-	printf("Readendschains: %i (avgLen: %.2f)\n",end,(float)endLen/end);
 }
 
 void mt_createKmers(char* read, int readNum){

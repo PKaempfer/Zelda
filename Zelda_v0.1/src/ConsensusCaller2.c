@@ -328,10 +328,10 @@ static inline int poa_initMatrix(struct Letter_T* current, struct Letter_T** new
 		for(j=1;j<=mat_end;j++){
 			// k is pos in seq, j-1, because j==0 is first gap position;
 			k = j-1;
-			current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(alMatrix[0][j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(alMatrix[0][j]+GAP_PENALTY));
+//			current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(alMatrix[0][j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(alMatrix[0][j]+GAP_PENALTY));
 //			printf("%i -> %i (j: %i)/n",current->ml[j],current->ml[j-1],j);
 //			current->ml[j] = _max((_max((current->ml[j-1]+GAP_PENALTY),(alMatrix[0][j-1] + SM1[codes[current->letter]][codes[seq[k]]]))),(alMatrix[0][j]+GAP_PENALTY));
-//			current->ml[j] = max_func2(current->ml[j-1]+GAP_PENALTY,alMatrix[0][j-1] + SM1[codes[current->letter]][codes[seq[k]]],alMatrix[0][j]+GAP_PENALTY);
+			current->ml[j] = max_func2(current->ml[j-1]+GAP_PENALTY,alMatrix[0][j-1] + SM1[codes[current->letter]][codes[seq[k]]],alMatrix[0][j]+GAP_PENALTY);
 //			current->ml[j] = _max((current->ml[j]),(j*GAP_PENALTY + SM1[codes[current->letter]][codes[seq[k]]]));
 			if(current->ml[best_sc] < current->ml[j]) best_sc = j;
 
@@ -445,8 +445,8 @@ static inline int poa_fillMatrix(int new_num, struct Letter_T** new_letters, uns
 //							else{
 //								printf("%i > %i (at i: %i ,j: %i)\n",current->ml[j],left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]],depth,j);
 //							}
-							current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
-//							current->ml[j] = max_func2((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
+//							current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
+							current->ml[j] = max_func2((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
 						}
 //						current->ml[j] = _max((_max((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]))),(left->ml[j]+GAP_PENALTY));
 //						current->ml[j] = max_func2((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
@@ -511,7 +511,7 @@ static inline int poa_searchEndPoint(int line, unsigned char* seq, int insNum, c
 		exit(1);
 	}
 
-	if(!fullMatrix && best_Score < (len*SM1[0][0])*0.98)
+	if(!fullMatrix && best_Score < (len*SM1[0][0])*0.99)
 //		printf("BestScore: %i\n",best_Score);
 		return -1;
 
@@ -888,9 +888,9 @@ static inline void poa_updateGraph(unsigned char* seq, struct pairAlign* align, 
 static inline void poa_resetMatrix(int line, int len){
 	// free the letters and set matrix to 0
 	int i,j;
-	static int* nullLine = NULL;
+	static int16_t* nullLine = NULL;
 	if(!nullLine){
-		nullLine = (int*)malloc(sizeof(int)*10000);
+		nullLine = (int16_t*)malloc(sizeof(int16_t)*10000);
 		for(j=0;j<10000;j++){
 			nullLine[j] = (j+1) * GAP_PENALTY;;
 		}
@@ -903,10 +903,13 @@ static inline void poa_resetMatrix(int line, int len){
 			alMatrix_Letter[i]->junction = 0;
 		}
 		memcpy(&alMatrix[i][1],nullLine,sizeof(int16_t)*len);
-//		for(j=1;j<=len;j++){
-////			alMatrix[i][j] = j * GAP_PENALTY;
-//			alMatrix[i][j] = -100;
+//		printf("%i:  ",i);
+//		for(j=0;j<=len;j++){
+//			printf("%i ",alMatrix[i][j]);
+//////			alMatrix[i][j] = j * GAP_PENALTY;
+////			alMatrix[i][j] = -100;
 //		}
+//		printf("\n");
 	}
 //	memcpy(&alMatrix[0][0],data2[][])
 }
@@ -916,6 +919,7 @@ void poa_handleErrors(){
 }
 
 long alignmentTime = 0;
+int alignedReads = 0;
 
 /**
  * Aligns a read sequence to the part of the poa graph, provided by the overlap information of the string graph.
@@ -1009,7 +1013,8 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 			alignmentTime += (((alignmentEnd.tv_sec * 1000000000) + alignmentEnd.tv_nsec) - ((alignmentSt.tv_sec * 1000000000) + alignmentSt.tv_nsec));
 #endif
 			numFull++;
-			if(verbose)
+//			if(verbose)
+			if(numFull%1000 == 0)
 				printf("NumFull: %i (Part: %i)\n",numFull,numPart);
 		}
 
@@ -1076,6 +1081,6 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 
 //	clock_gettime(CLOCK_MONOTONIC, &alignmentEnd);
 //	alignmentTime += (((alignmentEnd.tv_sec * 1000000000) + alignmentEnd.tv_nsec) - ((alignmentSt.tv_sec * 1000000000) + alignmentSt.tv_nsec));
-
+	alignedReads++;
 	return 1;
 }

@@ -532,6 +532,8 @@ struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* thread
 	}
 
 	printf("numreads: %i\n",numreads);
+	readLenList = (int16_t*)malloc(sizeof(int16_t)*(numreads+1));
+	readStartList = (int*)malloc(sizeof(int)*(numreads+1));
 
 	// Read BlockINFO
 	// Lock if ReadBlock distribution is consistent with pthr_num
