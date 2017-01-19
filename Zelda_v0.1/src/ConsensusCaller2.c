@@ -511,7 +511,7 @@ static inline int poa_searchEndPoint(int line, unsigned char* seq, int insNum, c
 		exit(1);
 	}
 
-	if(!fullMatrix && best_Score < (len*SM1[0][0])*0.99)
+	if(!fullMatrix && best_Score < (len*SM1[0][0])*0.98)
 //		printf("BestScore: %i\n",best_Score);
 		return -1;
 
