@@ -234,9 +234,9 @@ static inline int poa_align_prepro(struct Sequence* contig, int len, int overhan
 	do{
 //		if(!current->ml){
 			alMatrix_Letter[line] = current;
-			for(i=1;i<=len;i++){
-				alMatrix[line][i] = i * GAP_PENALTY;
-			}
+//			for(i=1;i<=len;i++){
+//				alMatrix[line][i] = i * GAP_PENALTY;
+//			}
 			current->ml = alMatrix[line++];
 			new_letters[new_num++] = current;
 //			current->junction = 1;
@@ -899,23 +899,11 @@ static inline void poa_resetMatrix(int line, int len){
 		alMatrix_Letter[i]->ml = NULL;
 		alMatrix_Letter[i]->score = 0;
 		if(alMatrix_Letter[i]->junction!=0){
-			printf("Junction WRONGGGG in line: %i\n",i);
+			printf("Junction WRONGGGG in line: %i: %i\n",i,alMatrix_Letter[i]->junction);
 			alMatrix_Letter[i]->junction = 0;
 		}
 		memcpy(&alMatrix[i][1],nullLine,sizeof(int16_t)*len);
-//		printf("%i:  ",i);
-//		for(j=0;j<=len;j++){
-//			printf("%i ",alMatrix[i][j]);
-//////			alMatrix[i][j] = j * GAP_PENALTY;
-////			alMatrix[i][j] = -100;
-//		}
-//		printf("\n");
 	}
-//	memcpy(&alMatrix[0][0],data2[][])
-}
-
-void poa_handleErrors(){
-
 }
 
 long alignmentTime = 0;
