@@ -96,7 +96,7 @@ static inline void poa_showAlignment(char* readseq, char* refseq, int readlen){
  * @param column	Number of the letters in the part of the reference
  * @param seq		Sequence of the read in correct orientation
  */
-static inline void poa_showMatrix(int row, int column, char* seq){
+void poa_showMatrix(int row, int column, char* seq){
 	printf("CHECKPOINT: Print Matrix (row: %i, col: %i)\n",row,column);
 	int i,j;
 	printf("\t");
@@ -198,6 +198,7 @@ void poa_catBackbone2(struct Sequence* contig, struct myovlList *G, char* seq, i
 	contig->readright = numNodes-1;
 }
 
+int gdepth = 100;
 
 /**
  * TODO: All Fine, May have a look at the real end node!!! Seems to cause a problem at some point.
@@ -211,6 +212,7 @@ void poa_catBackbone2(struct Sequence* contig, struct myovlList *G, char* seq, i
  */
 static inline int poa_align_prepro(struct Sequence* contig, int len, int overhang){
 	char verbose = 0;
+	char strictverbose = 0;
 //	printf("CHECKPOINT: Graph_prepro\n");
 
 	struct Letter_T* current = &Letters[contig->readleft];
@@ -220,7 +222,7 @@ static inline int poa_align_prepro(struct Sequence* contig, int len, int overhan
 	int new_num = 0;
 	static struct Letter_T** old_letters = NULL;
 	int old_num = 0;
-	struct Letter_T** temp;
+//	struct Letter_T** temp;
 
 	if(!new_letters){
 		new_letters = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*1000); // Max breadth of graph = 100
@@ -229,19 +231,11 @@ static inline int poa_align_prepro(struct Sequence* contig, int len, int overhan
 
 	struct Letter_T* end_node = &Letters[contig->readright];
 	int line = 1;
-	int i;
 
 	do{
-//		if(!current->ml){
-			alMatrix_Letter[line] = current;
-//			for(i=1;i<=len;i++){
-//				alMatrix[line][i] = i * GAP_PENALTY;
-//			}
-			current->ml = alMatrix[line++];
-			new_letters[new_num++] = current;
-//			current->junction = 1;
-//		}
-//		else break;
+		alMatrix_Letter[line] = current;
+		current->ml = alMatrix[line++];
+		new_letters[new_num++] = current;
 		if(current->align_ring && current->align_ring != start_node){
 			current = current->align_ring;
 		}
@@ -256,9 +250,9 @@ static inline int poa_align_prepro(struct Sequence* contig, int len, int overhan
 //	if(overhang >= 30) printf("Wide range overhang could cause a problem\n");
 
 	while(new_num && depth <= len + overhang + 50){
-//		printf("Go deeper: %i\n",depth);
+		if(strictverbose) printf("Go deeper: %i (overhang:%i), newnum: %i\n",depth,overhang,new_num);
 		if(verbose && new_num >= 90) printf("Graph breadth > 100\n");
-		memcpy(old_letters,new_letters,sizeof(struct Letter_T)*new_num);
+		memcpy(old_letters,new_letters,sizeof(struct Letter_T*)*new_num);
 //		temp = old_letters;
 //		old_letters = new_letters;
 //		new_letters = temp;
@@ -272,12 +266,16 @@ static inline int poa_align_prepro(struct Sequence* contig, int len, int overhan
 				while(edge){
 					if(Letters[edge->dest].junction == 0){
 						Letters[edge->dest].junction = 1;
+//						if(line>240)
+						if(strictverbose) printf("1 PrePro -> l: %i (d: %i) dest: %i / ori: %li\n",line,depth,edge->dest,old_letters[old_num]-&Letters[0]);
 						new_letters[new_num++] = &Letters[edge->dest];
 						alMatrix_Letter[line] = &Letters[edge->dest];
 						Letters[edge->dest].ml = alMatrix[line++];
 					}
 					else{
 						Letters[edge->dest].junction++;
+//						if(line>240)
+						if(strictverbose) printf("2 PrePro -> l: %i (d: %i) dest: %i / ori: %li\n",line,depth,edge->dest,old_letters[old_num]-&Letters[0]);
 					}
 //					if(insNum == 4077)	printf("Letter: %c (id: %i) num: %i\n",Letters[edge->dest].letter,edge->dest,(int)Letters[edge->dest].junction);
 					edge = edge->next;
@@ -290,7 +288,11 @@ static inline int poa_align_prepro(struct Sequence* contig, int len, int overhan
 		// Limit number of fields in matrix to compute. Give a maximum distance from the diagonal (e.g. 5bp)
 		depth++;
 	}
-//	printf("LineNumber: %i\n",line);
+	if(strictverbose && depth<90){
+		printf("LineNumber: %i / %i\n",line,depth);
+		gdepth = depth;
+	}
+
 
 	return line;
 }
@@ -352,6 +354,7 @@ static inline int poa_initMatrix(struct Letter_T* current, struct Letter_T** new
 }
 
 static inline int poa_fillMatrix(int new_num, struct Letter_T** new_letters, unsigned char* seq,struct Letter_T* end_node , struct Letter_T** end_letters, int overhang, int backoverhang, char fullMatrix, int len){
+	char strictverbose = 0;
 	int j,k;
 	int depth = 1;
 	int id;
@@ -363,18 +366,18 @@ static inline int poa_fillMatrix(int new_num, struct Letter_T** new_letters, uns
 	struct LetterEdge* edge;
 	struct Letter_T* left;
 	struct Letter_T* current;
-	struct Letter_T** temp;
+//	struct Letter_T** temp;
 	int old_num = 0;
 	static struct Letter_T** old_letters = NULL;
-	if(!old_letters) old_letters = (struct Letter_T**)malloc(sizeof(struct Letter_T)*10000);
+	if(!old_letters) old_letters = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*10000);
 
 	int range;
 	if(!fullMatrix) range = H_RANGE;
 	else range = len;
 
-	while(new_num && depth <= maxReadLen + overhang + 50){
+	while(new_num && depth <= len + overhang + 100){ //maxReadLen
 //		printf("Go deeper: %i\n",depth);
-		memcpy(old_letters,new_letters,sizeof(struct Letter_T)*new_num);
+		memcpy(old_letters,new_letters,sizeof(struct Letter_T*)*new_num);
 //		temp = old_letters;
 //		old_letters = new_letters;
 //		new_letters = temp;
@@ -391,21 +394,30 @@ static inline int poa_fillMatrix(int new_num, struct Letter_T** new_letters, uns
 //				printf("Letter: %c (id: %i) num: %i\n",old_letters[old_num]->letter,id,(int)old_letters[old_num]->junction);
 				while(edge){
 //					new_letters[new_num++] = &Letters[edge->dest];
-//					printf("edge: %c (depth: %i)\n",Letters[edge->dest].letter,depth);
+					if(strictverbose && gdepth < 90)
+					printf("edge: %i (depth: %i)\n",edge->dest,depth);
 					if(Letters[edge->dest].junction == 1){
+//						if((&Letters[edge->dest].ml[0] - &alMatrix[0][0]) / (maxReadLen+1) >240)
+//							printf("FILL (%lu , %p - %p) -> l: %lu (d: %i)\n",&Letters[edge->dest].ml[0] - &alMatrix[0][0],&Letters[edge->dest].ml[0],&alMatrix[0][0],(&Letters[edge->dest].ml[0] - &alMatrix[0][0]) / (maxReadLen+1),depth);
 						Letters[edge->dest].junction--;
 						rightbool = 1;
 					}
 					else if(Letters[edge->dest].junction > 1){
+//						if((&Letters[edge->dest].ml[0] - &alMatrix[0][0]) / (maxReadLen+1) >240)
+//							printf("FILL (%lu , %p - %p) -> l: %lu (d: %i)\n",&Letters[edge->dest].ml[0] - &alMatrix[0][0],&Letters[edge->dest].ml[0],&alMatrix[0][0],(&Letters[edge->dest].ml[0] - &alMatrix[0][0]) / (maxReadLen+1),depth);
 						Letters[edge->dest].junction--;
 						Letters[edge->dest].junction *= -1;
 						rightbool = 3;
 					}
 					else if(Letters[edge->dest].junction == -1){
+//						if((&Letters[edge->dest].ml[0] - &alMatrix[0][0]) / (maxReadLen+1) >240)
+//							printf("FILL (%lu , %p - %p) -> l: %lu (d: %i)\n",&Letters[edge->dest].ml[0] - &alMatrix[0][0],&Letters[edge->dest].ml[0],&alMatrix[0][0],(&Letters[edge->dest].ml[0] - &alMatrix[0][0]) / (maxReadLen+1),depth);
 						Letters[edge->dest].junction++;
 						rightbool = 0;
 					}
 					else if(Letters[edge->dest].junction < -1){
+//						if((&Letters[edge->dest].ml[0] - &alMatrix[0][0]) / (maxReadLen+1) >240)
+//							printf("FILL (%lu , %p - %p) -> l: %lu (d: %i)\n",&Letters[edge->dest].ml[0] - &alMatrix[0][0],&Letters[edge->dest].ml[0],&alMatrix[0][0],(&Letters[edge->dest].ml[0] - &alMatrix[0][0]) / (maxReadLen+1),depth);
 						Letters[edge->dest].junction++;
 						rightbool = 2;
 					}
@@ -481,13 +493,15 @@ static inline int poa_fillMatrix(int new_num, struct Letter_T** new_letters, uns
 //	if(depth%2==0){
 //		memcpy(old_letters,new_letters,sizeof(struct Letter_T)*new_num);
 //	}
+//	if(gdepth<90) exit(1);
 
 	return end_num;
 
 }
 
-static inline int poa_searchEndPoint(int line, unsigned char* seq, int insNum, char backbone, char print_align, int overhang, struct Sequence* contig, char fullMatrix,int len){
-	int i,j;
+//static inline int poa_searchEndPoint(int line, unsigned char* seq, int insNum, char backbone, char print_align, int overhang, struct Sequence* contig, char fullMatrix,int len){
+static inline int poa_searchEndPoint(int line, char fullMatrix,int len){
+	int i;
 	int best_Letter = 0;
 	int best_Score = 0;
 //	for(i=0;i<end_num;i++){
@@ -515,45 +529,45 @@ static inline int poa_searchEndPoint(int line, unsigned char* seq, int insNum, c
 //		printf("BestScore: %i\n",best_Score);
 		return -1;
 
-	if(best_Score < (len*SM1[0][0])*0.10){ //!backbone &&
-		if(!backbone) printf("Alignment %i -> Best Score of Matrix below threshold for Containment -> Alignment denied go to next (best Score: %i/%i)  \n",insNum,best_Score,len*SM1[0][0]);
-		else printf("Alignment %i -> Best Score of Matrix below threshold for PROPER -> Alignment denied go to next (best Score: %i/%i)  \n",insNum,best_Score,len*SM1[0][0]);
-//		poa_part_toDot("output/error.dot",contig);
-		print_align = 1;
-		if(!backbone){
-			for(i=1;i<line;i++){
-				alMatrix_Letter[i]->ml = NULL;
-				alMatrix_Letter[i]->score = 0;
-				alMatrix_Letter[i]->junction = 0;
-				for(j=1;j<=len;j++){
-					alMatrix[i][j] = j * GAP_PENALTY;
-				}
-			}
-			return 0;
-		}
-		if(!print_align){
-			for(i=1;i<line;i++){
-				alMatrix_Letter[i]->ml = NULL;
-				alMatrix_Letter[i]->score = 0;
-				alMatrix_Letter[i]->junction = 0;
-				for(j=1;j<=len;j++){
-					alMatrix[i][j] = j * GAP_PENALTY;
-				}
-			}
-			return 0;
-		}
-		else{
-			printf("CHECKPOINT: Print Matrix (row: %i, col: %i,overhang: %i)\n",len,line,overhang);
-			static int part = 0;
-//			poa_showMatrix(len,line,seq);
-			char* dotFile = (char*)malloc(100);
-			sprintf(dotFile,"part_%i.dot",part);
-			printf("POA: %s\n",dotFile);
-			printf("Sequence: %s\n",seq);
-			poa_part_toDot(dotFile,contig);
-			part++;
-		}
-	}
+//	if(best_Score < (len*SM1[0][0])*0.10){ //!backbone &&
+//		if(!backbone) printf("Alignment %i -> Best Score of Matrix below threshold for Containment -> Alignment denied go to next (best Score: %i/%i)  \n",insNum,best_Score,len*SM1[0][0]);
+//		else printf("Alignment %i -> Best Score of Matrix below threshold for PROPER -> Alignment denied go to next (best Score: %i/%i)  \n",insNum,best_Score,len*SM1[0][0]);
+////		poa_part_toDot("output/error.dot",contig);
+//		print_align = 1;
+//		if(!backbone){
+////			for(i=1;i<line;i++){
+////				alMatrix_Letter[i]->ml = NULL;
+////				alMatrix_Letter[i]->score = 0;
+////				alMatrix_Letter[i]->junction = 0;
+////				for(j=1;j<=len;j++){
+////					alMatrix[i][j] = j * GAP_PENALTY;
+////				}
+////			}
+//			return 0;
+//		}
+//		if(!print_align){
+////			for(i=1;i<line;i++){
+////				alMatrix_Letter[i]->ml = NULL;
+////				alMatrix_Letter[i]->score = 0;
+////				alMatrix_Letter[i]->junction = 0;
+////				for(j=1;j<=len;j++){
+////					alMatrix[i][j] = j * GAP_PENALTY;
+////				}
+////			}
+//			return 0;
+//		}
+//		else{
+//			printf("CHECKPOINT: Print Matrix (row: %i, col: %i,overhang: %i)\n",len,line,overhang);
+//			static int part = 0;
+////			poa_showMatrix(len,line,seq);
+//			char* dotFile = (char*)malloc(100);
+//			sprintf(dotFile,"part_%i.dot",part);
+//			printf("POA: %s\n",dotFile);
+//			printf("Sequence: %s\n",seq);
+//			poa_part_toDot(dotFile,contig);
+//			part++;
+//		}
+//	}
 	return best_Letter;
 }
 
@@ -917,11 +931,14 @@ int alignedReads = 0;
  * @param seq		Is the read sequence to align
  * @param backbone	Is a boolean value if the read was proper, than it is set as new reference point for the area in the PO-graph for the next read alignment
  */
-char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned char* seq, char backbone, char heuristic, int insNum, int overhang, int backoverhang){
+char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned char* seq, char backbone, char heuristic, int overhang, int backoverhang){
 	static struct timespec alignmentSt;
 	static struct timespec alignmentEnd;
+	static int seqlen = 0;
+	static int line = 0;
 
 	char verbose = 0;
+	char breakverbose = 1;
 	static char print_align = 0;
 	static char print_Message = 0;
 	static struct Letter_T** new_letters = NULL;
@@ -929,7 +946,7 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 	static struct Letter_T** end_letters = NULL;
 	static int numFull = 0;
 	static int numPart = 0;
-	int seqlen = strlen((char*)seq);
+	seqlen = strlen((char*)seq);
 	int end_num = 0;
 
 	if(!new_letters){
@@ -946,7 +963,6 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 //	int j;
 
 	char fullMatrix = !heuristic;
-	int line;
 	struct Letter_T* current;
 	struct Letter_T* end_node;
 	int best_Letter;
@@ -954,6 +970,7 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 		new_num = 0;
 		end_num = 0;
 		// 1. Alignemnt matrix size definition and line assignment to the poa Nodes
+		poa_resetMatrix(line,seqlen);
 		line = poa_align_prepro(contig,seqlen,overhang);
 		if(print_Message) printf("Build SW-Matrix of read: %i\n",read->ID);
 #ifdef TIMEM
@@ -979,13 +996,14 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 		sumMatrix += (((ts_finish.tv_sec * 1000000000) + ts_finish.tv_nsec) - ((ts_start.tv_sec * 1000000000) + ts_start.tv_nsec));
 #endif
 		if(new_num){
-			memcpy(&end_letters[end_num],new_letters,sizeof(struct Letter_T)*new_num);
+			memcpy(&end_letters[end_num],new_letters,sizeof(struct Letter_T*)*new_num);
 			end_num += new_num;
 		}
 		if(print_Message) printf("Number of alternative ends: %i\n",end_num);
 
 		// 4. Search best Alignmet end Point
-		best_Letter = poa_searchEndPoint(line,seq,insNum,backbone,print_align,overhang,contig,fullMatrix,seqlen);
+//		best_Letter = poa_searchEndPoint(line,seq,insNum,backbone,print_align,overhang,contig,fullMatrix,seqlen);
+		best_Letter = poa_searchEndPoint(line,fullMatrix,seqlen);
 		if(fullMatrix || best_Letter>=0){
 			numPart++;
 			break;
@@ -995,7 +1013,6 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 #ifdef TIMEM
 			clock_gettime(CLOCK_MONOTONIC, &alignmentSt);
 #endif
-			poa_resetMatrix(line,seqlen);
 #ifdef TIMEM
 			clock_gettime(CLOCK_MONOTONIC, &alignmentEnd);
 			alignmentTime += (((alignmentEnd.tv_sec * 1000000000) + alignmentEnd.tv_nsec) - ((alignmentSt.tv_sec * 1000000000) + alignmentSt.tv_nsec));
@@ -1009,7 +1026,8 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 	}
 
 	if(!best_Letter){
-		if(verbose) printf("No Best Letter -> Return!\n");
+//		poa_resetMatrix(line,seqlen);
+		if(breakverbose) printf("BestLetter Break\n");
 		return 0;
 	}
 	else current = alMatrix_Letter[best_Letter];
@@ -1022,7 +1040,8 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 #endif
 	struct pairAlign align = poa_backtrace(contig,seq,current,print_Message,backbone,seqlen); // Parameter 4: read->ID,
 	if(!align.current){
-		poa_resetMatrix(line,seqlen);
+		if(breakverbose) printf("Alignment Break\n");
+//		poa_resetMatrix(line,seqlen);
 		return 0;
 	}
 
@@ -1058,7 +1077,7 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 #ifdef TIMEM
 	clock_gettime(CLOCK_MONOTONIC, &alignmentSt);
 #endif
-	poa_resetMatrix(line,seqlen);
+//	poa_resetMatrix(line,seqlen);
 #ifdef TIMEM
 	clock_gettime(CLOCK_MONOTONIC, &alignmentEnd);
 	alignmentTime += (((alignmentEnd.tv_sec * 1000000000) + alignmentEnd.tv_nsec) - ((alignmentSt.tv_sec * 1000000000) + alignmentSt.tv_nsec));

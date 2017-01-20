@@ -185,7 +185,7 @@ void testFunct();
 
 void poa_heuristic_align(struct Sequence* contig, struct reads* read, char* seq, char backbone, int insNum);
 
-char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned char* seq, char backbone, char heuristic, int insNum, int overhang, int backoverhang);
+char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned char* seq, char backbone, char heuristic, int overhang, int backoverhang);
 
 struct POG* make_poa(struct myovlList* G, struct reads* reads);
 
