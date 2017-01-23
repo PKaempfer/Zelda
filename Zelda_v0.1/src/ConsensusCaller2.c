@@ -222,7 +222,7 @@ static inline int poa_align_prepro(struct Sequence* contig, int len, int overhan
 	int new_num = 0;
 	static struct Letter_T** old_letters = NULL;
 	int old_num = 0;
-//	struct Letter_T** temp;
+	struct Letter_T** temp_letters;
 
 	if(!new_letters){
 		new_letters = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*1000); // Max breadth of graph = 100
@@ -252,10 +252,9 @@ static inline int poa_align_prepro(struct Sequence* contig, int len, int overhan
 	while(new_num && depth <= len + overhang + 50){
 		if(strictverbose) printf("Go deeper: %i (overhang:%i), newnum: %i\n",depth,overhang,new_num);
 		if(verbose && new_num >= 90) printf("Graph breadth > 100\n");
-		memcpy(old_letters,new_letters,sizeof(struct Letter_T*)*new_num);
-//		temp = old_letters;
-//		old_letters = new_letters;
-//		new_letters = temp;
+		temp_letters = old_letters;
+		old_letters = new_letters;
+		new_letters = temp_letters;
 		old_num = new_num;
 		new_num = 0;
 
@@ -353,7 +352,7 @@ static inline int poa_initMatrix(struct Letter_T* current, struct Letter_T** new
 	return new_num;
 }
 
-static inline int poa_fillMatrix(int new_num, struct Letter_T** new_letters, unsigned char* seq,struct Letter_T* end_node , struct Letter_T** end_letters, int overhang, int backoverhang, char fullMatrix, int len){
+static inline int poa_fillMatrix(int* new_numG, struct Letter_T** new_letters, unsigned char* seq,struct Letter_T* end_node , struct Letter_T** end_letters, int overhang, int backoverhang, char fullMatrix, int len){
 	char strictverbose = 0;
 	int j,k;
 	int depth = 1;
@@ -366,21 +365,22 @@ static inline int poa_fillMatrix(int new_num, struct Letter_T** new_letters, uns
 	struct LetterEdge* edge;
 	struct Letter_T* left;
 	struct Letter_T* current;
-//	struct Letter_T** temp;
+	struct Letter_T** temp_letters;
 	int old_num = 0;
 	static struct Letter_T** old_letters = NULL;
 	if(!old_letters) old_letters = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*10000);
 
 	int range;
+	int new_num = (*new_numG);
 	if(!fullMatrix) range = H_RANGE;
 	else range = len;
 
 	while(new_num && depth <= len + overhang + 100){ //maxReadLen
 //		printf("Go deeper: %i\n",depth);
-		memcpy(old_letters,new_letters,sizeof(struct Letter_T*)*new_num);
-//		temp = old_letters;
-//		old_letters = new_letters;
-//		new_letters = temp;
+//		memcpy(old_letters,new_letters,sizeof(struct Letter_T*)*new_num);
+		temp_letters = old_letters;
+		old_letters = new_letters;
+		new_letters = temp_letters;
 		old_num = new_num;
 		new_num = 0;
 
@@ -490,9 +490,13 @@ static inline int poa_fillMatrix(int new_num, struct Letter_T** new_letters, uns
 		depth++;
 	}
 
-//	if(depth%2==0){
-//		memcpy(old_letters,new_letters,sizeof(struct Letter_T)*new_num);
-//	}
+	(*new_numG) = new_num;
+	if(depth%2==0){
+		memcpy(old_letters,new_letters,sizeof(struct Letter_T)*new_num);
+		temp_letters = old_letters;
+		old_letters = new_letters;
+		new_letters = temp_letters;
+	}
 //	if(gdepth<90) exit(1);
 
 	return end_num;
@@ -969,10 +973,18 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 	while(1){
 		new_num = 0;
 		end_num = 0;
+#ifdef TIMEM
+			clock_gettime(CLOCK_MONOTONIC, &alignmentSt);
+#endif
 		// 1. Alignemnt matrix size definition and line assignment to the poa Nodes
 		poa_resetMatrix(line,seqlen);
 		line = poa_align_prepro(contig,seqlen,overhang);
+#ifdef TIMEM
+			clock_gettime(CLOCK_MONOTONIC, &alignmentEnd);
+			alignmentTime += (((alignmentEnd.tv_sec * 1000000000) + alignmentEnd.tv_nsec) - ((alignmentSt.tv_sec * 1000000000) + alignmentSt.tv_nsec));
+#endif
 		if(print_Message) printf("Build SW-Matrix of read: %i\n",read->ID);
+
 #ifdef TIMEM
 		clock_gettime(CLOCK_MONOTONIC, &ts_start);
 #endif
@@ -986,7 +998,7 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 
 		// 3. Fill the Alignment Matrix (Most Time Consuming Part of the entire tool)
 		end_node = &Letters[contig->readright];
-		end_num = poa_fillMatrix(new_num,new_letters,seq,end_node,end_letters,overhang,backoverhang,fullMatrix,seqlen);
+		end_num = poa_fillMatrix(&new_num,new_letters,seq,end_node,end_letters,overhang,backoverhang,fullMatrix,seqlen);
 
 		if(end_num < 0){
 			return 0;
@@ -996,6 +1008,7 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 		sumMatrix += (((ts_finish.tv_sec * 1000000000) + ts_finish.tv_nsec) - ((ts_start.tv_sec * 1000000000) + ts_start.tv_nsec));
 #endif
 		if(new_num){
+			printf("\tAdd new Letters\n");
 			memcpy(&end_letters[end_num],new_letters,sizeof(struct Letter_T*)*new_num);
 			end_num += new_num;
 		}
@@ -1010,13 +1023,6 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 		}
 		else{
 			fullMatrix=1;
-#ifdef TIMEM
-			clock_gettime(CLOCK_MONOTONIC, &alignmentSt);
-#endif
-#ifdef TIMEM
-			clock_gettime(CLOCK_MONOTONIC, &alignmentEnd);
-			alignmentTime += (((alignmentEnd.tv_sec * 1000000000) + alignmentEnd.tv_nsec) - ((alignmentSt.tv_sec * 1000000000) + alignmentSt.tv_nsec));
-#endif
 			numFull++;
 //			if(verbose)
 			if(numFull%1000 == 0)
@@ -1034,10 +1040,10 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 	int ID = current-Letters;
 	if(ID < 0) ID *= -1;
 
-	// 5. Make backtrace
 #ifdef TIMEM
 	clock_gettime(CLOCK_MONOTONIC, &ts_start);
 #endif
+	// 5. Make backtrace
 	struct pairAlign align = poa_backtrace(contig,seq,current,print_Message,backbone,seqlen); // Parameter 4: read->ID,
 	if(!align.current){
 		if(breakverbose) printf("Alignment Break\n");

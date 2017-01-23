@@ -3010,10 +3010,11 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 
     		printf("Aligned Reads: %i\n",alignedReads);
 #ifdef TIMEM
-    		printf("Matrix time:    %.3f s\n",(float)sumMatrix/1000000000);
-    		printf("Backtrace time: %.3f s\n",(float)sumTrace/1000000000);
+    		printf("Init time:      %.3f s\n",(float)alignmentTime/1000000000);
+    		printf("Alignment time: %.3f s\n",(float)sumMatrix/1000000000);
+    		printf("Backtrack time: %.3f s\n",(float)sumTrace/1000000000);
     		printf("Consensus time: %.3f s\n",(float)consensusTime/1000000000);
-    		printf("Align time:     %.3f s\n",(float)alignmentTime/1000000000);
+
 #endif
     	}
     }
