@@ -2659,38 +2659,38 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     // Init Graph structure
     struct POG* pog = (struct POG*)malloc(sizeof(struct POG));
     pog->contigNum = 0;
-    pog->maxNum = 100;
+    pog->maxNum = 1000;
     pog->contig = (struct Sequence*)malloc(sizeof(struct Sequence)*pog->maxNum);
-    if(!Letters) Letters = (struct Letter_T*)malloc(sizeof(struct Letter_T)*maxNumNodes);
-    for(i=0;i<maxNumNodes;i++){
-    	Letters[i].left = NULL;
-    	Letters[i].right = NULL;
-    	Letters[i].junction = 0;
-//    	Letters[i].source.next = NULL;
-    	Letters[i].score = 0;
-    	Letters[i].vFlag = 0;
+    if(!Letters){
+    	printf("Malloc new Letters\n");
+    	Letters = (struct Letter_T*)malloc(sizeof(struct Letter_T)*maxNumNodes);
+        for(i=0;i<maxNumNodes;i++){
+        	Letters[i].left = NULL;
+        	Letters[i].right = NULL;
+        	Letters[i].junction = 0;
+    //    	Letters[i].source.next = NULL;
+        	Letters[i].score = 0;
+        	Letters[i].vFlag = 0;
+        }
     }
 
-    // Init Matrix (5 x maxreaden * maxreadlen)
-    // E.g. for maxReadLen = 100 -> 500 x 100 matrix (50,000 array)
-    int16_t data[maxReadLen*MATRIX_MAX_BR+1][maxReadLen+1];
-//    for(i=0;i<=maxReadLen*MATRIX_MAX_BR;i++){
-//    	for(j=0;j<=maxReadLen;j++){
-//    		data2[i][j] = j * GAP_PENALTY;
-//    	}
-//    }
 
-    alMatrix = (int16_t**)malloc(sizeof(int16_t*)*(maxReadLen*MATRIX_MAX_BR+1)); // Convention that the aligning part of the graph do not contain more than 5*maxReadLen nodes
-    alMatrix_Letter = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*(maxReadLen*MATRIX_MAX_BR+1));
-    for(i=0;i<=maxReadLen*MATRIX_MAX_BR;i++){
-    	alMatrix[i] = &data[i][0];
-//    	alMatrix[i]=(int*)malloc(sizeof(int)*(maxReadLen+1));
-    	alMatrix_Letter[i] = NULL;
-    	for(j=0;j<=maxReadLen;j++){
-//    		alMatrix[i][j] = (i+j) * GAP_PENALTY;
-    		alMatrix[i][j] = j * GAP_PENALTY;
-    	}
+    if(!alMatrix_Letter){
+    	printf("Init MatrixLetter");
+    	int16_t data[maxReadLen*MATRIX_MAX_BR+1][maxReadLen+1];
+    	alMatrix = (int16_t**)malloc(sizeof(int16_t*)*(maxReadLen*MATRIX_MAX_BR+1)); // Convention that the aligning part of the graph do not contain more than 5*maxReadLen nodes
+    	alMatrix_Letter = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*(maxReadLen*MATRIX_MAX_BR+1));
+        for(i=0;i<=maxReadLen*MATRIX_MAX_BR;i++){
+        	alMatrix[i] = &data[i][0];
+    //    	alMatrix[i]=(int*)malloc(sizeof(int)*(maxReadLen+1));
+        	alMatrix_Letter[i] = NULL;
+        	for(j=0;j<=maxReadLen;j++){
+    //    		alMatrix[i][j] = (i+j) * GAP_PENALTY;
+        		alMatrix[i][j] = j * GAP_PENALTY;
+        	}
+        }
     }
+
 
     int dir;
     int bdir;
@@ -3046,7 +3046,8 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 //    for(i=0;i<=maxReadLen*MATRIX_MAX_BR;i++){
 //    	free(alMatrix[i]);
 //    }
-    free(alMatrix);
+//    free(alMatrix);
+//    alMatrix = NULL;
     if(verbose)printf("Free DotPath\n");
     free(dotPath);
     if(verbose)printf("Return\n");
@@ -3086,8 +3087,8 @@ void free_POG(struct POG* contigs_pog){
 		free(contigs_pog->contig[i].sequence);
 	}
 
-	free(Letters);
+//	free(Letters);
 	free(contigs_pog->contig);
 	free(contigs_pog);
-	Letters = NULL;
+//	Letters = NULL;
 }

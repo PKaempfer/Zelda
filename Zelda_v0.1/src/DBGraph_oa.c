@@ -29,11 +29,9 @@ void addLinks_oa(struct readEnd* readend, int index){
 uint32_t getKmer_oa(KmerBitBuffer kmer){
 	static uint32_t bucket;
 	bucket = my_hash(kmer);
-//	printf("Search at Bucket. %i\n",bucket);
 	int i = 0;
 
 	while(dbHash_oa[bucket].count && i < max_reprobes){
-//		printf("Search for The Seq\n");
 		if(dbHash_oa[bucket].kmer == kmer) return bucket;
 		bucket++;
 		i++;
@@ -56,21 +54,15 @@ void hashToTabDFS_oa(){
     			tabindex++;
 
     		}
-//    		printf("Start Component building at position %i\n",i);
     		travDFS_oa(i);
-//    		printf("Finished component\n");
     		if(tabindex-oldIndex < MINCOMP){
-//    			printf("Component to small: %i -> Delete Component\n",tabindex-oldIndex);
-//    			printf("size of Graph: %i\n",graph->V);
     			graph->V -= tabindex - oldIndex;
     			delNode += tabindex - oldIndex;
     			deleteComp(oldIndex);
     			delcomp++;
-//    			printf("Deletion Complete\n");
     		}
     		else{
     			comp++;
-//    			printf("%i. Component, size: %i\n",comp,tabindex-oldIndex);
     		}
     		oldIndex = tabindex;
 		}
@@ -129,7 +121,6 @@ void goUpDFS_2_oa(uint32_t** upStackold,uint32_t** downStackold, uint32_t* upPtr
 	struct readEnd* reads;
 
 	do{
-//		printf("New Run (Up: %i / Down: %i)\n",up,down);
 		if(upbool)	s = upStack[--up];
 		if(!upbool) s = downStack[--down];
 
@@ -150,9 +141,7 @@ void goUpDFS_2_oa(uint32_t** upStackold,uint32_t** downStackold, uint32_t* upPtr
 				s_kmer =  (KmerBitBuffer)dbHash_oa[s].kmer;
 				p = hasParent_2_oa(&s_kmer,b,&pdir);
 				if(p!=EMPTYBUCKET){
-//					printf("current Kmer: %s\n",toSeq(s_kmer));
 					p_kmer = (KmerBitBuffer)dbHash_oa[p].kmer;
-//					printf("Parent found: %s (edge transition: %c)\n",toSeq(p_kmer),rev_codes[(int)b]);
 					if(dbHash_oa[p].index == 0){
 						dbHash_oa[p].index = pdir * tabindex;
 						tabindex++;
@@ -163,7 +152,6 @@ void goUpDFS_2_oa(uint32_t** upStackold,uint32_t** downStackold, uint32_t* upPtr
 						addEdge(ABS((dbHash_oa[s].index)),ABS((dbHash_oa[p].index)),transbase,transbaseDown);
 						edgeNum++;
 						if(!dbHash_oa[p].trans){
-//							printf("pop up parent\n");
 							upStack[up++] = p;
 						}
 						// Resize Up-Stack
@@ -178,7 +166,6 @@ void goUpDFS_2_oa(uint32_t** upStackold,uint32_t** downStackold, uint32_t* upPtr
 								printf("Error: could not reallocate Stack memory\n");
 								exit(1);
 							}
-
 						}
 					}
 					else{

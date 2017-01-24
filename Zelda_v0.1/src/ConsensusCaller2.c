@@ -913,9 +913,10 @@ static inline void poa_resetMatrix(int line, int len){
 			nullLine[j] = (j+1) * GAP_PENALTY;;
 		}
 	}
+	if(!alMatrix_Letter) printf("No alMatrix_Letter\n");
 	for(i=1;i<line;i++){
-		alMatrix_Letter[i]->ml = NULL;
 		alMatrix_Letter[i]->score = 0;
+		alMatrix_Letter[i]->ml = NULL;
 		if(alMatrix_Letter[i]->junction!=0){
 			printf("Junction WRONGGGG in line: %i: %i\n",i,alMatrix_Letter[i]->junction);
 			alMatrix_Letter[i]->junction = 0;

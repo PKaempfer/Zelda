@@ -16,7 +16,8 @@
 #include <string.h>
 #include <pthread.h>
 #include <time.h>
-#include "math.h"
+#include <math.h>
+#include "readDB.h"
 #include "kmerHash_oa.h"
 #include "kmerHash.h"
 #include "FileReader.h"
@@ -312,6 +313,7 @@ void hashStats_oa(){
 	int full = 0;
 	int maxcount = 0;
 	int distinct = 0;
+	int totdist = 0;
 	int setchains = 0;
 	int usetchains = 0;
 	int setchainlen = 0;
@@ -331,7 +333,10 @@ void hashStats_oa(){
 			dif_kmer++;
 			tot_num += dbHash_oa[i].count;
 			if(dbHash_oa[i].count==1) unique++;
-			else distinct += dbHash_oa[i].count;
+			else{
+				distinct ++;
+				totdist += dbHash_oa[i].count;
+			}
 			if(dbHash_oa[i].count==255) full++;
 			if(dbHash_oa[i].count > maxcount) maxcount = dbHash_oa[i].count;
 			old = dbHash_oa[i].kmer;
@@ -346,13 +351,17 @@ void hashStats_oa(){
 		}
 	}
 	graphSize = itemNum+1;
+	float coverage = (float)totdist/(float)distinct;
+	float part = (float)maxReadLen/((float)(maxReadLen-nK)+1);
+	float part2 = unique / (float)tot_num;
 	printf("hashTable contains %i (%.2f%%) different k-mers with a total number of %i\n",dif_kmer,(((float)dif_kmer/j))*100,tot_num);
-	printf("Unique Sequences: %i\n",unique);
-	printf("Distinct Sequences: %i\n",distinct);
-	printf("Conunt >=255: %i\n",full);
-	printf("MaxCount: %i\n",maxcount);
-	printf("GraphSize: %i\n",graphSize);
-	printf("SetChains: %i (avglen: %.2f)\n",setchains,(float)setchainlen/setchains);
+	printf("Unique k-mer: (c=1)    %i\n",unique);
+	printf("Estimated genome size: %i\n",distinct);
+	printf("Estimated Coverage:    %.2f\n",(coverage * part) + (coverage * part * part2));
+	printf("Conunt >=255:          %i\n",full);
+	printf("MaxCoverage:           %i\n",maxcount);
+	printf("AL GraphSize:          %i\n",graphSize);
+	printf("SetChains:             %i (avglen: %.2f)\n",setchains,(float)setchainlen/setchains);
 }
 
 void mt_createKmers(char* read, int readNum){

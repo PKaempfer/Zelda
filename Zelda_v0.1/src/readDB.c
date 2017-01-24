@@ -107,10 +107,7 @@ int makeDB(char* outDB, int blocks, struct readFiles* files){
 			}
 			files[i].endId = readNum-1;
 		}
-//		files[i].endId = readNum - 1;
 	}
-
-//	numreads = readNum - 1;
 
 	printf("Write database to: %s\n",outDB);
 	writeDB(outDB,blocks,files);
@@ -130,6 +127,7 @@ void writeDB(char* outDB, int blocks, struct readFiles* files){
 	int j = 0;
 	int temp;
 	int len;
+	int maxlen = 0;
 	int blsize = readTotNum / blocks;
 	char* readDB = (char*)malloc(500);
 	strcpy(readDB,outDB);
@@ -154,6 +152,7 @@ void writeDB(char* outDB, int blocks, struct readFiles* files){
 			blsize += readTotNum / blocks;
 		}
 		len = readsList[i].len;
+		if(len > maxlen) maxlen = len;
 		fwrite(&len,sizeof(int),1,db);
 		wPos += sizeof(int);
 		if(len){
@@ -164,17 +163,15 @@ void writeDB(char* outDB, int blocks, struct readFiles* files){
 	}
 	blocksPos[1][j] = wPos;
 
-//	for(i = 0; i < blocks; i++){
-//		printf("Block %i: From %lu to %lu\n",i,blocksPos[0][i],blocksPos[1][i]);
-//	}
-
 	fclose(db);
 
 	printf("CHECKPOINT write metaData to %s\n",outDB);
 
 	db = fopen(outDB,"wb");
 
-	// Write MetaInfo (Do not write Binary)
+	// Write MetaInfo (Binary)
+	maxReadLen = maxlen;
+	fwrite(&maxlen,sizeof(int),1,db);
 	fwrite(&files->libNum,sizeof(int),1,db);
 	fwrite(files,sizeof(struct readFiles),files->libNum,db);
 	for(i=0; i<files->libNum;i++){
@@ -182,7 +179,6 @@ void writeDB(char* outDB, int blocks, struct readFiles* files){
 		fwrite(&temp,sizeof(int),1,db);
 		fwrite(files[i].leftReads,sizeof(char),temp,db);
 		if(files[i].rightReads){
-//			printf("RightReads (lib %i): %s\n",i,files[i].rightReads);
 			temp = strlen(files[i].rightReads);
 			fwrite(&temp,sizeof(int),1,db);
 			fwrite(files[i].rightReads,sizeof(char),temp,db);
@@ -221,6 +217,8 @@ struct reads* readDB(char* outDB){
 	int i;
 	int temp;
 	// Read MetaINFO
+	fread(&maxReadLen,sizeof(int),1,metaDB);
+	printf("MaxRead: %i\n",maxReadLen);
 	fread(&temp,sizeof(int),1,metaDB);
 	printf("Number of Libs: %i\n",temp);
 	struct readFiles* files = (struct readFiles*)malloc(sizeof(struct readFiles)*temp);
@@ -262,7 +260,6 @@ struct reads* readDB(char* outDB){
 	}
 	free(files);
 
-//	int blocks;
 	fread(&temp,sizeof(int),1,metaDB);
 	char* readDBFile = (char*)malloc(temp+1);
 	fread(readDBFile,sizeof(char),temp,metaDB);
@@ -271,7 +268,6 @@ struct reads* readDB(char* outDB){
 	int readNumber;
 	fread(&readNumber,sizeof(int),1,metaDB);
 	printf("numreads: %i\n",numreads);
-	// TODO: my cause segfault
 	numreads = readNumber;
 
 	fclose(metaDB);
@@ -286,7 +282,6 @@ struct reads* readDB(char* outDB){
 
 	int ID;
 	int len;
-//	char* decomp;
 
 	for(i=0;i<readNumber;i++) reads[i].len = 0;
 
@@ -297,9 +292,6 @@ struct reads* readDB(char* outDB){
 			fread(&ID,sizeof(int),1,readDB);
 			reads[ID].seq = (char*)malloc((len+3)/4);
 			fread(reads[ID].seq,sizeof(char),(len+3)/4,readDB);
-//			decomp = decompressRead(seq,len);
-//			printf("ID: %i len: %i: Seq: %s\n",ID,len,decomp);
-//			free(decomp);
 			reads[ID].ID = ID;
 			reads[ID].len = len;
 		}
@@ -322,7 +314,6 @@ void freeDB(struct reads* reads){
 }
 
 char* compressRead(char* read){
-//	printf("Read: %s\n",read);
 	int len = strlen(read);
 	int i = 0,j = ((len+3)/4)-1;
 	int complen = (len+3)/4;
@@ -516,7 +507,6 @@ int readFastQ_DB(char* inFile, int readNum, int jump){
 							readsList[readTotNum].len = strlen(read);
 							readsList[readTotNum].ID = readNum;
 							readsList[readTotNum].seq = comp;
-//							printf("Len: %i\n",readsList[readTotNum].len);
 						}
 						else{
 							readsList[readTotNum].len = 0;
@@ -550,7 +540,6 @@ int readFastQ_DB(char* inFile, int readNum, int jump){
 				}
 				buffer2 = &filebuffer[i] + 1;
 				if(first == 0 && n-i < 150000 && n > 150000){
-//					printf("Load new Block\n");
 					cursize += i;
 					first = 3;
 					fseek(fasta, -(n-i), SEEK_CUR);
@@ -571,13 +560,4 @@ int readFastQ_DB(char* inFile, int readNum, int jump){
 	free(read);
 
 	return readNum-jump;
-}
-
-void runTest(){
-	char* test = (char*)malloc(15);
-	strcpy(test,"ACGGTGCACTGGTT");
-	char* comp = compressRead(test);
-	printf("Test org: %s\n",test);
-	char* decomp = decompressRead(comp,14);
-	printf("Test com: %s\n",decomp);
 }

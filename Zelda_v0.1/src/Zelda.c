@@ -29,10 +29,11 @@
 #include "ConsensusCaller.h"
 
 int main(int argc, char* argv[]) {
+	char scaffolding = 1;
+	char heuristic = 1;
 	char findotdump = 0;
 	char dotdump = 0;
 	char sleeptime = 0;
-	char heuristic = 1;
 	time_t start,stop;
 
 	struct para* para = readCMDline(argc, argv);
@@ -181,7 +182,8 @@ int main(int argc, char* argv[]) {
 	printf("CHECKPOINT: 8. POA (Layout-Consensus)\n");
 	// 3. Argument, scaffolding 1 - yes, 0 - no
 	// boolean heuristic parameter decides whether heuristic alignments methods are used or not
-	struct POG* contigs_pog = make_poaScaff(G,reads,1,para,heuristic);
+	// Contigs
+	struct POG* contigs_pog = make_poaScaff(G,reads,0,para,heuristic);
 	time(&stop);
 	printf("POA: %0.2f\n",difftime (stop,start));
 	printf("Wait after POA\n");
@@ -202,9 +204,36 @@ int main(int argc, char* argv[]) {
 	printf("continue\n");
 	poa_deleteVariant(contigs_pog);
 	if(contigs_pog) free_POG(contigs_pog);
-	freeDB(reads);
-	freeMyOvlList(G,S);
-	free(contigPath);
-	free(tempPath);
-	finished(para);
+
+
+	// Scaffolds
+	if(scaffolding){
+		contigs_pog = make_poaScaff(G,reads,1,para,heuristic);
+		time(&stop);
+		printf("POA: %0.2f\n",difftime (stop,start));
+		printf("Wait after POA\n");
+		sleep(sleeptime);
+		printf("continue\n");
+		char* contigPath = (char*)malloc(100);
+		sprintf(contigPath,"%s/scaff.fasta",para->asemblyFolder);
+		printf("CHECKPOINT: FastaOut\n");
+		time(&start);
+		poa_printContigs(contigs_pog,contigPath);
+		sprintf(tempPath,"%s/scaff.vcf",para->asemblyFolder);
+		printf("CHECKPOINT: Variation Calling\n");
+		poa_reportVariant(contigs_pog,tempPath,contigPath);
+		time(&stop);
+		printf("FASTA Out: %0.2f\n",difftime (stop,start));
+		printf("Wait after FastaOut\n");
+		sleep(sleeptime);
+		printf("continue\n");
+		poa_deleteVariant(contigs_pog);
+		if(contigs_pog) free_POG(contigs_pog);
+		freeDB(reads);
+		freeMyOvlList(G,S);
+		free(contigPath);
+		free(tempPath);
+		finished(para);
+		free(Letters);
+	}
 }

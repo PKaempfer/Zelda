@@ -14,6 +14,7 @@
 #include <time.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "readDB.h"
 #include "kmer.h"
 #include "FileReader.h"
 #include "kmerHash.h"
@@ -260,7 +261,6 @@ struct readFiles* readCMDmakeDB(int argc, char *argv[],int libnumTot){
 			files[libnum].rightReads = (char*)malloc(sizeof(char)*100);
 			strcpy(files[libnum].leftReads,argv[i+1]);
 			strcpy(files[libnum].rightReads,argv[i+2]);
-//			files[libnum].insertSize = atoi(argv[i+3]);
 			files[libnum].minInsert = atoi(argv[i+3]);
 			files[libnum].maxInsert = atoi(argv[i+4]);
 			i+=4;
@@ -289,7 +289,6 @@ struct readFiles* readCMDmakeDB(int argc, char *argv[],int libnumTot){
 			files[libnum].rightReads = NULL;
 			files[libnum].leftReads = (char*)malloc(sizeof(char)*100);
 			strcpy(files[libnum].leftReads,argv[i+1]);
-//			files[libnum].insertSize = 0;
 			libnum++;
 			i++;
 		}
@@ -299,9 +298,6 @@ struct readFiles* readCMDmakeDB(int argc, char *argv[],int libnumTot){
 		}
 	}
 	files->libNum = libnum;
-
-//	files = realloc(files,libnum*sizeof(struct readFiles));
-
 	return files;
 }
 
@@ -315,10 +311,8 @@ void* mt_fileReader(void* block){
 	long end = hash_block.end;
 	long len = end - start;
 	int pthr_id = hash_block.pthr_id;
-//	int pthr_num =  hash_block.pthr_num;
 	FILE* fasta = fopen(hash_block.fasta,"r");
 	fseek(fasta,start,SEEK_CUR);
-//	printf("Thread %i starts reading pos: %ld %ld\n",pthr_id,start, end);
 
 	char filebuffer[BUFFER_SIZE]; // 4 MB buffer
 	char* readname = NULL;
@@ -328,9 +322,7 @@ void* mt_fileReader(void* block){
 	long cursize=0;
 	int i;
 	int readID;
-//	int bits = bitOffset(pthr_num);
 	int tempnum;
-//	int newnum;
 
 	// Read blocks of 4mb (macro BUFFER_SIZE) from FileStream to the End
 	while((n = fread(filebuffer,sizeof(char),BUFFER_SIZE,fasta))){
@@ -345,7 +337,7 @@ void* mt_fileReader(void* block){
 					strcpy(readname,buffer2);
 				}
 				else{
-					// Sequence Dataas
+					// Sequence Data
 					if(readname && strlen(buffer2)){
 						// Provides consistent assignment of IDs, but assignment is not deterministic (best resolution is a pre-build database)
 						tempnum = readID_global;
@@ -382,22 +374,14 @@ void* mt_fileReaderDB(void* block){
 	struct hash_block hash_block = *((struct hash_block*)block);
 	uint64_t start = (uint64_t)hash_block.start;
 	uint64_t end = (uint64_t)hash_block.end;
-//	long len = end - start;
-//	int pthr_id = hash_block.pthr_id;
-//	int pthr_num =  hash_block.pthr_num;
 
 	FILE* fasta = fopen(hash_block.fasta,"rb");
 	fseek(fasta,start,SEEK_SET);
 
 	char* readsequence = (char*)malloc(150000);
-//	char* decomp;
-//	size_t n;
-//	int i;
 	int readID=0;
 	int readLen=0;
 	uint64_t wPos = start;
-
-//	printf("Thread: %i opens DB: %s (start: %ld / End: %ld)\n",pthr_id,hash_block.fasta,start, end);
 
 	while(wPos < end){
 		fread(&readLen,sizeof(int),1,fasta);
@@ -416,7 +400,6 @@ void* mt_fileReaderDB(void* block){
 		new_mutex = old_mutex;
 		old_mutex = __sync_val_compare_and_swap(&fin_mutex,new_mutex,new_mutex+1);
 	} while(old_mutex != new_mutex);
-//	printf("Thread finished job and reports Finished-Status\n");
 
 	fclose(fasta);
 	free(readsequence);
@@ -430,16 +413,13 @@ void fileScheduler(char* inFile, int pthr_num, pthread_t* threads){
 	long start, end;
 	long blocksize;
 	int i;
-//	int maxlayer = 20;
 
 	fseek (fasta , 0 , SEEK_END);
 	filesize = ftell(fasta);
 	rewind(fasta);
 	printf("Filesize: %li\n",filesize);
 	// Creates HashTable
-	// Max number of hash table extensions
 	createHashTable_oa();
-//	pthread_mutex_init(&lock,NULL);
 
 	struct hash_block* hash_block = (struct hash_block*)malloc(sizeof(struct hash_block)*pthr_num);
 	blocksize = filesize/pthr_num;
@@ -471,11 +451,7 @@ void fileScheduler(char* inFile, int pthr_num, pthread_t* threads){
     for(i = 0; i < pthr_num; i++){
         pthread_join(threads[i], &status);
     }
-//    pthread_mutex_destroy(&lock);
-    // Merge hash Tables
-
     numreads = readID_global-1;
-//    exit(1);
     hashStats_oa();
 }
 /**
@@ -497,15 +473,16 @@ struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* thread
 	int i;
 	int temp;
 	// Read MetaINFO
+	fread(&maxReadLen,sizeof(int),1,metaDB);
 	fread(&temp,sizeof(int),1,metaDB);
 	printf("Number of Libs: %i\n",temp);
+	printf("Max Read Len: %i\n",maxReadLen);
 	struct readFiles* files = (struct readFiles*)malloc(sizeof(struct readFiles)*temp);
 	fread(files,sizeof(struct readFiles),temp,metaDB);
 	for(i=0; i<files->libNum;i++){
 		printf("EndId: %i\n",files[i].endId);
 		numreads = files[i].endId;
 		fread(&temp,sizeof(int),1,metaDB);
-//		printf("Left-read malloc size: %i\n",temp);
 		files[i].leftReads = (char*)malloc(temp+1);
 		fread(files[i].leftReads,sizeof(char),temp,metaDB);
 		files[i].leftReads[temp]='\0';
@@ -513,7 +490,6 @@ struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* thread
 		fread(&temp,sizeof(int),1,metaDB);
 		files[i].rightReads = NULL;
 		if(temp){
-//			printf("right-read malloc size: %i\n",temp);
 			files[i].rightReads = (char*)malloc(temp+1);
 			fread(files[i].rightReads,sizeof(char),temp,metaDB);
 			files[i].rightReads[temp]='\0';
@@ -591,7 +567,6 @@ struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* thread
 			rest_blocks--;
 		}
 		hash_block[i].end = blocksPos[1][blockend];
-//		printf("Thread %i reads blocks %i -> %i\n",i,blockst,blockend);
 	    pthread_create(&threads[i], NULL, mt_fileReaderDB, (void*)&hash_block[i]);
 		blockst = blockend+1;
 	}

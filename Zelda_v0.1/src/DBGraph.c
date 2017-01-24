@@ -37,12 +37,10 @@ char* revRead(char *read){
 void revReadSt(char *read, char* revread){
 	int i,j=0;
 	int len = strlen(read);
-//	printf("RevRead -> ReadLen: %i\n",len);
 	for(i=len-1; i>=0; i--){
 		revread[j++] = compcodes[read[i]-65];
 	}
 	revread[len]='\0';
-//	printf("RevRead -> ReadLen: %i\n",strlen(revread));
 }
 
 void writeDot(char *fileName){
@@ -55,7 +53,6 @@ void writeDot(char *fileName){
 	struct AdjListNode *edge;
 	struct LinkListNode *link;
 	fprintf(dot,"digraph dbg {\n");
-//	printf("digraph dbg {\n");
 	for(i=1;i<graph->V;i++){
 		if(graph->array[i].head || graph->array[i].tail){
 #ifdef LINKS
@@ -73,11 +70,9 @@ void writeDot(char *fileName){
 			fprintf(dot,"%i [label=\"%i\"];\n",i,i);
 #endif
 
-//			printf("%i [label=\"%i\"];\n",i,i);
 			edge=graph->array[i].head;
 			while(edge){
 				fprintf(dot,"%i -> %i [label=%c];\n",edge->dest,i,toCharTrans(edge->trans));
-//				printf("%i -> %i [label=%c];\n",edge->dest,i,edge->trans);
 				edge = edge->next;
 			}
 			edge = graph->array[i].tail;
