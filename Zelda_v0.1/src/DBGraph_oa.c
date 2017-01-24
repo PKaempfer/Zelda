@@ -18,12 +18,14 @@
 #include "kmer.h"
 
 void addLinks_oa(struct readEnd* readend, int index){
-	while(readend){
-		struct LinkListNode* newNodeParent = newLinkListNode(readend->read);
-		newNodeParent->next = graph->array[index].Link;
-		graph->array[index].Link = newNodeParent;
-		readend = (struct readEnd*)readend->next;
-	}
+	graph->array[index].Link = (struct LinkListNode*) readend;
+
+//	while(readend){
+//		struct LinkListNode* newNodeParent = newLinkListNode(readend->read);
+//		newNodeParent->next = graph->array[index].Link;
+//		graph->array[index].Link = newNodeParent;
+//		readend = (struct readEnd*)readend->next;
+//	}
 }
 
 uint32_t getKmer_oa(KmerBitBuffer kmer){
@@ -43,10 +45,12 @@ void hashToTabDFS_oa(){
     tabindex=1;
     int comp = 0;
     int oldIndex = 1;
-    int delcomp = 0, delNode = 0;
+    int delcomp = 0, delNode = 0, delEnd = 0;
 
 	uint32_t j = INITHASHSIZE(bitnum);
 	uint32_t i;
+	uint32_t k;
+	struct LinkListNode* readEnd;
 	for(i=0;i<j;i++){
 		if(dbHash_oa[i].count && !dbHash_oa[i].trans){
     		if(dbHash_oa[i].index==0){
@@ -56,6 +60,16 @@ void hashToTabDFS_oa(){
     		}
     		travDFS_oa(i);
     		if(tabindex-oldIndex < MINCOMP){
+    			for(k=oldIndex;k<tabindex;k++){
+    				readEnd = graph->array[k].Link;
+    				while(readEnd){
+    					delEnd++;
+    					graph->array[k].Link = readEnd->next;
+    					free((void*)readEnd);
+    					readEnd = graph->array[k].Link;
+    				}
+    			}
+//    			printf("%i Ends deleted\n",delEnd);
     			graph->V -= tabindex - oldIndex;
     			delNode += tabindex - oldIndex;
     			deleteComp(oldIndex);
@@ -70,6 +84,7 @@ void hashToTabDFS_oa(){
 	travDFS_oa(EMPTYBUCKET);
 
     printf("%i Nodes in %i Components\n",tabindex-1,comp);
+    printf("%i Ends deleted\n",delEnd);
     printf("%i Nodes in %i Components deleted\n",delNode,delcomp);
 }
 

@@ -61,18 +61,18 @@ void createHashTable_oa(){
 
 void freeHashTable_oa(){
 	printf("CHECKPOINT: Free HashTable\n");
-	uint32_t j = INITHASHSIZE(bitnum);
-	uint32_t i;
-	volatile struct readEnd* readEnd;
-	for(i=0;i<j;i++){
-		readEnd = dbHash_oa[i].ends;
-		while(readEnd){
-			dbHash_oa[i].ends = readEnd->next;
-			free((void*)readEnd);
-			readEnd = dbHash_oa[i].ends;
-		}
-	}
-	printf("Free ReadEnd Pointer finished\n");
+//	uint32_t j = INITHASHSIZE(bitnum);
+//	uint32_t i;
+//	volatile struct readEnd* readEnd;
+//	for(i=0;i<j;i++){
+//		readEnd = dbHash_oa[i].ends;
+//		while(readEnd){
+//			dbHash_oa[i].ends = readEnd->next;
+//			free((void*)readEnd);
+//			readEnd = dbHash_oa[i].ends;
+//		}
+//	}
+//	printf("Free ReadEnd Pointer finished\n");
 	free((void*)dbHash_oa);
 }
 
