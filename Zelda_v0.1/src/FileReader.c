@@ -385,7 +385,7 @@ void* mt_fileReaderDB(void* block){
 
 	while(wPos < end){
 		fread(&readLen,sizeof(int),1,fasta);
-		if(readLen){
+		if(readLen >= nK){
 			fread(&readID,sizeof(int),1,fasta);
 			fread(&readsequence[16],sizeof(char),(readLen+3)/4,fasta);
 			mt_createKmers_DB(&readsequence[16],readLen,readID);
