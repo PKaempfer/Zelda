@@ -454,6 +454,7 @@ void mt_createKmers_DB(char* read, int len, int readNum){
 //	printf("Read: %s\n",decompRead);
 //	free(decompRead);
 
+//	printf("readPos: %i, nK: %i, len: %i\n",readPos,nK,len);
 	while(readPos + nK < len){
 		temp = 0;
 		if(bitpos==0){

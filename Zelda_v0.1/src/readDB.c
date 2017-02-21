@@ -339,6 +339,7 @@ char* compressRead(char* read){
 				return compRead;
 			}
 			else{
+//				printf("return NULL, i: %i\n",i);
 				free(compRead);
 				return NULL;
 			}
@@ -515,9 +516,9 @@ int readFastQ_DB(char* inFile, int readNum, int jump){
 					// Name
 					if(!first){
 						// Save read (Quality Streams?)
-						printf("Before -> readlen: %i (pos: %p)\n",strlen(read),&read);
+//						printf("Before -> readlen: %i (pos: %p)\n",strlen(read),&read);
 						comp = compressRead(read);
-						printf("After -> readlen: %i (pos: %p)\n",strlen(read),&read);
+//						printf("After -> readlen: %i (pos: %p)\n",strlen(read),&read);
 						if(comp){
 							readsList[readTotNum].len = strlen(read);
 							readsList[readTotNum].ID = readNum;
