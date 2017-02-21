@@ -156,7 +156,9 @@ void writeDB(char* outDB, int blocks, struct readFiles* files){
 		fwrite(&len,sizeof(int),1,db);
 		wPos += sizeof(int);
 		if(len){
+			printf("Len: %i (i:%i)\n",len,i);
 			fwrite(&readsList[i].ID,sizeof(int),1,db);
+			printf("ID: %i\n",readsList[i].ID);
 			fwrite(readsList[i].seq,sizeof(char),(len+3)/4,db);
 			wPos += (sizeof(int)+((len+3)/4));
 		}
@@ -559,11 +561,14 @@ int readFastQ_DB(char* inFile, int readNum, int jump){
 			}
 		}
 	}
-	readsList[readTotNum].len = strlen(read);
 	comp = compressRead(read);
 	if(comp){
+		readsList[readTotNum].len = strlen(read);
 		readsList[readTotNum].ID = readNum;
 		readsList[readTotNum].seq = comp;
+	}
+	else{
+		readsList[readTotNum].len = 0;
 	}
 	readTotNum++;
 	readNum+=jump;
