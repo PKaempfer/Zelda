@@ -328,12 +328,12 @@ char* compressRead(char* read){
 		}
 		if(codes[(unsigned char)read[i]]==4){
 			if(i>=31){
+				read[i] = '\0';
 				while(i%4!=0){
 					current = current << 2;
 					i++;
 				}
 				compRead[j] = current;
-				read[i] = '\0';
 				return compRead;
 			}
 			else{
