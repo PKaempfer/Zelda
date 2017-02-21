@@ -388,15 +388,15 @@ void* mt_fileReaderDB(void* block){
 		if(readLen>31){
 			fread(&readID,sizeof(int),1,fasta);
 			fread(&readsequence[16],sizeof(char),(readLen+3)/4,fasta);
-			printf("ID: %i, len: %i\n",readID,readLen);
+//			printf("ID: %i, len: %i\n",readID,readLen);
 			if(readLen >= nK){
-				printf("ID: %i, len: %i\n",readID,readLen);
+//				printf("ID: %i, len: %i\n",readID,readLen);
 				mt_createKmers_DB(&readsequence[16],readLen,readID);
 			}
 			wPos += (sizeof(int) + ((readLen+3)/4));
 		}
 		wPos += sizeof(int);
-		printf("wpos: %i, end: %i\n",wPos, end);
+//		printf("wpos: %i, end: %i\n",wPos, end);
 	}
 
 	unsigned char old_mutex = fin_mutex;
