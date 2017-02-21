@@ -156,9 +156,9 @@ void writeDB(char* outDB, int blocks, struct readFiles* files){
 		fwrite(&len,sizeof(int),1,db);
 		wPos += sizeof(int);
 		if(len){
-			printf("Len: %i (i:%i)\n",len,i);
+//			printf("Len: %i (i:%i)\n",len,i);
 			fwrite(&readsList[i].ID,sizeof(int),1,db);
-			printf("ID: %i\n",readsList[i].ID);
+//			printf("ID: %i\n",readsList[i].ID);
 			fwrite(readsList[i].seq,sizeof(char),(len+3)/4,db);
 			wPos += (sizeof(int)+((len+3)/4));
 		}
