@@ -385,7 +385,7 @@ void* mt_fileReaderDB(void* block){
 
 	while(wPos < end){
 		fread(&readLen,sizeof(int),1,fasta);
-		if(readLen>31){
+		if(readLen>=31){
 			fread(&readID,sizeof(int),1,fasta);
 			fread(&readsequence[16],sizeof(char),(readLen+3)/4,fasta);
 //			printf("ID: %i, len: %i\n",readID,readLen);
