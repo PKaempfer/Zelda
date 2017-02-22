@@ -30,12 +30,13 @@ void createHashTable(){
 	for(i=0;i<j;i++){
 		dbHashg[i] = NULL;
 	}
+	bitmask = 0;
 	for(i=0;i<bitnum;i++){
 		bitmask = bitmask << 1;
 		bitmask |= 1;
 	}
 	expansionThreshold = INITHASHSIZE(bitnum);
-	printf("Create HashTable of size: %i (expTreshold: %i)\n",j,expansionThreshold);
+	printf("Create HashTable of size: %i (expTreshold: %i, BitMask: %i)\n",j,expansionThreshold,bitmask);
 }
 
 char insertKmer(KmerBitBuffer *kmer){

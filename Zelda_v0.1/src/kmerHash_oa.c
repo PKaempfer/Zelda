@@ -29,7 +29,9 @@ unsigned char pthr_runN = 0;
 KmerBitBuffer NULL_KMER;
 
 void createHashTable_oa(){
+	printf("CHECKPOINT: Create HashTable\n");
 	uint32_t i,j;
+	NULL_KMER = 0;
 	for(i=0;i<nK;i++){
 		NULL_KMER = NULL_KMER << 2;
 		NULL_KMER |= 3;
@@ -51,6 +53,7 @@ void createHashTable_oa(){
 		dbHash_oa[i].index = 0;
 		dbHash_oa[i].ends = NULL;
 	}
+	bitmask = 0;
 	for(i=0;i<bitnum;i++){
 		bitmask = bitmask << 1;
 		bitmask |= 1;
@@ -61,19 +64,22 @@ void createHashTable_oa(){
 
 void freeHashTable_oa(){
 	printf("CHECKPOINT: Free HashTable\n");
-//	uint32_t j = INITHASHSIZE(bitnum);
-//	uint32_t i;
-//	volatile struct readEnd* readEnd;
-//	for(i=0;i<j;i++){
-//		readEnd = dbHash_oa[i].ends;
-//		while(readEnd){
-//			dbHash_oa[i].ends = readEnd->next;
-//			free((void*)readEnd);
-//			readEnd = dbHash_oa[i].ends;
-//		}
-//	}
-//	printf("Free ReadEnd Pointer finished\n");
 	free((void*)dbHash_oa);
+	dbHash_oa=NULL;
+}
+
+void freeEnds_oa(){
+	uint32_t j = INITHASHSIZE(bitnum);
+	uint32_t i;
+	volatile struct readEnd* readEnd;
+	for(i=0;i<j;i++){
+		readEnd = dbHash_oa[i].ends;
+		while(readEnd){
+			dbHash_oa[i].ends = readEnd->next;
+			free((void*)readEnd);
+			readEnd = dbHash_oa[i].ends;
+		}
+	}
 }
 
 volatile struct hashkmer_oa* resizeHashTable(){
@@ -188,7 +194,7 @@ char addKmer128_oa(KmerBitBuffer current_new){
 //					printf("Already locked by other thread: Return and start new\n");
 					return 0;
 				}
-//				printf("Hash table full: RESIZE!\n");
+				printf("Hash table full: RESIZE!\n");
 
 				// Wait till all other threads report a stopped- or finished-state
 				while(pthr_runN != resize_mutex + fin_mutex){
@@ -443,7 +449,7 @@ void mt_createKmers(char* read, int readNum){
  * @param len		length of the read in decompressed format
  * @param readNum	ID of the read as in database
  */
-void mt_createKmers_DB(char* read, int len, int readNum){
+void mt_createKmers_DB(char* readSeq, int len, int readNum){
 	KmerBitBuffer kmercp;
 	KmerBitBuffer temp;
 	KmerBitBuffer revtemp;
@@ -470,14 +476,14 @@ void mt_createKmers_DB(char* read, int len, int readNum){
 		temp = 0;
 		if(bitpos==0){
 //			printf("Copy bytes: %i (len: %i)\n",byte,cpByte);
-			memcpy(&kmercp,&read[byte],cpByte);
+			memcpy(&kmercp,&readSeq[byte],cpByte);
 		}
 		shift = ((8*cpByte) - (nK*2)) - (bitpos%8);
 		if(shift>=0) temp = kmercp >> shift;
 		else{
 			shift2 = 8+shift;
 			shift*=-1;
-			lastbyte = read[byte-1];
+			lastbyte = readSeq[byte-1];
 			temp = kmercp << shift;
 			lastbyte = lastbyte >> shift2;
 			lastbyte &= (char)pow(2,shift) - 1;
@@ -502,14 +508,14 @@ void mt_createKmers_DB(char* read, int len, int readNum){
 		}
 	}
 	if(bitpos==0){
-		memcpy(&kmercp,&read[byte],cpByte);
+		memcpy(&kmercp,&readSeq[byte],cpByte);
 	}
 	shift = ((8*cpByte) - (nK*2)) - (bitpos%8);
 	if(shift>=0) temp = kmercp >> shift;
 	else{
 		shift2 = 8+shift;
 		shift*=-1;
-		lastbyte = read[byte-1];
+		lastbyte = readSeq[byte-1];
 		temp = kmercp << shift;
 		lastbyte = lastbyte >> shift2;
 		lastbyte &= (char)pow(2,shift) - 1;

@@ -37,6 +37,8 @@ void createHashTable_oa();
 
 void freeHashTable_oa();
 
+void freeEnds_oa();
+
 char addReadEnd_oa(KmerBitBuffer, readID, char, int32_t);
 
 #ifdef TYPE128

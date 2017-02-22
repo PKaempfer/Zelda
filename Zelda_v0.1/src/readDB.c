@@ -401,7 +401,6 @@ void freeDB(struct reads* reads){
 			free(reads[i].seq);
 			if(reads[i].annotation) free(reads[i].annotation);
 		}
-
 	}
 	free(reads);
 }
