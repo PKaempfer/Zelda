@@ -302,7 +302,7 @@ char addKmer_oa(KmerBitBuffer current_new){
 // Running Hash-Stats is essential to calc the total number of nodes in the following adjacency list
 void hashStats_oa(){
 	uint32_t dif_kmer = 0;
-	uint32_t tot_num = 0;
+	uint64_t tot_num = 0;
 	uint32_t j, i;
 	j = INITHASHSIZE(bitnum);
 	KmerBitBuffer old = empty;
