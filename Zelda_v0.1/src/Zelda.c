@@ -27,6 +27,7 @@
 #include "DBGraph_scaffold.h"
 #include "readDB.h"
 #include "ConsensusCaller.h"
+#include "read_filter.h"
 
 int main(int argc, char* argv[]) {
 	char scaffolding = 1;
@@ -50,15 +51,28 @@ int main(int argc, char* argv[]) {
 		if(para->run == 1) finished(para);
 	}
 
+
+
 	char* tempPath = (char*)malloc(1000);
 	nK = para->kSize;
 	minovlLen = para->minOvlLen;
 
+	// preliminary filter
 	const int NUM_THREADS = para->threads;
     pthread_t threads[NUM_THREADS];
     printf("CHECKPOINT: 1. create Graph\n");
 	time(&stop);
-    para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
+	para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
+	struct reads* reads1 = readDB(para->readDB);
+	filter_reads(reads1,NUM_THREADS,threads);
+	strcat(para->readDB,"filter");
+	write_filteredDB(para->readDB,para->blocks,para->files,reads1);
+
+	// Hashing
+
+
+	exit(1);
+
 	createGraph(graphSize);
 	time(&start);
 	printf("Time: %0.2f\n",difftime (start,stop));

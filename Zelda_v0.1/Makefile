@@ -14,8 +14,8 @@ CFLAGS += -fsanitize=address
 CFLAGS += -fsanitize=leak
 
 SOURCES =  src/DBGraph.c src/DBGraph_oa.c
-SOURCES += src/FileReader.c  src/kmer.c src/kmerHash.c src/kmerHash_oa.c src/readDB.c 
-SOURCES += src/DBGraph_error.c
+SOURCES += src/FileReader.c  src/kmer.c src/kmerHash.c src/kmerHash_oa.c src/readDB.c
+SOURCES += src/read_filter.c src/DBGraph_error.c
 SOURCES += src/DBGraph_reduced.c src/DBGraph_reduced_strong.c
 SOURCES += src/DBGraph_stringer_2.c src/DBGraph_stringer_refine.c
 SOURCES += src/DBGraph_scaffold.c

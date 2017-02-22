@@ -18,6 +18,7 @@
 extern volatile unsigned char resize_mutex;
 extern volatile unsigned char fin_mutex;
 extern unsigned char pthr_runN;
+extern KmerBitBuffer NULL_KMER;
 
 struct readEnd{
 	readID read;
@@ -43,6 +44,8 @@ char addKmer128_oa(KmerBitBuffer); // 128 bit (dwCAS)
 #else
 char addKmer_oa(KmerBitBuffer); // 64 bit (CAS)
 #endif
+
+uint32_t findKmer128_oa(KmerBitBuffer current_new);
 
 void hashStats_oa();
 

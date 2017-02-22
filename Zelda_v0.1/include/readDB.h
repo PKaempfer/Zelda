@@ -37,6 +37,8 @@ int makeDB(char* outDB, int blocks, struct readFiles* files);
 
 void writeDB(char* outDB, int blocks, struct readFiles* files);
 
+void write_filteredDB(char* outDB, int blocks, struct readFiles* files, struct reads* reads);
+
 struct reads* readDB(char* outDB);
 
 void freeDB(struct reads* reads);

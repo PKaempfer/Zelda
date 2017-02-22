@@ -214,6 +214,95 @@ void writeDB(char* outDB, int blocks, struct readFiles* files){
 	fclose(db);
 }
 
+void write_filteredDB(char* outDB, int blocks, struct readFiles* files, struct reads* reads){
+
+	int i = 0;
+	int j = 0;
+	int temp;
+	int len;
+	int maxlen = 0;
+	int blsize = numreads / blocks;
+	char* readDB = (char*)malloc(500);
+	strcpy(readDB,outDB);
+	strcat(readDB,"_reads.db");
+
+	FILE* db = fopen(readDB,"wb");
+	uint64_t wPos=0;
+	uint64_t** blocksPos = (uint64_t**)malloc(sizeof(uint64_t*)*2);
+	blocksPos[0] = (uint64_t*)malloc(sizeof(uint64_t)*blocks);
+	blocksPos[1] = (uint64_t*)malloc(sizeof(uint64_t)*blocks);
+
+	blocksPos[0][0] = wPos;
+
+	printf("CHECKPOINT write read DB\n");
+	printf("Number of all reads: %i\n",numreads);
+
+	for(i=0;i<numreads;i++){
+		if(i==blsize && j < blocks-1){
+			blocksPos[1][j] = wPos;
+			j++;
+			blocksPos[0][j] = wPos;
+			blsize += numreads / blocks;
+		}
+		len = reads[i].len;
+		if(len > maxlen) maxlen = len;
+		fwrite(&len,sizeof(int),1,db);
+		wPos += sizeof(int);
+		if(len){
+			fwrite(&reads[i].ID,sizeof(int),1,db);
+			fwrite(reads[i].seq,sizeof(char),(len+3)/4,db);
+			wPos += (sizeof(int)+((len+3)/4));
+		}
+	}
+	blocksPos[1][j] = wPos;
+
+	fclose(db);
+
+	printf("CHECKPOINT write metaData to %s\n",outDB);
+
+	db = fopen(outDB,"wb");
+
+	// Write MetaInfo (Binary)
+	maxReadLen = maxlen;
+	fwrite(&maxlen,sizeof(int),1,db);
+	fwrite(&files->libNum,sizeof(int),1,db);
+	fwrite(files,sizeof(struct readFiles),files->libNum,db);
+	for(i=0; i<files->libNum;i++){
+		temp = strlen(files[i].leftReads);
+		fwrite(&temp,sizeof(int),1,db);
+		fwrite(files[i].leftReads,sizeof(char),temp,db);
+		if(files[i].rightReads){
+			temp = strlen(files[i].rightReads);
+			fwrite(&temp,sizeof(int),1,db);
+			fwrite(files[i].rightReads,sizeof(char),temp,db);
+			fwrite(&files[i].minInsert,sizeof(int),1,db);
+			fwrite(&files[i].maxInsert,sizeof(int),1,db);
+			fwrite(&files[i].avgInsert,sizeof(int),1,db);
+			fwrite(&files[i].oriPE,sizeof(int),1,db);
+		}
+		else{
+			temp = 0;
+			fwrite(&temp,sizeof(int),1,db);
+		}
+	}
+
+	// Write Block information
+	temp = strlen(readDB);
+	fwrite(&temp,sizeof(int),1,db);
+	fwrite(readDB,sizeof(char),temp,db);
+	fwrite(&readTotNum,sizeof(int),1,db);
+	fwrite(&blocks,sizeof(int),1,db);
+	fwrite(blocksPos[0],sizeof(uint64_t),blocks,db);
+	fwrite(blocksPos[1],sizeof(uint64_t),blocks,db);
+
+	free(blocksPos[0]);
+	free(blocksPos[1]);
+	free(blocksPos);
+	free(readDB);
+
+	fclose(db);
+}
+
 struct reads* readDB(char* outDB){
 	FILE* metaDB = fopen(outDB,"rb");
 	struct reads* reads = NULL;

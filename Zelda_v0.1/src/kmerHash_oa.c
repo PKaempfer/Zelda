@@ -227,7 +227,6 @@ char addKmer128_oa(KmerBitBuffer current_new){
 	return 1;
 }
 
-
 #else
 // 64bit KmerBitBuffer data type
 char addKmer_oa(KmerBitBuffer current_new){
@@ -299,6 +298,18 @@ char addKmer_oa(KmerBitBuffer current_new){
 }
 #endif
 
+uint32_t findKmer128_oa(KmerBitBuffer current_new){
+	uint32_t bucket;
+
+	bucket = my_hash(current_new)-1;
+	while(dbHash_oa[bucket].kmer != current_new){
+		bucket++;
+	}
+
+	return bucket;
+}
+
+
 // Running Hash-Stats is essential to calc the total number of nodes in the following adjacency list
 void hashStats_oa(){
 	uint32_t dif_kmer = 0;
@@ -354,7 +365,7 @@ void hashStats_oa(){
 	float coverage = (float)totdist/(float)distinct;
 	float part = (float)maxReadLen/((float)(maxReadLen-nK)+1);
 	float part2 = unique / (float)tot_num;
-	printf("hashTable contains %i (%.2f%%) different k-mers with a total number of %i\n",dif_kmer,(((float)dif_kmer/j))*100,tot_num);
+	printf("hashTable contains %i (%.2f%%) different k-mers with a total number of %lu\n",dif_kmer,(((float)dif_kmer/j))*100,tot_num);
 	printf("Unique k-mer: (c=1)    %i\n",unique);
 	printf("Estimated genome size: %i\n",distinct);
 	printf("Estimated Coverage:    %.2f\n",(coverage * part) + (coverage * part * part2));
