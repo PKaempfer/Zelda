@@ -69,6 +69,8 @@ int main(int argc, char* argv[]) {
 	write_filteredDB(para->readDB,para->blocks,para->files,reads1);
 
 	// Hashing
+	freeHashTable_oa();
+	para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
 
 
 	exit(1);

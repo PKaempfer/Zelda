@@ -18,6 +18,7 @@
  * Is not used in next hash table construction.
  */
 void* mt_filter_reads(void* filter_block){
+	printf("Checkpoint: Create Mapping Thread\n");
 	KmerBitBuffer kmercp;
 	KmerBitBuffer temp;
 	KmerBitBuffer revtemp;
@@ -46,6 +47,7 @@ void* mt_filter_reads(void* filter_block){
 	for(;i<=end;i++){
 		len = reads[i].len;
 		if(len >= nK){
+			printf("Thread: %i with read: %i\n",block.pthr_id,reads[i].ID);
 			cov_tot = 0;
 			cov_one = 0;
 			readPos = 0;
