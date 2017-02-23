@@ -315,7 +315,7 @@ void rekCorrection(int a, int b, int up){
 
 int collapse(int ori, int dir){
 //	static int number = 0;
-	static int a,b;
+	static int a,b, temp;
 	struct AdjListNode *node, *nextnode;
 	if(dir){
 //		printf("while0: %i\n",ori);
@@ -326,27 +326,27 @@ int collapse(int ori, int dir){
 //				printf("while 1: %i\n",ori);
 				nextnode = node->next;
 				while(nextnode){
-//					if(ori == 112711) number++;
-//					printf("while 2: %i (%i)\n",ori,number);
-//					if(ori == 112711 && number == 2){
-////						cleanAllFlaggs();
-//						writePartialDot(112711,10);
-//					}
 					if((node->trans & TRANS_MASK) == (nextnode->trans & TRANS_MASK) && node->dest != nextnode->dest){
 						// Control the coverage of the nodes (Needs to be implemented)
 						// Previously it has to be implemented in hash to adjacency transformation functions
 						a = _min(node->dest,nextnode->dest);
 						b = _max(node->dest,nextnode->dest);
-//						printf("Collapse Paths starting: ori: %i (a:%i / b%i)\n",ori,a,b);
-						// would lead to edge to itself
-						if(ori == a || ori == b){
+						if(graph->array[a].counter > graph->array[b].counter){
+							temp = a;
+							a = b;
+							b = temp;
+						}
+						if(graph->array[a].counter < 10 || graph->array[a].counter < 10){
+							nextnode = nextnode->next;
+							continue;
+						}
+						else if(ori == a || ori == b){
 							nextnode = nextnode->next;
 							continue;
 						}
 						else if(isChild(ori,a) || isChild(ori,b)){
 							nextnode = nextnode->next;
 							continue;
-//							return 0;
 						}
 						else rekCorrection(a,b,1);
 						return 1;
@@ -461,7 +461,7 @@ void perfectErrorCorrection(){
 			}
 		}
 		round++;
-		if(round>5) break;
+		if(round>10) break;
 		if(verbose){
 			sprintf(dotFile,"test_%i.dot",round);
 			writeDot(dotFile);

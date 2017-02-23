@@ -139,11 +139,13 @@ void goUpDFS_2_oa(uint32_t** upStackold,uint32_t** downStackold, uint32_t* upPtr
 		if(upbool)	s = upStack[--up];
 		if(!upbool) s = downStack[--down];
 
+
 		if(!dbHash_oa[s].trans){
 
 			// Put read links to adjacency list
 			reads = (struct readEnd*)dbHash_oa[s].ends;
 			addLinks_oa(reads,ABS(dbHash_oa[s].index));
+			graph->array[ABS(dbHash_oa[s].index)].counter = dbHash_oa[s].count;
 
 			s_kmer = (KmerBitBuffer)dbHash_oa[s].kmer;
 			transbase = getTransBase(&s_kmer,dbHash_oa[s].index);

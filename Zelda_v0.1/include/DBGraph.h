@@ -87,6 +87,7 @@ struct AdjList{
     struct AdjListNode *head;  // pointer to head node of list (node parents)
     struct AdjListNode	*tail;	// pointer to head node of list (node childs)
     struct LinkListNode *Link;
+    unsigned char counter;
 };
 
 struct Graph{
