@@ -307,7 +307,8 @@ char addKmer_oa(KmerBitBuffer current_new){
 uint32_t findKmer128_oa(KmerBitBuffer current_new){
 	uint32_t bucket;
 
-	bucket = my_hash(current_new)-1;
+	bucket = my_hash(current_new);
+//	printf("Bucket: %i\n",bucket);
 	while(dbHash_oa[bucket].count && dbHash_oa[bucket].kmer != current_new){
 		bucket++;
 	}
