@@ -180,7 +180,7 @@ struct para* readCMDline(int argc, char *argv[]){
 				    errorAbort(para);
 				}
 				else{
-					para->readDB = (char*)malloc(strlen(temp)+1);
+					para->readDB = (char*)malloc(strlen(temp)+100);
 					strcpy(para->readDB,temp);
 				}
 			}
