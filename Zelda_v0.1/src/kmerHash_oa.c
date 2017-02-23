@@ -308,7 +308,7 @@ uint32_t findKmer128_oa(KmerBitBuffer current_new){
 	uint32_t bucket;
 
 	bucket = my_hash(current_new)-1;
-	while(dbHash_oa[bucket].kmer != current_new){
+	while(dbHash_oa[bucket].count && dbHash_oa[bucket].kmer != current_new){
 		bucket++;
 	}
 
