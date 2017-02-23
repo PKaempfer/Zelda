@@ -250,7 +250,7 @@ void collapseNodes(int a, int b){
 void rekCorrection(int a, int b, int up){
 //	printf("Rek Collapse: a: %i / b:%i\n",a,b);
 	collapseNodes(a,b);
-	static int oldA;
+	static int oldA, temp;
 	oldA = a;
 	static struct AdjListNode *node, *nextnode;
 	if(up){
@@ -262,6 +262,15 @@ void rekCorrection(int a, int b, int up){
 					if((node->trans & TRANS_MASK) == (nextnode->trans & TRANS_MASK) && node->dest != nextnode->dest){
 						a = _min(node->dest,nextnode->dest);
 						b = _max(node->dest,nextnode->dest);
+						if(graph->array[a].counter > graph->array[b].counter){
+							temp = a;
+							a = b;
+							b = temp;
+						}
+						if(graph->array[a].counter > 10 && graph->array[b].counter > 10){
+							nextnode = nextnode->next;
+							continue;
+						}
 						if(oldA == a || oldA == b){
 //							return;
 							nextnode = nextnode->next;
@@ -291,6 +300,15 @@ void rekCorrection(int a, int b, int up){
 					if((node->trans & TRANS_MASK) == (nextnode->trans & TRANS_MASK) && node->dest != nextnode->dest){
 						a = _min(node->dest,nextnode->dest);
 						b = _max(node->dest,nextnode->dest);
+						if(graph->array[a].counter > graph->array[b].counter){
+							temp = a;
+							a = b;
+							b = temp;
+						}
+						if(graph->array[a].counter > 10 && graph->array[b].counter > 10){
+							nextnode = nextnode->next;
+							continue;
+						}
 						if(oldA == a || oldA == b) {
 //							return;
 							nextnode = nextnode->next;
@@ -336,7 +354,7 @@ int collapse(int ori, int dir){
 							a = b;
 							b = temp;
 						}
-						if(graph->array[a].counter < 10 || graph->array[a].counter < 10){
+						if(graph->array[a].counter > 10 && graph->array[b].counter > 10){
 							nextnode = nextnode->next;
 							continue;
 						}
@@ -370,6 +388,15 @@ int collapse(int ori, int dir){
 						// Previously it has to be implemented in hash to adjacency transformation functions
 						a = _min(node->dest,nextnode->dest);
 						b = _max(node->dest,nextnode->dest);
+						if(graph->array[a].counter > graph->array[b].counter){
+							temp = a;
+							a = b;
+							b = temp;
+						}
+						if(graph->array[a].counter > 10 && graph->array[b].counter > 10){
+							nextnode = nextnode->next;
+							continue;
+						}
 //						printf("Collapse Paths starting: ori: %i (a:%i / b%i)\n",ori,a,b);
 						if(ori == a || ori == b){
 							nextnode = nextnode->next;
