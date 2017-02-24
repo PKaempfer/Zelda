@@ -249,7 +249,10 @@ void collapseNodes(int a, int b){
 
 void rekCorrection(int a, int b, int up){
 //	printf("Rek Collapse: a: %i / b:%i\n",a,b);
+	static uint32_t corrCount = 0;
+	corrCount++;
 	collapseNodes(a,b);
+	if(corrCount%100000==0) printf("Number of current corrections: %i\n",corrCount);
 	static int oldA, temp;
 	oldA = a;
 	static struct AdjListNode *node, *nextnode;

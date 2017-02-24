@@ -129,7 +129,7 @@ void writeDB(char* outDB, int blocks, struct readFiles* files){
 	int len;
 	int maxlen = 0;
 	int blsize = readTotNum / blocks;
-	char* readDB = (char*)malloc(500);
+	char* readDB = (char*)malloc(1000);
 	strcpy(readDB,outDB);
 	strcat(readDB,"_reads.db");
 
@@ -305,6 +305,7 @@ void write_filteredDB(char* outDB, int blocks, struct readFiles* files, struct r
 
 struct reads* readDB(char* outDB){
 	FILE* metaDB = fopen(outDB,"rb");
+	printf("Read Reads from: %s\n",outDB);
 	struct reads* reads = NULL;
 
 	int i;
@@ -361,7 +362,11 @@ struct reads* readDB(char* outDB){
 	int readNumber;
 	fread(&readNumber,sizeof(int),1,metaDB);
 	printf("numreads: %i\n",numreads);
-	numreads = readNumber;
+//	numreads = readNumber;
+	//TODo: Why wrong in MetaDB
+	readNumber = numreads;
+	printf("readNumber: %i\n",readNumber);
+
 
 	fclose(metaDB);
 
@@ -383,6 +388,7 @@ struct reads* readDB(char* outDB){
 		if(len){
 			if(len > maxReadLen) maxReadLen = len;
 			fread(&ID,sizeof(int),1,readDB);
+			if(ID == 1) printf("read with ID: 1 was found\n");
 			reads[ID].seq = (char*)malloc((len+3)/4);
 			fread(reads[ID].seq,sizeof(char),(len+3)/4,readDB);
 			reads[ID].ID = ID;
@@ -391,6 +397,8 @@ struct reads* readDB(char* outDB){
 	}
 
 	fclose(readDB);
+
+	printf("Length of read 1: %i \n",reads[1].len);
 
 	return reads;
 }

@@ -36,11 +36,13 @@ int componentNum;
  * @param numread	Number of all reads of all kinds of Libraries
  */
 void initAnnotation(struct myovlList* G, struct reads* reads){
+	printf("CHECKPOINT: Init Annotation\n");
 	char verbose = 0;
 	int i;
 	paths = (struct path*)malloc(sizeof(struct path) * maxPathNum);
 	struct pc_anno* pc_anno;
 	struct j_anno* j_anno;
+	struct bread* bread;
 
 	for(i=1; i <= G->V; i++){
 
@@ -56,6 +58,13 @@ void initAnnotation(struct myovlList* G, struct reads* reads){
 			pc_anno->pathID = 0;
 			pc_anno->lJunctionDist = 0;
 			pc_anno->rJunctionDist = 0;
+//			printf("i:%i\n",i);
+			bread = G->read[i]->first;
+			while(bread){
+//				printf("Bread: %i\n",bread->ID);
+				bread = bread->next;
+			}
+//			if(reads[i].len<=nK) printf("Annotate read with len: %i", reads[i].len);
 			reads[i].annotation = (void*)pc_anno;
 		}
 	}
