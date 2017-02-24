@@ -471,12 +471,17 @@ void perfectErrorCorrection(){
 	int round=0;
 	int change = 0;
 	int oldchange;
+	int pro = 0;
 	char *dotFile = (char*)malloc(sizeof(char)*100);
 	do{
 		printf("ErrorCorrection Round %i\n",round);
 		countKmers();
 		change = 0;
 		for(i=1;i<graph->V;i++){
+			if(i%(graph->V/100)){
+				pro++;
+				printf("%i \% (%i) of reads Corrected\n",pro,i);
+			}
 			oldchange = change;
 			while(collapse(i,1)){
 //				printf("Colappse: %i!\n",i);
