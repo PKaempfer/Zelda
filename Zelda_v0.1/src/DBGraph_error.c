@@ -480,7 +480,7 @@ void perfectErrorCorrection(){
 		for(i=1;i<graph->V;i++){
 			if(i%(graph->V/100)){
 				pro++;
-				printf("%i \% (%i) of reads Corrected\n",pro,i);
+				printf("%i %% (%i) of reads Corrected\n",pro,i);
 			}
 			oldchange = change;
 			while(collapse(i,1)){
