@@ -478,7 +478,7 @@ void perfectErrorCorrection(){
 		countKmers();
 		change = 0;
 		for(i=1;i<graph->V;i++){
-			if(i%(graph->V/100)){
+			if(i%(graph->V/100)==0){
 				pro++;
 				printf("%i %% (%i) of reads Corrected\n",pro,i);
 			}
