@@ -334,7 +334,7 @@ void rekCorrection(int a, int b, int up){
 	}
 }
 
-int collapse(int ori, int dir){
+static inline int collapse(int ori, int dir){
 //	static int number = 0;
 	static int a,b, temp;
 	struct AdjListNode *node, *nextnode;
@@ -424,6 +424,112 @@ int collapse(int ori, int dir){
 	return 0;
 }
 
+static inline int iter_collapse(int ori, int dir){
+//	static int number = 0;
+	static int a,b, temp;
+	struct AdjListNode *node, *nextnode;
+	char found = 1;
+	char foundany = 0;
+	if(dir){
+		while(found){
+			found = 0;
+			if(graph->array[ori].head && graph->array[ori].head->next){
+				node = graph->array[ori].head;
+				while(node){
+					nextnode = node->next;
+					while(nextnode){
+						if((node->trans & TRANS_MASK) == (nextnode->trans & TRANS_MASK) && node->dest != nextnode->dest){
+							// Control the coverage of the nodes (Needs to be implemented)
+							// Previously it has to be implemented in hash to adjacency transformation functions
+							a = _min(node->dest,nextnode->dest);
+							b = _max(node->dest,nextnode->dest);
+							if(graph->array[a].counter > graph->array[b].counter){
+								temp = a;
+								a = b;
+								b = temp;
+							}
+							if(graph->array[a].counter > 10 && graph->array[b].counter > 10){
+								nextnode = nextnode->next;
+								continue;
+							}
+							else if(ori == a || ori == b){
+								nextnode = nextnode->next;
+								continue;
+							}
+							else if(isChild(ori,a) || isChild(ori,b)){
+								nextnode = nextnode->next;
+								continue;
+							}
+							else{
+								found=1;
+								foundany = 1;
+								collapseNodes(a,b);
+								ori = a;
+								break;
+							}
+						}
+						nextnode = nextnode->next;
+					}
+					if(found == 1) break;
+					else node = node->next;
+				}
+			}
+		}
+	}
+	else{
+		while(found){
+			found = 0;
+			if(graph->array[ori].tail && graph->array[ori].tail->next){
+				node = graph->array[ori].tail;
+	//			nextnode =  graph->array[ori].tail->next; // ->
+				while(node){
+					nextnode = node->next;
+					while(nextnode){
+						if((node->trans & TRANS_MASK) == (nextnode->trans & TRANS_MASK) && node->dest != nextnode->dest){
+							// Control the coverage of the nodes (Needs to be implemented)
+							// Previously it has to be implemented in hash to adjacency transformation functions
+							a = _min(node->dest,nextnode->dest);
+							b = _max(node->dest,nextnode->dest);
+							if(graph->array[a].counter > graph->array[b].counter){
+								temp = a;
+								a = b;
+								b = temp;
+							}
+							if(graph->array[a].counter > 10 && graph->array[b].counter > 10){
+								nextnode = nextnode->next;
+								continue;
+							}
+	//						printf("Collapse Paths starting: ori: %i (a:%i / b%i)\n",ori,a,b);
+							if(ori == a || ori == b){
+								nextnode = nextnode->next;
+								continue;
+	//							return 0;
+							}
+							else if(isParent(ori,a) || isParent(ori,b)){
+								nextnode = nextnode->next;
+								continue;
+	//							return 0;
+							}
+							else{
+								found=1;
+								foundany = 1;
+								collapseNodes(a,b);
+								ori = a;
+								break;
+							}
+						}
+						nextnode = nextnode->next;
+					}
+					if(found == 1) break;
+					else node = node->next;
+				}
+			}
+		}
+	}
+	if(foundany) return 1;
+	else return 0;
+}
+
 void indelHandle(int ori){
 	struct AdjListNode *node, *nextnode;
 	node = graph->array[ori].head;
@@ -471,9 +577,10 @@ void perfectErrorCorrection(){
 	int round=0;
 	int change = 0;
 	int oldchange;
-	int pro = 0;
+	int pro;
 	char *dotFile = (char*)malloc(sizeof(char)*100);
 	do{
+		pro = 0;
 		printf("ErrorCorrection Round %i\n",round);
 		countKmers();
 		change = 0;
@@ -483,13 +590,15 @@ void perfectErrorCorrection(){
 				printf("%i %% (%i) of reads Corrected\n",pro,i);
 			}
 			oldchange = change;
-			while(collapse(i,1)){
+//			while(collapse(i,1)){
+			while(iter_collapse(i,1)){
 //				printf("Colappse: %i!\n",i);
 				change++;
 //				if(round>19) printSorrounding(i);
 				if(change-oldchange>10) break;
 			}
-			while(collapse(i,0)){
+//			while(collapse(i,0)){
+			while(iter_collapse(i,0)){
 //				printf("Colappse!Rev: %i\n",i);
 				change++;
 				if(change-oldchange>10) break;
