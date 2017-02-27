@@ -82,6 +82,8 @@ void doulbeEdgeTest(int a, int phase,int aa, int b, int ori){
 void collapseNodes(int a, int b){
 	struct AdjListNode *anode,*bnode,*bpar,*bchi;
 	int c, delete;
+	if(graph->array[a].counter+graph->array[b].counter<256) graph->array[a].counter += graph->array[b].counter;
+	else graph->array[a].counter = 255;
 
 	// 0. take on the read links
 //	printf("Check 0 a: %i b:%i ori: %i\n",a,b,ori);
