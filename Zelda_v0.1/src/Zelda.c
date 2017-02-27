@@ -62,26 +62,26 @@ int main(int argc, char* argv[]) {
 
 
 //	// preliminary filter
-//  printf("CHECKPOINT: 1. create Graph\n");
-//	time(&stop);
-//	para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
-//	struct reads* reads1 = readDB(para->readDB);
-//	filter_reads(reads1,NUM_THREADS,threads);
-//	strcat(para->readDB,"filter");
-//	write_filteredDB(para->readDB,para->blocks,para->files,reads1);
-//	freeEnds_oa();
-//	freeHashTable_oa();
-//	printf("CHECKPOINT: 1. Free Reads\n");
-////	freeDB(reads1);
-//
-//	// Hashing
-//	printf("CHECKPOINT: 1. Start New Hashing\n");
-//	para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
+    printf("CHECKPOINT: 1. create Graph\n");
+	time(&stop);
+	para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
+	struct reads* reads1 = readDB(para->readDB);
+	filter_reads(reads1,NUM_THREADS,threads);
+	strcat(para->readDB,"filter");
+	write_filteredDB(para->readDB,para->blocks,para->files,reads1);
+	freeEnds_oa();
+	freeHashTable_oa();
+	printf("CHECKPOINT: 1. Free Reads\n");
+//	freeDB(reads1);
+
+	// Hashing
+	printf("CHECKPOINT: 1. Start New Hashing\n");
+	para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
 
 	// Hashing the allready filterd
-    time(&stop);
-	strcat(para->readDB,"filter");
-	para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
+//    time(&stop);
+//	strcat(para->readDB,"filter");
+//	para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
 
 
 	createGraph(graphSize);

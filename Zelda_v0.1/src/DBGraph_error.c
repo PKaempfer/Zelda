@@ -461,7 +461,7 @@ static inline int iter_collapse(int ori, int dir){
 				}
 			}
 			if(found){
-				if(numNeighbor>10) printf("High Number of parents: %i\n",numNeighbor);
+//				if(numNeighbor>10) printf("High Number of parents: %i\n",numNeighbor);
 				found = 0;
 				node = graph->array[ori].head;
 				while(node){
@@ -525,7 +525,7 @@ static inline int iter_collapse(int ori, int dir){
 				}
 			}
 			if(found){
-				if(numNeighbor>10) printf("High Number of children: %i\n",numNeighbor);
+//				if(numNeighbor>10) printf("High Number of children: %i\n",numNeighbor);
 				found = 0;
 				node = graph->array[ori].tail;
 	//			nextnode =  graph->array[ori].tail->next; // ->
