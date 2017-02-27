@@ -18,7 +18,7 @@
 #include "kmer.h"
 
 
-#define H_RANGE 3
+#define H_RANGE 5
 
 /**
  * Function returns the maximum of all given integer values
