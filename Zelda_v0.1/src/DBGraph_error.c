@@ -435,6 +435,7 @@ long sumcollapse = 0;
 long sumIter = 0;
 long collapseCountUp = 0;
 long collapseCountDown = 0;
+int counterTrash = 10;
 
 static inline int iter_collapse(int ori, int dir){
 //	static int number = 0;
@@ -452,7 +453,7 @@ static inline int iter_collapse(int ori, int dir){
 			if(node && node->next){
 				while(node){
 					numNeighbor++;
-					if(graph->array[node->dest].counter <= 5){
+					if(graph->array[node->dest].counter <= counterTrash){
 						found = 1;
 //						break;
 					}
@@ -466,7 +467,7 @@ static inline int iter_collapse(int ori, int dir){
 				while(node){
 					nextnode = node->next;
 					while(nextnode){
-						if(graph->array[node->dest].counter > 5 && graph->array[nextnode->dest].counter > 5){
+						if(graph->array[node->dest].counter > counterTrash && graph->array[nextnode->dest].counter > counterTrash){
 							nextnode = nextnode->next;
 							continue;
 						}
@@ -516,7 +517,7 @@ static inline int iter_collapse(int ori, int dir){
 			if(node && node->next){
 				while(node){
 					numNeighbor++;
-					if(graph->array[node->dest].counter <= 5){
+					if(graph->array[node->dest].counter <= counterTrash){
 						found = 1;
 //						break;
 					}
@@ -531,7 +532,7 @@ static inline int iter_collapse(int ori, int dir){
 				while(node){
 					nextnode = node->next;
 					while(nextnode){
-						if(graph->array[node->dest].counter > 5 && graph->array[nextnode->dest].counter > 5){
+						if(graph->array[node->dest].counter > counterTrash && graph->array[nextnode->dest].counter > counterTrash){
 							nextnode = nextnode->next;
 							continue;
 						}
@@ -637,9 +638,9 @@ void perfectErrorCorrection(){
 		countKmers();
 		change = 0;
 		for(i=1;i<graph->V;i++){
-			if(i%(graph->V/1000)==0){
+			if(i%(graph->V/10)==0){
 				pro++;
-				printf("%.1f %% (%i) nodes Corrected\n",(float)pro/10,i);
+				printf("%.1f %% (%i) nodes Corrected\n",(float)pro*10,i);
 				printf("Number of collapsed Kmers: up: %i / down: %i\n",collapseCountUp,collapseCountDown);
 	    		printf("Iter time:      %.3f s\n",(float)sumcollapse/1000000000);
 	    		printf("Collapse time:  %.3f s\n",(float)sumIter/1000000000);
