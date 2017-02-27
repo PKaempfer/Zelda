@@ -34,11 +34,6 @@ void radixSort(int nodeNum, int* nStat){
 		memcpy(&nStat[temp0N],&temp1[0],sizeof(int)*temp1N);
 		mask = mask << 1;
 	}
-	printf("Sorted Contigs:\n");
-	for(j=0;j<nodeNum;j++){
-		printf("%i: %i\n",j,nStat[j]);
-	}
-
 }
 
 void countRemainingNodes(){
@@ -67,28 +62,11 @@ void countRemainingNodes(){
 	int k=0;
 	for(i=1;i<=redGraph->V;i++){
 		if(redGraph->array[i].head || redGraph->array[i].tail || redGraph->array[i].headread){
-			nStat[k++]=redGraph->array[i].len;
+			nStat[k++]=redGraph->array[i].len+k;
 		}
 	}
 
 	radixSort(nodeNum,nStat);
-
-//	int temp;
-//	k = nodeNum;
-//	int newk;
-//
-//	do{
-//		newk = 1;
-//		for(i = 0; i < k-1 ; ++i){
-//			if(nStat[i] < nStat[i+1]){
-//				temp = nStat[i+1];
-//				nStat[i+1] = nStat[i];
-//				nStat[i] = temp;
-//				newk = i+1;
-//			}
-//		}
-//		k = newk;
-//	} while(k>1);
 
 	printf("Contig Length: %i\n",nodeLen);
 	printf("Contig Length (>100): %i\n",nodeLen100);
