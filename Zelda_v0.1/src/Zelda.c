@@ -79,6 +79,7 @@ int main(int argc, char* argv[]) {
 //	para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
 
 	// Hashing the allready filterd
+    time(&stop);
 	strcat(para->readDB,"filter");
 	para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
 
