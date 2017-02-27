@@ -611,7 +611,7 @@ void perfectErrorCorrection(){
 			if(i%(graph->V/1000)==0){
 				pro++;
 				printf("%.1f %% (%i) nodes Corrected\n",(float)pro/10,i);
-				printnf("Number of collapsed Kmers: up: %i / down: %i\n",collapseCountUp,collapseCountDown);
+				printf("Number of collapsed Kmers: up: %i / down: %i\n",collapseCountUp,collapseCountDown);
 	    		printf("Iter time:      %.3f s\n",(float)sumcollapse/1000000000);
 	    		printf("Collapse time:  %.3f s\n",(float)sumIter/1000000000);
 			}
