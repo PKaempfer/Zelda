@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "FileReader.h"
 #include "kmer.h"
 #include "DBGraph.h"
@@ -424,8 +425,16 @@ static inline int collapse(int ori, int dir){
 	return 0;
 }
 
+struct timespec collapseSt;
+struct timespec collapseEnd;
+struct timespec iterSt;
+struct timespec iterEnd;
+long sumcollapse = 0;
+long sumIter = 0;
+
 static inline int iter_collapse(int ori, int dir){
 //	static int number = 0;
+	clock_gettime(CLOCK_MONOTONIC, &collapseSt);
 	static int a,b, temp;
 	struct AdjListNode *node, *nextnode;
 	char found = 1;
@@ -463,7 +472,10 @@ static inline int iter_collapse(int ori, int dir){
 							else{
 								found=1;
 								foundany = 1;
+								clock_gettime(CLOCK_MONOTONIC, &iterSt);
 								collapseNodes(a,b);
+								clock_gettime(CLOCK_MONOTONIC, &iterEnd);
+								sumIter += (((iterEnd.tv_sec * 1000000000) + iterEnd.tv_nsec) - ((iterSt.tv_sec * 1000000000) + iterSt.tv_nsec));
 								ori = a;
 								break;
 							}
@@ -513,7 +525,9 @@ static inline int iter_collapse(int ori, int dir){
 							else{
 								found=1;
 								foundany = 1;
+								clock_gettime(CLOCK_MONOTONIC, &iterSt);
 								collapseNodes(a,b);
+								clock_gettime(CLOCK_MONOTONIC, &iterEnd);
 								ori = a;
 								break;
 							}
@@ -526,6 +540,8 @@ static inline int iter_collapse(int ori, int dir){
 			}
 		}
 	}
+	clock_gettime(CLOCK_MONOTONIC, &collapseEnd);
+	sumcollapse += (((collapseEnd.tv_sec * 1000000000) + collapseEnd.tv_nsec) - ((collapseSt.tv_sec * 1000000000) + collapseSt.tv_nsec));
 	if(foundany) return 1;
 	else return 0;
 }
@@ -585,9 +601,11 @@ void perfectErrorCorrection(){
 		countKmers();
 		change = 0;
 		for(i=1;i<graph->V;i++){
-			if(i%(graph->V/100)==0){
+			if(i%(graph->V/1000)==0){
 				pro++;
-				printf("%i %% (%i) of reads Corrected\n",pro,i);
+				printf("%.1f %% (%i) of reads Corrected\n",(float)pro/10,i);
+	    		printf("Iter time:      %.3f s\n",(float)sumcollapse/1000000000);
+	    		printf("Collapse time:  %.3f s\n",(float)sumIter/1000000000);
 			}
 			oldchange = change;
 //			while(collapse(i,1)){
