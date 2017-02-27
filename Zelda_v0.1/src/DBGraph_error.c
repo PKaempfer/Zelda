@@ -448,11 +448,11 @@ static inline int iter_collapse(int ori, int dir){
 				node = graph->array[ori].head;
 				while(node){
 					nextnode = node->next;
-					if(graph->array[node->dest].counter >= 5 && graph->array[nextnode->dest].counter >= 5){
-						nextnode = nextnode->next;
-						continue;
-					}
 					while(nextnode){
+						if(graph->array[node->dest].counter >= 5 && graph->array[nextnode->dest].counter >= 5){
+							nextnode = nextnode->next;
+							continue;
+						}
 						if((node->trans & TRANS_MASK) == (nextnode->trans & TRANS_MASK) && node->dest != nextnode->dest){
 							// Control the coverage of the nodes (Needs to be implemented)
 							// Previously it has to be implemented in hash to adjacency transformation functions
@@ -504,8 +504,6 @@ static inline int iter_collapse(int ori, int dir){
 							nextnode = nextnode->next;
 							continue;
 						}
-						else
-
 						if((node->trans & TRANS_MASK) == (nextnode->trans & TRANS_MASK) && node->dest != nextnode->dest){
 							// Control the coverage of the nodes (Needs to be implemented)
 							// Previously it has to be implemented in hash to adjacency transformation functions
