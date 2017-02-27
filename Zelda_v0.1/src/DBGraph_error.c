@@ -444,12 +444,21 @@ static inline int iter_collapse(int ori, int dir){
 	if(dir){
 		while(found){
 			found = 0;
-			if(graph->array[ori].head && graph->array[ori].head->next){
+			node = graph->array[ori].head;
+			while(node){
+				if(graph->array[node->dest].counter <= 5){
+					found = 1;
+					break;
+				}
+				node = node->next;
+			}
+			if(found && graph->array[ori].head && graph->array[ori].head->next){
+				found = 0;
 				node = graph->array[ori].head;
 				while(node){
 					nextnode = node->next;
 					while(nextnode){
-						if(graph->array[node->dest].counter >= 5 && graph->array[nextnode->dest].counter >= 5){
+						if(graph->array[node->dest].counter > 5 && graph->array[nextnode->dest].counter > 5){
 							nextnode = nextnode->next;
 							continue;
 						}
@@ -494,13 +503,22 @@ static inline int iter_collapse(int ori, int dir){
 	else{
 		while(found){
 			found = 0;
-			if(graph->array[ori].tail && graph->array[ori].tail->next){
+			node = graph->array[ori].tail;
+			while(node){
+				if(graph->array[node->dest].counter <= 5){
+					found = 1;
+					break;
+				}
+				node = node->next;
+			}
+			if(found && graph->array[ori].tail && graph->array[ori].tail->next){
+				found = 0;
 				node = graph->array[ori].tail;
 	//			nextnode =  graph->array[ori].tail->next; // ->
 				while(node){
 					nextnode = node->next;
 					while(nextnode){
-						if(graph->array[node->dest].counter > 10 && graph->array[nextnode->dest].counter > 10){
+						if(graph->array[node->dest].counter > 5 && graph->array[nextnode->dest].counter > 5){
 							nextnode = nextnode->next;
 							continue;
 						}
