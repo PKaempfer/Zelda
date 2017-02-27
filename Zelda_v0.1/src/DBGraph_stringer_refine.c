@@ -27,8 +27,8 @@ void radixSort(int nodeNum, int* nStat){
 		temp0N = 0;
 		temp1N = 0;
 		for(j=0;j<nodeNum;j++){
-			if(nStat[i] & mask) temp0[temp0N++] = nStat[i];
-			else temp1[temp1N++] = nStat[i];
+			if(nStat[j] & mask) temp0[temp0N++] = nStat[j];
+			else temp1[temp1N++] = nStat[j];
 		}
 		memcpy(&nStat[0],&temp0[0],sizeof(int)*temp0N);
 		memcpy(&nStat[temp0N],&temp1[0],sizeof(int)*temp1N);
