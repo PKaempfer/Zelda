@@ -431,6 +431,8 @@ struct timespec iterSt;
 struct timespec iterEnd;
 long sumcollapse = 0;
 long sumIter = 0;
+long collapseCountUp = 0;
+long collapseCountDown = 0;
 
 static inline int iter_collapse(int ori, int dir){
 //	static int number = 0;
@@ -446,6 +448,10 @@ static inline int iter_collapse(int ori, int dir){
 				node = graph->array[ori].head;
 				while(node){
 					nextnode = node->next;
+					if(graph->array[node->dest].counter >= 5 && graph->array[nextnode->dest].counter >= 5){
+						nextnode = nextnode->next;
+						continue;
+					}
 					while(nextnode){
 						if((node->trans & TRANS_MASK) == (nextnode->trans & TRANS_MASK) && node->dest != nextnode->dest){
 							// Control the coverage of the nodes (Needs to be implemented)
@@ -456,10 +462,6 @@ static inline int iter_collapse(int ori, int dir){
 								temp = a;
 								a = b;
 								b = temp;
-							}
-							if(graph->array[a].counter > 10 && graph->array[b].counter > 10){
-								nextnode = nextnode->next;
-								continue;
 							}
 							else if(ori == a || ori == b){
 								nextnode = nextnode->next;
@@ -476,6 +478,7 @@ static inline int iter_collapse(int ori, int dir){
 								collapseNodes(a,b);
 								clock_gettime(CLOCK_MONOTONIC, &iterEnd);
 								sumIter += (((iterEnd.tv_sec * 1000000000) + iterEnd.tv_nsec) - ((iterSt.tv_sec * 1000000000) + iterSt.tv_nsec));
+								collapseCountUp++;
 								ori = a;
 								break;
 							}
@@ -497,6 +500,12 @@ static inline int iter_collapse(int ori, int dir){
 				while(node){
 					nextnode = node->next;
 					while(nextnode){
+						if(graph->array[node->dest].counter > 10 && graph->array[nextnode->dest].counter > 10){
+							nextnode = nextnode->next;
+							continue;
+						}
+						else
+
 						if((node->trans & TRANS_MASK) == (nextnode->trans & TRANS_MASK) && node->dest != nextnode->dest){
 							// Control the coverage of the nodes (Needs to be implemented)
 							// Previously it has to be implemented in hash to adjacency transformation functions
@@ -506,10 +515,6 @@ static inline int iter_collapse(int ori, int dir){
 								temp = a;
 								a = b;
 								b = temp;
-							}
-							if(graph->array[a].counter > 10 && graph->array[b].counter > 10){
-								nextnode = nextnode->next;
-								continue;
 							}
 	//						printf("Collapse Paths starting: ori: %i (a:%i / b%i)\n",ori,a,b);
 							if(ori == a || ori == b){
@@ -528,6 +533,8 @@ static inline int iter_collapse(int ori, int dir){
 								clock_gettime(CLOCK_MONOTONIC, &iterSt);
 								collapseNodes(a,b);
 								clock_gettime(CLOCK_MONOTONIC, &iterEnd);
+								sumIter += (((iterEnd.tv_sec * 1000000000) + iterEnd.tv_nsec) - ((iterSt.tv_sec * 1000000000) + iterSt.tv_nsec));
+								collapseCountDown++;
 								ori = a;
 								break;
 							}
@@ -603,7 +610,8 @@ void perfectErrorCorrection(){
 		for(i=1;i<graph->V;i++){
 			if(i%(graph->V/1000)==0){
 				pro++;
-				printf("%.1f %% (%i) of reads Corrected\n",(float)pro/10,i);
+				printf("%.1f %% (%i) nodes Corrected\n",(float)pro/10,i);
+				printnf("Number of collapsed Kmers: up: %i / down: %i\n",collapseCountUp,collapseCountDown);
 	    		printf("Iter time:      %.3f s\n",(float)sumcollapse/1000000000);
 	    		printf("Collapse time:  %.3f s\n",(float)sumIter/1000000000);
 			}
