@@ -441,20 +441,24 @@ static inline int iter_collapse(int ori, int dir){
 	struct AdjListNode *node, *nextnode;
 	char found = 1;
 	char foundany = 0;
+	static uint32_t numNeighbor;
 	if(dir){
 		while(found){
 			found = 0;
+			numNeighbor = 0;
 			node = graph->array[ori].head;
 			if(node && node->next){
 				while(node){
+					numNeighbor++;
 					if(graph->array[node->dest].counter <= 5){
 						found = 1;
-						break;
+//						break;
 					}
 					node = node->next;
 				}
 			}
 			if(found){
+				if(numNeighbor>10) printf("High Number of parents: %i\n",numNeighbor);
 				found = 0;
 				node = graph->array[ori].head;
 				while(node){
@@ -505,17 +509,20 @@ static inline int iter_collapse(int ori, int dir){
 	else{
 		while(found){
 			found = 0;
+			numNeighbor = 0;
 			node = graph->array[ori].tail;
 			if(node && node->next){
 				while(node){
+					numNeighbor++;
 					if(graph->array[node->dest].counter <= 5){
 						found = 1;
-						break;
+//						break;
 					}
 					node = node->next;
 				}
 			}
 			if(found){
+				if(numNeighbor>10) printf("High Number of children: %i\n",numNeighbor);
 				found = 0;
 				node = graph->array[ori].tail;
 	//			nextnode =  graph->array[ori].tail->next; // ->
