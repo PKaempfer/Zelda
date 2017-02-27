@@ -646,15 +646,15 @@ void perfectErrorCorrection(){
 	    		printf("Collapse time:  %.3f s\n",(float)sumIter/1000000000);
 			}
 			oldchange = change;
-//			while(collapse(i,1)){
-			while(iter_collapse(i,1)){
+			while(collapse(i,1)){
+//			while(iter_collapse(i,1)){
 //				printf("Colappse: %i!\n",i);
 				change++;
 //				if(round>19) printSorrounding(i);
 				if(change-oldchange>10) break;
 			}
-//			while(collapse(i,0)){
-			while(iter_collapse(i,0)){
+			while(collapse(i,0)){
+//			while(iter_collapse(i,0)){
 //				printf("Colappse!Rev: %i\n",i);
 				change++;
 				if(change-oldchange>10) break;
