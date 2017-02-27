@@ -435,7 +435,7 @@ long sumcollapse = 0;
 long sumIter = 0;
 long collapseCountUp = 0;
 long collapseCountDown = 0;
-int counterTrash = 10;
+int counterTrash = 256;
 
 static inline int iter_collapse(int ori, int dir){
 //	static int number = 0;

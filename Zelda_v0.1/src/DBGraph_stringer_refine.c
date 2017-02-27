@@ -34,6 +34,8 @@ void radixSort(int nodeNum, int* nStat){
 		memcpy(&nStat[temp0N],&temp1[0],sizeof(int)*temp1N);
 		mask = mask << 1;
 	}
+	free(temp0);
+	free(temp1);
 }
 
 void countRemainingNodes(){
@@ -62,7 +64,7 @@ void countRemainingNodes(){
 	int k=0;
 	for(i=1;i<=redGraph->V;i++){
 		if(redGraph->array[i].head || redGraph->array[i].tail || redGraph->array[i].headread){
-			nStat[k++]=redGraph->array[i].len+k;
+			nStat[k++]=redGraph->array[i].len+nK;
 		}
 	}
 
