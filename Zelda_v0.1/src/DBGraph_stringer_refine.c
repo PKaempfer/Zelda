@@ -17,6 +17,30 @@
 static char status_char[] = { 'W', 'C', 'S', 'P', 'J' };
 static const char *arrowdir[2]={"normal","inv"};
 
+void radixSort(int nodeNum, int* nStat){
+	int i,j;
+	int temp0N,temp1N;
+	int *temp0 = (int*)malloc(sizeof(int)*nodeNum);
+	int *temp1 = (int*)malloc(sizeof(int)*nodeNum);
+	uint32_t mask = 1;
+	for(i=0;i<24;i++){ // Max Length of largest Contig 16mbp
+		temp0N = 0;
+		temp1N = 0;
+		for(j=0;j<nodeNum;j++){
+			if(nStat[i] & mask) temp0[temp0N++] = nStat[i];
+			else temp1[temp1N++] = nStat[i];
+		}
+		memcpy(&nStat[0],&temp0[0],sizeof(int)*temp0N);
+		memcpy(&nStat[temp0N],&temp1[0],sizeof(int)*temp1N);
+		mask = mask << 1;
+	}
+	printf("Sorted Contigs:\n");
+	for(j=0;j<nodeNum;j++){
+		printf("%i: %i\n",j,nStat[j]);
+	}
+
+}
+
 void countRemainingNodes(){
 	int i;
 	int nodeNum = 0;
@@ -46,22 +70,25 @@ void countRemainingNodes(){
 			nStat[k++]=redGraph->array[i].len;
 		}
 	}
-	int temp;
-	k = nodeNum;
-	int newk;
 
-	do{
-		newk = 1;
-		for(i = 0; i < k-1 ; ++i){
-			if(nStat[i] < nStat[i+1]){
-				temp = nStat[i+1];
-				nStat[i+1] = nStat[i];
-				nStat[i] = temp;
-				newk = i+1;
-			}
-		}
-		k = newk;
-	} while(k>1);
+	radixSort(nodeNum,nStat);
+
+//	int temp;
+//	k = nodeNum;
+//	int newk;
+//
+//	do{
+//		newk = 1;
+//		for(i = 0; i < k-1 ; ++i){
+//			if(nStat[i] < nStat[i+1]){
+//				temp = nStat[i+1];
+//				nStat[i+1] = nStat[i];
+//				nStat[i] = temp;
+//				newk = i+1;
+//			}
+//		}
+//		k = newk;
+//	} while(k>1);
 
 	printf("Contig Length: %i\n",nodeLen);
 	printf("Contig Length (>100): %i\n",nodeLen100);
