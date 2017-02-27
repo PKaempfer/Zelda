@@ -22,6 +22,7 @@ SOURCES += src/DBGraph_scaffold.c
 SOURCES += src/ConsensusCaller.c src/ConsensusCaller2.c
 SOURCES += src/misc_hash.c
 
+
 OBJECTS = $(SOURCES:.c=.o) 
 
 TODAY=`date +%Y-%m-%d`

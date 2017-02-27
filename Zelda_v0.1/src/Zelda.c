@@ -76,6 +76,7 @@ int main(int argc, char* argv[]) {
 
 	// Hashing
 	printf("CHECKPOINT: 1. Start New Hashing\n");
+	time(&stop);
 	para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
 
 	// Hashing the allready filterd
