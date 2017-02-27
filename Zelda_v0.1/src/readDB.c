@@ -362,9 +362,9 @@ struct reads* readDB(char* outDB){
 	int readNumber;
 	fread(&readNumber,sizeof(int),1,metaDB);
 	printf("numreads: %i\n",numreads);
-//	numreads = readNumber;
+	numreads = readNumber;
 	//TODo: Why wrong in MetaDB
-	readNumber = numreads;
+//	readNumber = numreads;
 	printf("readNumber: %i\n",readNumber);
 
 

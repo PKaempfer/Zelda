@@ -16,6 +16,7 @@
 #include "DBGraph.h"
 #include "DBGraph_error.h"
 
+int counterTrash = 256;
 int maxDir;
 
 void rekDot(int a, int layer, FILE *part){
@@ -273,7 +274,7 @@ void rekCorrection(int a, int b, int up){
 							a = b;
 							b = temp;
 						}
-						if(graph->array[a].counter > 10 && graph->array[b].counter > 10){
+						if(graph->array[a].counter > counterTrash && graph->array[b].counter > counterTrash){
 							nextnode = nextnode->next;
 							continue;
 						}
@@ -311,7 +312,7 @@ void rekCorrection(int a, int b, int up){
 							a = b;
 							b = temp;
 						}
-						if(graph->array[a].counter > 10 && graph->array[b].counter > 10){
+						if(graph->array[a].counter > counterTrash && graph->array[b].counter > counterTrash){
 							nextnode = nextnode->next;
 							continue;
 						}
@@ -360,7 +361,7 @@ static inline int collapse(int ori, int dir){
 							a = b;
 							b = temp;
 						}
-						if(graph->array[a].counter > 10 && graph->array[b].counter > 10){
+						if(graph->array[a].counter > counterTrash && graph->array[b].counter > counterTrash){
 							nextnode = nextnode->next;
 							continue;
 						}
@@ -399,7 +400,7 @@ static inline int collapse(int ori, int dir){
 							a = b;
 							b = temp;
 						}
-						if(graph->array[a].counter > 10 && graph->array[b].counter > 10){
+						if(graph->array[a].counter > counterTrash && graph->array[b].counter > counterTrash){
 							nextnode = nextnode->next;
 							continue;
 						}
@@ -435,7 +436,6 @@ long sumcollapse = 0;
 long sumIter = 0;
 long collapseCountUp = 0;
 long collapseCountDown = 0;
-int counterTrash = 256;
 
 static inline int iter_collapse(int ori, int dir){
 //	static int number = 0;
