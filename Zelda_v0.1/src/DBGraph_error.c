@@ -16,7 +16,7 @@
 #include "DBGraph.h"
 #include "DBGraph_error.h"
 
-int counterTrash = 256;
+int counterTrash = 30;
 int maxDir;
 
 void rekDot(int a, int layer, FILE *part){
