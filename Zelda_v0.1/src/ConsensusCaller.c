@@ -1341,6 +1341,7 @@ void poa_printContigs(struct POG* pog, char* contigFile){
 	int insert;
 	for(i=0;i<pog->contigNum;i++){
 		if(!pog->contig[i].vflag){
+			printf("Write %s\n",pog->contig[i].name);
 			len = strlen(pog->contig[i].sequence);
 			fprintf(correctContigs,">%s\n",pog->contig[i].name);
 			j=0;
