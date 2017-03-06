@@ -12,27 +12,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "DBGraph_stringer.h"
 #include "DBGraph.h"
 
 static char status_char[] = { 'W', 'C', 'S', 'P', 'J' };
 static const char *arrowdir[2]={"normal","inv"};
 
-void radixSort(int nodeNum, int* nStat){
+void radixSort(int elemNum, int* elemList){
 	int i,j;
 	int temp0N,temp1N;
-	int *temp0 = (int*)malloc(sizeof(int)*nodeNum);
-	int *temp1 = (int*)malloc(sizeof(int)*nodeNum);
+	int *temp0 = (int*)malloc(sizeof(int)*elemNum);
+	int *temp1 = (int*)malloc(sizeof(int)*elemNum);
 	uint32_t mask = 1;
-	for(i=0;i<24;i++){ // Max Length of largest Contig 16mbp
+	int runs = 0;
+	int bit = sizeof(int)*8;
+	int clz;
+
+	for(i=0;i<elemNum;i++){
+		clz = bit - __builtin_clz(elemList[i]);
+		runs = _max(runs,clz);
+	}
+
+	printf("Number of Runs: %i to sort Elements up to %0.f\n",runs,pow(2,runs));
+
+	for(i=0;i<runs;i++){ // Max Length of largest Contig 2.1gbp
 		temp0N = 0;
 		temp1N = 0;
-		for(j=0;j<nodeNum;j++){
-			if(nStat[j] & mask) temp0[temp0N++] = nStat[j];
-			else temp1[temp1N++] = nStat[j];
+		for(j=0;j<elemNum;j++){
+			if(elemList[j] & mask) temp0[temp0N++] = elemList[j];
+			else temp1[temp1N++] = elemList[j];
 		}
-		memcpy(&nStat[0],&temp0[0],sizeof(int)*temp0N);
-		memcpy(&nStat[temp0N],&temp1[0],sizeof(int)*temp1N);
+		memcpy(&elemList[0],&temp0[0],sizeof(int)*temp0N);
+		memcpy(&elemList[temp0N],&temp1[0],sizeof(int)*temp1N);
 		mask = mask << 1;
 	}
 	free(temp0);

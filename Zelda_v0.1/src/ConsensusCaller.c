@@ -1328,7 +1328,7 @@ void poa_consensus(struct Sequence* contig){
 }
 
 void poa_printContigs(struct POG* pog, char* contigFile){
-	char verbose = 0;
+	char verbose = 1;
 	printf("CHECKPOINT: Write CorrectContigs in fasta\n");
 	FILE* correctContigs = fopen(contigFile,"w");
 	char hideEnds = 0;
@@ -1368,7 +1368,7 @@ void poa_printContigs(struct POG* pog, char* contigFile){
 					fprintf(correctContigs,"N");
 					if(j%80==0) fprintf(correctContigs,"\n");
 				}
-				if(verbose)printf("Write Fasta Behind Bridge\n");
+				if(verbose)printf("Write Fasta Behind Bridge (nextID: %i)\n",nextID);
 				lenNew = strlen(pog->contig[nextID].sequence);
 				if(verbose) printf("Write Fasta Behind Bridge (len: %i)\n",lenNew);
 				len += lenNew;
@@ -1614,35 +1614,23 @@ int findLeftMostJunction(int i){
 
 struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 	char verbose = 1;
+	char verbose2 = 0;
     int gesLen = 0;													// Sum over all scaffold length
 	int *nStat = (int*)malloc(sizeof(int)*aS->num);				// List of Scaffold length
 
 	int i;
 
     int v;
-    int k=0;
-    int anzlen;
+//    int k=0;
+    int anzlen = 0;
     for (v = 0; v < aS->num; v++){
-    	if(aS->scaff[v].len >= 200) nStat[k++] = aS->scaff[v].len;
+    	if(aS->scaff[v].len >= 200) nStat[anzlen++] = aS->scaff[v].len;
     }
 
 	int temp;
-	anzlen = k;
-//	k = aS->num;
-	int newk;
-	// Sort Scaffolds, simple bubble-sort
-	do{
-		newk = 1;
-		for(i = 0; i < k-1 ; ++i){
-			if(nStat[i] < nStat[i+1]){
-				temp = nStat[i+1];
-				nStat[i+1] = nStat[i];
-				nStat[i] = temp;
-				newk = i+1;
-			}
-		}
-		k = newk;
-	} while(k>1);
+
+	// Sort Scaffolds by length
+	radixSort(anzlen,nStat);
 
 	for(i=0;i<anzlen;i++) gesLen += nStat[i];
 
@@ -1681,7 +1669,7 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 		}
 	}
 
-	printf("ScaffStat 3 !!!	\n");
+	if(verbose2) printf("ScaffStat 3 !!!	\n");
 	int scaffID;
 	int len;
 	int bridgeJunction;
@@ -1691,10 +1679,10 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 		aS->scaff[i].next = -1;
 		if(aS->scaff[i].len < 200 && i<aS->num) continue;
 		startJunction = aS->scaff[i].startJunction;
-//		printf("Scaffold: %i (len: %i bp) Type: %i\n",i,aS->scaff[i].len,aS->scaff[i].type);
+		if(verbose2) printf("Scaffold: %i (len: %i bp) Type: %i\n",i,aS->scaff[i].len,aS->scaff[i].type);
 		scaffEdge = aS->scaff[i].first;
 		len = scaffEdge->len;
-//		printf(KRED"%i"KNRM,startJunction);
+		if(verbose2) printf(KRED"%i"KNRM,startJunction);
 		scaffID = i;
 		while(scaffEdge){
 			if(scaffEdge != aS->scaff[i].first && scaffEdge->bridge){
@@ -1712,9 +1700,9 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 //				aS->scaff[i].next = &aS->scaff[aS->numbridge];
 				aS->scaff[i].next = aS->numbridge;
 				oldscaffEdge->next = NULL;
-//				printf(" ..(%i)..> "KYEL"%i"KNRM,scaffEdge->bridge->estLen,bridgeJunction);
-//				printf(" -> "KGRN"%i"KNRM,scaffEdge->ID);
-//				printf(" -> "KRED"%i"KNRM,scaffEdge->targetJunction);
+				if(verbose2) printf(" ..(%i)..> "KYEL"%i"KNRM,scaffEdge->bridge->estLen,bridgeJunction);
+				if(verbose2) printf(" -> "KGRN"%i"KNRM,scaffEdge->ID);
+				if(verbose2) printf(" -> "KRED"%i"KNRM,scaffEdge->targetJunction);
 				aS->numbridge++;
             	if(aS->numbridge == aS->nummax){
             		aS->nummax *= 2;
@@ -1727,8 +1715,8 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 				break;
 			}
 			else{
-//				printf(" -> "KGRN"%i"KNRM,scaffEdge->ID);
-//				printf(" -> "KRED"%i"KNRM,scaffEdge->targetJunction);
+				if(verbose2) printf(" -> "KGRN"%i"KNRM,scaffEdge->ID);
+				if(verbose2) printf(" -> "KRED"%i"KNRM,scaffEdge->targetJunction);
 			}
 			if(scaffEdge->next && scaffEdge->next->bridge){
 				oldscaffEdge = scaffEdge;
@@ -1736,7 +1724,7 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 			scaffEdge = scaffEdge->next;
 			len += scaffEdge->len;
 		}
-//		printf("\n");
+		if(verbose2) printf("\n");
 	}
 
 	printf("\n");
@@ -2712,6 +2700,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     int startJunction;
     for(i=0;i<aS->numbridge;i++){
     	if(aS->scaff[i].len > MIN_SCAFF_LEN || i >= aS->num){
+    		if(i>=aS->num) printf("\t\tGebridgetes Scaffold (%i)\n",i);
     		runB = 1;
     		scaffEdge = aS->scaff[i].first;
     		printf("FirstEdge: %i\n",scaffEdge->ID);
@@ -2994,6 +2983,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	    		}
 
 	    		aS->scaff[i].scaffoldID = pog->contigNum;
+	    		printf("i: %i , scaffID: %i\n",i,aS->scaff[i].scaffoldID);
 	    		if(aS->scaff[i].next>=0){
 	    			printf("Scaffold %i has a connection\n",pog->contigNum);
 	    			pog->contig[pog->contigNum].seqEdge = (struct sequenceEdge*)malloc(sizeof(struct sequenceEdge));
@@ -3005,6 +2995,9 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 	    		if(i >= aS->num) pog->contig[pog->contigNum].vflag = 1;
 	    		else pog->contig[pog->contigNum].vflag = 0;
 	    		pog->contigNum++;
+			}
+			else if(i>=aS->num){
+				aS->scaff[i].scaffoldID = -1;
 			}
     		resetLetters(Letters);
     		numNodes = 0;
@@ -3021,11 +3014,16 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
     }
 
     printf("POG Finisched\n");
-    verbose = 1;
+    verbose = 0;
 
     for(i=0;i<aS->numbridge;i++){
     	if(aS->scaff[i].len > MIN_SCAFF_LEN || i >= aS->num){
-    		if(aS->scaff[i].next >= 0){
+    		if(aS->scaff[aS->scaff[i].next].scaffoldID<0){
+    			free(pog->contig[aS->scaff[i].scaffoldID].seqEdge);
+    			pog->contig[aS->scaff[i].scaffoldID].seqEdge = NULL;
+    		}
+    		else if(aS->scaff[i].next >= 0){
+    			printf("Bild Bridge to %i\n",aS->scaff[i].next);
 //    			pog->contig[aS->scaff[i].scaffoldID].seqEdge->nextScaff = aS->scaff[i].next->scaffoldID;
     			pog->contig[aS->scaff[i].scaffoldID].seqEdge->nextScaff = aS->scaff[aS->scaff[i].next].scaffoldID;
 //    			printf("Connect Scaffold %i with %i bp to scaffold %i\n",aS->scaff[i].scaffoldID,pog->contig[aS->scaff[i].scaffoldID].seqEdge->insertLen,aS->scaff[i].next->scaffoldID);

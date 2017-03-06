@@ -108,6 +108,8 @@ struct seekOvl{
 extern struct Graph *graph;
 extern struct redGraph* redGraph;
 
+void radixSort(int elemNum, int* elemList);
+
 void writePartialDot(int ori, int width);
 
 void writeDot();

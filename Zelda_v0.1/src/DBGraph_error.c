@@ -16,7 +16,7 @@
 #include "DBGraph.h"
 #include "DBGraph_error.h"
 
-int counterTrash = 256;
+int counterTrash = 35;
 int maxDir;
 
 void rekDot(int a, int layer, FILE *part){
@@ -80,7 +80,10 @@ void doulbeEdgeTest(int a, int phase,int aa, int b, int ori){
 
 }
 
+long deletedKmer = 0;
+
 void collapseNodes(int a, int b){
+	deletedKmer++;
 	struct AdjListNode *anode,*bnode,*bpar,*bchi;
 	int c, delete;
 	if(graph->array[a].counter+graph->array[b].counter<256) graph->array[a].counter += graph->array[b].counter;
@@ -622,6 +625,8 @@ void indelHandle(int ori){
 	}
 }
 
+//#define IterError
+
 void perfectErrorCorrection(){
 //	struct AdjListNode *nextnode;
 //	int a, b;
@@ -641,31 +646,38 @@ void perfectErrorCorrection(){
 			if(i%(graph->V/10)==0){
 				pro++;
 				printf("%.1f %% (%i) nodes Corrected\n",(float)pro*10,i);
-				printf("Number of collapsed Kmers: up: %i / down: %i\n",collapseCountUp,collapseCountDown);
+				printf("Number of collapsed Kmers: up: %li / down: %li\n",collapseCountUp,collapseCountDown);
 	    		printf("Iter time:      %.3f s\n",(float)sumcollapse/1000000000);
 	    		printf("Collapse time:  %.3f s\n",(float)sumIter/1000000000);
 			}
 			oldchange = change;
+#ifdef IterError
+			while(iter_collapse(i,1)){
+#else
 			while(collapse(i,1)){
-//			while(iter_collapse(i,1)){
+#endif
 //				printf("Colappse: %i!\n",i);
 				change++;
 //				if(round>19) printSorrounding(i);
 				if(change-oldchange>10) break;
 			}
+#ifdef IterError
+			while(iter_collapse(i,0)){
+#else
 			while(collapse(i,0)){
-//			while(iter_collapse(i,0)){
+#endif
 //				printf("Colappse!Rev: %i\n",i);
 				change++;
 				if(change-oldchange>10) break;
 			}
 		}
 		round++;
-		if(round>10) break;
+		if(round>5) break;
 		if(verbose){
 			sprintf(dotFile,"test_%i.dot",round);
 			writeDot(dotFile);
 		}
+		printf("Deleted k-mers: %li\n",deletedKmer);
 	} while(change);
 	// Delete self pointing circles ?!?
 	indelHandle(i);
