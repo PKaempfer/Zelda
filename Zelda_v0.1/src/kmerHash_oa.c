@@ -468,7 +468,7 @@ void mt_createKmers_DB(char* readSeq, int len, int readNum){
 	if(byte < cpByte) cpByte = byte;
 	if(len > maxRlen) maxRlen = len;
 	byte-=(cpByte);
-//	char* decompRead = decompressRead(read,len);
+//	char* decompRead = decompressRead(readSeq,len);
 //	printf("Read: %s\n",decompRead);
 //	free(decompRead);
 

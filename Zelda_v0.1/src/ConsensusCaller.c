@@ -3018,11 +3018,12 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 
     for(i=0;i<aS->numbridge;i++){
     	if(aS->scaff[i].len > MIN_SCAFF_LEN || i >= aS->num){
-    		if(aS->scaff[aS->scaff[i].next].scaffoldID<0){
-    			free(pog->contig[aS->scaff[i].scaffoldID].seqEdge);
-    			pog->contig[aS->scaff[i].scaffoldID].seqEdge = NULL;
-    		}
-    		else if(aS->scaff[i].next >= 0){
+    		if(aS->scaff[i].next >= 0){
+        		if(aS->scaff[aS->scaff[i].next].scaffoldID<0){
+        			free(pog->contig[aS->scaff[i].scaffoldID].seqEdge);
+        			pog->contig[aS->scaff[i].scaffoldID].seqEdge = NULL;
+        			continue;
+        		}
     			printf("Bild Bridge to %i\n",aS->scaff[i].next);
 //    			pog->contig[aS->scaff[i].scaffoldID].seqEdge->nextScaff = aS->scaff[i].next->scaffoldID;
     			pog->contig[aS->scaff[i].scaffoldID].seqEdge->nextScaff = aS->scaff[aS->scaff[i].next].scaffoldID;

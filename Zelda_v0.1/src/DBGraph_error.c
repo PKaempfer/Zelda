@@ -16,7 +16,10 @@
 #include "DBGraph.h"
 #include "DBGraph_error.h"
 
-int counterTrash = 35;
+#define IterError
+#define counterCorrection
+
+int counterTrash = 45;
 int maxDir;
 
 void rekDot(int a, int layer, FILE *part){
@@ -82,10 +85,16 @@ void doulbeEdgeTest(int a, int phase,int aa, int b, int ori){
 
 long deletedKmer = 0;
 
+
+/**
+ * Collapse Sibling Nodes a and b. a-node is destination and inherits all non-duplicate information from b
+ */
 void collapseNodes(int a, int b){
+	char verbose = 0;
 	deletedKmer++;
 	struct AdjListNode *anode,*bnode,*bpar,*bchi;
 	int c, delete;
+	if(verbose) printf("a: %i-count: %i / b: %i-count: %i\n",a,graph->array[a].counter,b,graph->array[b].counter);
 	if(graph->array[a].counter+graph->array[b].counter<256) graph->array[a].counter += graph->array[b].counter;
 	else graph->array[a].counter = 255;
 
@@ -264,24 +273,26 @@ void rekCorrection(int a, int b, int up){
 	oldA = a;
 	static struct AdjListNode *node, *nextnode;
 	if(up){
-		if(graph->array[a].head && graph->array[a].head->next){
-			node=graph->array[a].head;
+		if(graph->array[oldA].head && graph->array[oldA].head->next){
+			node=graph->array[oldA].head;
 			while(node){
 				nextnode=node->next;
 				while(nextnode){
 					if((node->trans & TRANS_MASK) == (nextnode->trans & TRANS_MASK) && node->dest != nextnode->dest){
 						a = _min(node->dest,nextnode->dest);
 						b = _max(node->dest,nextnode->dest);
-						if(graph->array[a].counter > graph->array[b].counter){
+#ifdef counterCorrection
+						if(graph->array[a].counter < graph->array[b].counter){
 							temp = a;
 							a = b;
 							b = temp;
 						}
+#endif
 						if(graph->array[a].counter > counterTrash && graph->array[b].counter > counterTrash){
 							nextnode = nextnode->next;
 							continue;
 						}
-						if(oldA == a || oldA == b){
+						else if(oldA == a || oldA == b){
 //							return;
 							nextnode = nextnode->next;
 							continue;
@@ -302,24 +313,26 @@ void rekCorrection(int a, int b, int up){
 		}
 	}
 	else{
-		if(graph->array[a].tail && graph->array[a].tail->next){
-			node=graph->array[a].tail;
+		if(graph->array[oldA].tail && graph->array[oldA].tail->next){
+			node=graph->array[oldA].tail;
 			while(node){
 				nextnode=node->next;
 				while(nextnode){
 					if((node->trans & TRANS_MASK) == (nextnode->trans & TRANS_MASK) && node->dest != nextnode->dest){
 						a = _min(node->dest,nextnode->dest);
 						b = _max(node->dest,nextnode->dest);
-						if(graph->array[a].counter > graph->array[b].counter){
+#ifdef counterCorrection
+						if(graph->array[a].counter < graph->array[b].counter){
 							temp = a;
 							a = b;
 							b = temp;
 						}
+#endif
 						if(graph->array[a].counter > counterTrash && graph->array[b].counter > counterTrash){
 							nextnode = nextnode->next;
 							continue;
 						}
-						if(oldA == a || oldA == b) {
+						else if(oldA == a || oldA == b) {
 //							return;
 							nextnode = nextnode->next;
 							continue;
@@ -359,11 +372,13 @@ static inline int collapse(int ori, int dir){
 						// Previously it has to be implemented in hash to adjacency transformation functions
 						a = _min(node->dest,nextnode->dest);
 						b = _max(node->dest,nextnode->dest);
-						if(graph->array[a].counter > graph->array[b].counter){
+#ifdef counterCorrection
+						if(graph->array[a].counter < graph->array[b].counter){
 							temp = a;
 							a = b;
 							b = temp;
 						}
+#endif
 						if(graph->array[a].counter > counterTrash && graph->array[b].counter > counterTrash){
 							nextnode = nextnode->next;
 							continue;
@@ -398,17 +413,19 @@ static inline int collapse(int ori, int dir){
 						// Previously it has to be implemented in hash to adjacency transformation functions
 						a = _min(node->dest,nextnode->dest);
 						b = _max(node->dest,nextnode->dest);
-						if(graph->array[a].counter > graph->array[b].counter){
+#ifdef counterCorrection
+						if(graph->array[a].counter < graph->array[b].counter){
 							temp = a;
 							a = b;
 							b = temp;
 						}
+#endif
 						if(graph->array[a].counter > counterTrash && graph->array[b].counter > counterTrash){
 							nextnode = nextnode->next;
 							continue;
 						}
 //						printf("Collapse Paths starting: ori: %i (a:%i / b%i)\n",ori,a,b);
-						if(ori == a || ori == b){
+						else if(ori == a || ori == b){
 							nextnode = nextnode->next;
 							continue;
 //							return 0;
@@ -479,12 +496,14 @@ static inline int iter_collapse(int ori, int dir){
 							// Previously it has to be implemented in hash to adjacency transformation functions
 							a = _min(node->dest,nextnode->dest);
 							b = _max(node->dest,nextnode->dest);
+#ifdef counterCorrection
 							if(graph->array[a].counter > graph->array[b].counter){
 								temp = a;
 								a = b;
 								b = temp;
 							}
-							else if(ori == a || ori == b){
+#endif
+							if(ori == a || ori == b){
 								nextnode = nextnode->next;
 								continue;
 							}
@@ -544,11 +563,13 @@ static inline int iter_collapse(int ori, int dir){
 							// Previously it has to be implemented in hash to adjacency transformation functions
 							a = _min(node->dest,nextnode->dest);
 							b = _max(node->dest,nextnode->dest);
+#ifdef counterCorrection
 							if(graph->array[a].counter > graph->array[b].counter){
 								temp = a;
 								a = b;
 								b = temp;
 							}
+#endif
 	//						printf("Collapse Paths starting: ori: %i (a:%i / b%i)\n",ori,a,b);
 							if(ori == a || ori == b){
 								nextnode = nextnode->next;
@@ -624,8 +645,6 @@ void indelHandle(int ori){
 		node = node->next;
 	}
 }
-
-//#define IterError
 
 void perfectErrorCorrection(){
 //	struct AdjListNode *nextnode;

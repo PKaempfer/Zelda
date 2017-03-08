@@ -385,7 +385,7 @@ void* mt_fileReaderDB(void* block){
 
 	while(wPos < end){
 		fread(&readLen,sizeof(int),1,fasta);
-		if(readLen>=31){
+		if(readLen >=31){ //
 			fread(&readID,sizeof(int),1,fasta);
 			fread(&readsequence[16],sizeof(char),(readLen+3)/4,fasta);
 //			printf("ID: %i, len: %i\n",readID,readLen);
@@ -395,6 +395,7 @@ void* mt_fileReaderDB(void* block){
 			}
 			wPos += (sizeof(int) + ((readLen+3)/4));
 		}
+//		else printf("read to short (len: %i)\n",readLen);
 		wPos += sizeof(int);
 //		printf("wpos: %i, end: %i\n",wPos, end);
 	}
@@ -469,6 +470,7 @@ void fileScheduler(char* inFile, int pthr_num, pthread_t* threads){
  * @return			The library meta information (SE-,PE-,MP-lib, insert size, read number, ...)
  */
 struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* threads){
+	printf("CHECKPOINT: FileScheduler\n");
 	FILE* metaDB = fopen(dbFile,"rb");
 
 	if(!metaDB){

@@ -84,6 +84,7 @@ int main(int argc, char* argv[]) {
     	strcat(para->readDB,"filter");
     }
 
+    printf("CHECKPOINT: Build DeBruijn Graph\n");
 	para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
 
 

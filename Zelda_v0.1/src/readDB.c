@@ -381,11 +381,15 @@ struct reads* readDB(char* outDB){
 	int ID;
 	int len;
 
-	for(i=0;i<readNumber;i++) reads[i].len = 0;
+	for(i=0;i<readNumber;i++){
+		reads[i].len = 0;
+		reads[i].annotation = NULL;
+		reads[i].seq = NULL;
+	}
 
 	for(i=0;i<readNumber;i++){
 		fread(&len,sizeof(int),1,readDB);
-		if(len){
+		if(len>=31){
 			if(len > maxReadLen) maxReadLen = len;
 			fread(&ID,sizeof(int),1,readDB);
 			if(ID == 1) printf("read with ID: 1 was found\n");
@@ -404,10 +408,11 @@ struct reads* readDB(char* outDB){
 }
 
 void freeDB(struct reads* reads){
+	printf("Numreads to free: %i\n",numreads);
 	for(int i=0;i<numreads;i++){
 		if(reads[i].len){
 			free(reads[i].seq);
-			if(reads[i].annotation) free(reads[i].annotation);
+			free(reads[i].annotation);
 		}
 	}
 	free(reads);
@@ -415,6 +420,7 @@ void freeDB(struct reads* reads){
 
 char* compressRead(char* read){
 	int len = strlen(read);
+	if(len < 31) return NULL;
 	int i = 0,j = ((len+3)/4)-1;
 	int complen = (len+3)/4;
 	char* compRead = (char*)malloc(complen);
@@ -437,7 +443,7 @@ char* compressRead(char* read){
 				return compRead;
 			}
 			else{
-//				printf("return NULL, i: %i\n",i);
+				printf("return NULL, i: %i\n",i);
 				free(compRead);
 				return NULL;
 			}
@@ -450,8 +456,8 @@ char* compressRead(char* read){
 		current = current << 2;
 		i++;
 	}
-
-	compRead[j] = current;
+//	if(complen)
+		compRead[j] = current;
 
 	return compRead;
 }
@@ -490,6 +496,7 @@ void decompressReadSt(char* compRead, char* read, int len){
 }
 
 int readFastA_DB(char* inFile, int readNum, int jump){
+	char verbose = 0;
 	char filebuffer[BUFFER_SIZE]; // 4 MB buffer
 	long filesize;
 	long cursize=0;
@@ -520,6 +527,7 @@ int readFastA_DB(char* inFile, int readNum, int jump){
 				if((*buffer2)=='>'){
 					if(first){
 						// Save read
+						if(verbose) printf("%i: len: %i\n",readTotNum,strlen(read));
 						comp = compressRead(read);
 						if(comp){
 							readsList[readTotNum].ID = readNum;
@@ -555,6 +563,7 @@ int readFastA_DB(char* inFile, int readNum, int jump){
 	}
 	// Add last read
 	if(first){
+		if(verbose) printf("%i: len: %i\n",readTotNum,strlen(read));
 		comp = compressRead(read);
 		if(comp){
 			readsList[readTotNum].ID = readNum;

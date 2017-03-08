@@ -34,8 +34,6 @@ void radixSort(int elemNum, int* elemList){
 		runs = _max(runs,clz);
 	}
 
-	printf("Number of Runs: %i to sort Elements up to %0.f\n",runs,pow(2,runs));
-
 	for(i=0;i<runs;i++){ // Max Length of largest Contig 2.1gbp
 		temp0N = 0;
 		temp1N = 0;
