@@ -443,7 +443,7 @@ char* compressRead(char* read){
 				return compRead;
 			}
 			else{
-				printf("return NULL, i: %i\n",i);
+//				printf("return NULL, i: %i\n",i);
 				free(compRead);
 				return NULL;
 			}
