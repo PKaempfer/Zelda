@@ -83,11 +83,11 @@ struct Letter_T {
 //	struct LetterSource_S source;	/** SOURCE SEQ POSITION(S) */
 	struct Letter_T* align_ring; 	/** CIRCULAR LIST OF ALIGNED POSITIONS */
 	uint16_t counter;				/** Number reads supporting this letter (number of sources)  */
-	int16_t* ml;						/** Line of Alignment matrix between the local PO graph and the new sequence*/
+	int16_t* ml;					/** Line of Alignment matrix between the local PO graph and the new sequence*/
 	int score;						/** SCORE FOR BALANCING PARTIAL ORDER EFFECTS ON MATRIX NEUTRALITY */
-	unsigned char letter;					/** THE ACTUAL RESIDUE CODE! */
-	char junction;
-	char vFlag;
+	unsigned char letter;			/** THE ACTUAL RESIDUE CODE! */
+	char junction;					/** Number of Passing Paths through this node, continue aligning behind when last path reached the node*/
+	char vFlag;						/** Flags the Nodes when used in Consensus Calling, Tags the Consensus Path*/
 };
 
 struct Variation{
@@ -147,7 +147,7 @@ struct pairAlign{
 	int len;
 	int j;
 };
-
+extern int gdepth;
 extern struct Letter_T* Letters;
 extern uint32_t numNodes;
 // For ConsensusCaller2 -> Temporary delete when merged
@@ -161,6 +161,10 @@ extern struct timespec ts_finish;
 extern long sumMatrix;
 extern long sumTrace;
 extern long alignmentTime;
+
+struct scaffold_set* scaffold_init2();
+
+struct scaffold_set* scaffold_stats(struct scaffold_set* aS);
 
 void buildBackBone(struct myovlList* ovlgraph, struct string_graph* S, struct reads* reads);
 

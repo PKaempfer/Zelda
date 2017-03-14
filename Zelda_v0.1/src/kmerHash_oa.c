@@ -129,7 +129,7 @@ char addReadEnd_oa(KmerBitBuffer current_new, readID read, char end, int32_t rea
 	new_readEnd->read = setID(read,end);
 	if(end){
 		readLenList[read] = readlen;
-		readStartList[read] = 0;
+//		readStartList[read] = 0;
 	}
 //	new_readEnd->len = readlen;
 

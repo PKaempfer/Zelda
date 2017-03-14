@@ -290,7 +290,8 @@ void printStringGraph(struct myovlList *ovlGraph, char *filename){
 
 	for(i = 0; i <= ovlGraph->V; i++){
 		if(ovlGraph->read[i] && ovlGraph->read[i]->flag == JUNCTION){
-			fprintf(string,"%i [label=\"%i (%i)\"]\n",i,i,readStartList[i]);
+			fprintf(string,"%i [label=\"%i\"]\n",i,i);
+//			fprintf(string,"%i [label=\"%i (%i)\"]\n",i,i,readStartList[i]);
 			bread = ovlGraph->read[i]->first;
 			while(bread){
 				len = 0;
@@ -578,7 +579,7 @@ struct string_graph* catOVLgraph(struct myovlList *ovlGraph, char* pathAssembly)
 }
 
 void ovlToString(struct myovlList *G, struct string_graph *S, char* pathAssembly){
-
+	printf("CHECKPOINT: OVL-graph to String-Graph\n");
 	char verbose = 0;
 
 	int i;

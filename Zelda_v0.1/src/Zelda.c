@@ -27,6 +27,7 @@
 #include "DBGraph_scaffold.h"
 #include "readDB.h"
 #include "ConsensusCaller.h"
+#include "CC.h"
 #include "read_filter.h"
 
 int main(int argc, char* argv[]) {
@@ -75,7 +76,7 @@ int main(int argc, char* argv[]) {
 		freeHashTable_oa();
 		printf("CHECKPOINT: 1. Free Reads\n");
 		freeDB(reads1);
-
+		freeFiles(para);
     }
     else if(prefilter == 2){
     	// Hashing
@@ -238,7 +239,9 @@ int main(int argc, char* argv[]) {
 
 	// Scaffolds
 	if(scaffolding){
-		contigs_pog = make_poaScaff(G,reads,1,para,heuristic);
+		contigs_pog = OLC(G,reads,1,heuristic, para);
+//		exit(1);
+//		contigs_pog = make_poaScaff(G,reads,1,para,heuristic);
 		time(&stop);
 		printf("POA: %0.2f\n",difftime (stop,start));
 		printf("Wait after POA\n");
@@ -265,5 +268,6 @@ int main(int argc, char* argv[]) {
 		free(tempPath);
 		finished(para);
 		free(Letters);
+//		free(readStartList);
 	}
 }

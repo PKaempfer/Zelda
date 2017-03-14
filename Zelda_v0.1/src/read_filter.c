@@ -51,9 +51,10 @@ void* mt_filter_reads(void* filter_block){
 	for(;i<=end;i++){
 		len = reads[i].len;
 		if(len >= nK){
-			decomRead = decompressRead(reads[i].seq,len);
+//			decomRead = decompressRead(reads[i].seq,len);
 //			printf("read: %s\n",decomRead);
 //			printf("Thread: %i with read: %i (len: %i nK: %i)\n",block.pthr_id,reads[i].ID, len, nK);
+//			free(decomRead);
 			cov_tot = 0;
 			cov_one = 0;
 			readPos = 0;
@@ -130,6 +131,7 @@ void* mt_filter_reads(void* filter_block){
 			}
 		}
 	}
+	free(readSeqC);
 	return NULL;
 }
 
@@ -165,6 +167,6 @@ void filter_reads(struct reads* reads, const int pthr_num, pthread_t* threads){
 	for(i=0;i<pthr_num;i++){
 		pthread_join(threads[i],&status);
 	}
-
+	free(filter_block);
 }
 

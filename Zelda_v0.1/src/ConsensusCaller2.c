@@ -529,9 +529,10 @@ static inline int poa_searchEndPoint(int line, char fullMatrix,int len){
 		exit(1);
 	}
 
-	if(!fullMatrix && best_Score < (len*SM1[0][0])*0.98)
+	if(!fullMatrix && best_Score < (len*SM1[0][0])*0.98){
 //		printf("BestScore: %i\n",best_Score);
 		return -1;
+	}
 
 //	if(best_Score < (len*SM1[0][0])*0.10){ //!backbone &&
 //		if(!backbone) printf("Alignment %i -> Best Score of Matrix below threshold for Containment -> Alignment denied go to next (best Score: %i/%i)  \n",insNum,best_Score,len*SM1[0][0]);
@@ -964,9 +965,6 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 		else printf("CHECKPOINT: Start PO_Alignment for CONTAINED Read\n");
 	}
 
-//	int i;
-//	int j;
-
 	char fullMatrix = !heuristic;
 	struct Letter_T* current;
 	struct Letter_T* end_node;
@@ -1081,14 +1079,7 @@ char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned 
 //		poa_part_toDot(out,contig);
 //		free(out);
 	}
-#ifdef TIMEM
-	clock_gettime(CLOCK_MONOTONIC, &alignmentSt);
-#endif
-//	poa_resetMatrix(line,seqlen);
-#ifdef TIMEM
-	clock_gettime(CLOCK_MONOTONIC, &alignmentEnd);
-	alignmentTime += (((alignmentEnd.tv_sec * 1000000000) + alignmentEnd.tv_nsec) - ((alignmentSt.tv_sec * 1000000000) + alignmentSt.tv_nsec));
-#endif
+
 
 	free(readseq);
 	free(refseq);

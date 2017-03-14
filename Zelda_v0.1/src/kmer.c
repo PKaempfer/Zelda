@@ -21,7 +21,7 @@ int nK = 47;
 int dtSize;
 
 int16_t *readLenList;
-int *readStartList;
+//int *readStartList;
 
 KmerBitBuffer toBuffer(char* read){
 	KmerBitBuffer kmer=0;

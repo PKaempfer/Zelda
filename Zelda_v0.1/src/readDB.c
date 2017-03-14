@@ -409,10 +409,11 @@ struct reads* readDB(char* outDB){
 
 void freeDB(struct reads* reads){
 	printf("Numreads to free: %i\n",numreads);
-	for(int i=0;i<numreads;i++){
+	for(int i=0;i<=numreads;i++){
 		if(reads[i].len){
 			free(reads[i].seq);
 			free(reads[i].annotation);
+
 		}
 	}
 	free(reads);
@@ -527,7 +528,7 @@ int readFastA_DB(char* inFile, int readNum, int jump){
 				if((*buffer2)=='>'){
 					if(first){
 						// Save read
-						if(verbose) printf("%i: len: %i\n",readTotNum,strlen(read));
+						if(verbose) printf("%i: len: %lu\n",readTotNum,strlen(read));
 						comp = compressRead(read);
 						if(comp){
 							readsList[readTotNum].ID = readNum;
@@ -563,7 +564,7 @@ int readFastA_DB(char* inFile, int readNum, int jump){
 	}
 	// Add last read
 	if(first){
-		if(verbose) printf("%i: len: %i\n",readTotNum,strlen(read));
+		if(verbose) printf("%i: len: %lu\n",readTotNum,strlen(read));
 		comp = compressRead(read);
 		if(comp){
 			readsList[readTotNum].ID = readNum;

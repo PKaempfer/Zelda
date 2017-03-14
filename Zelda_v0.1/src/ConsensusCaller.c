@@ -1170,7 +1170,6 @@ void poa_variantCalling(struct Sequence* contig){
 		}
 	}
 	free(altPath);
-
 }
 
 
@@ -1339,6 +1338,7 @@ void poa_printContigs(struct POG* pog, char* contigFile){
 
 	int nextID;
 	int insert;
+	printf("Number of Contigs to Write: %i\n",pog->contigNum);
 	for(i=0;i<pog->contigNum;i++){
 		if(!pog->contig[i].vflag){
 			printf("Write %s\n",pog->contig[i].name);
