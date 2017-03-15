@@ -48,7 +48,7 @@ struct POGset{
 
 struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char heuristic, struct para* para);
 
-char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuristic);
+char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuristic, uint32_t contigLen);
 
 void POG_alignConsensus(struct POGseq* contig);
 

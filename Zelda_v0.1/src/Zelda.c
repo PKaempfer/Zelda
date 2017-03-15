@@ -239,9 +239,9 @@ int main(int argc, char* argv[]) {
 
 	// Scaffolds
 	if(scaffolding){
-		contigs_pog = OLC(G,reads,1,heuristic, para);
+//		contigs_pog = OLC(G,reads,1,heuristic, para);
 //		exit(1);
-//		contigs_pog = make_poaScaff(G,reads,1,para,heuristic);
+		contigs_pog = make_poaScaff(G,reads,1,para,heuristic);
 		time(&stop);
 		printf("POA: %0.2f\n",difftime (stop,start));
 		printf("Wait after POA\n");

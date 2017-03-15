@@ -380,7 +380,7 @@ void POG_alignConsensus(struct POGseq* contig){
 	printf("CHECKPOINT: PO-MSA to Contig\n");
 	int verbose = 0;
 //	if(strcmp(contig->name,"Scaffold_19_90086_186097_len:")==0) verbose = 1;
-	char* seq = (char*)malloc(contig->length + 100);
+	char* seq = (char*)malloc(contig->length + 10000);
 	int i=0;
 
 	struct Letter_T* current = &Letters[contig->startLetter.dest];
@@ -393,7 +393,10 @@ void POG_alignConsensus(struct POGseq* contig){
 
 	struct LetterEdge* lettersSt[4];
 
+	uint32_t backb_pos = 0;
+
 	while(1){
+//		printf("Seqpos: %i",i);
 		if(current->counter < 5) seq[i++] = current->letter+32;
 		else seq[i++] = current->letter;
 		if(current->vFlag) printf("Flag was set\n");
@@ -410,6 +413,7 @@ void POG_alignConsensus(struct POGseq* contig){
 				edge = edge->next;
 			}
 			edge = bestedge;
+			if(bestedge->dest < contig->length) backb_pos = bestedge->dest;
 			bestRing = &Letters[bestedge->dest];
 			if(Letters[bestedge->dest].align_ring){
 				ring = Letters[bestedge->dest].align_ring;
@@ -429,7 +433,30 @@ void POG_alignConsensus(struct POGseq* contig){
 		}
 		else{
 			current->vFlag = 1;
-			break;
+			printf("Break at POS: %i\n",i);
+			printf("Search for alignment ring\n");
+//			bestRing = current;
+//			current = current->align_ring;
+//			while(current && current != bestRing){
+//				if(current->right){
+//					edge = current->right;
+//					break;
+//				}
+//				current = current->align_ring;
+//			}
+			if(!edge){
+				printf("No edge found, break CC\n");
+				backb_pos++;
+				if(backb_pos < contig->length){
+					printf("Jump to back to Backbone (%i)\n",backb_pos);
+					current = &Letters[backb_pos];
+					bestRing = NULL;
+					continue;
+				}
+				break;
+			}
+			else printf("New edge found, continue CC\n");
+
 		}
 		bestRing = NULL;
 	}
@@ -441,8 +468,11 @@ void POG_alignConsensus(struct POGseq* contig){
 //		printf("%.80s\n",&seq[k]);
 //	}
 //	printf("\n");
-	contig->sequence = seq;
 	contig->length = strlen(seq);
+	contig->sequence = (char*)malloc(sizeof(char)*(strlen(seq)+1));
+	strcpy(contig->sequence,seq);
+	free(seq);
+//	contig->sequence = seq;
 	sprintf(contig->name,"%s%i",contig->name,contig->length);
 //	struct rusage r_usage;
 //	getrusage(RUSAGE_SELF,&r_usage);
@@ -450,7 +480,7 @@ void POG_alignConsensus(struct POGseq* contig){
 	POG_variantCalling(contig);
 	POG_avgCov(contig);
 	sprintf(contig->name,"%s_avgCov:%.2f",contig->name,contig->avgCov);
-	if(verbose) exit(1);
+//	if(verbose) exit(1);
 }
 
 

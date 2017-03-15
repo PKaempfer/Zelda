@@ -16,7 +16,7 @@
 
 #define MIN_CONTIG_LEN 100
 #define MIN_SCAFF_LEN 	200
-#define H_RANGE 		5
+#define H_RANGE 		6
 
 static inline int max_func(int a,int b,int c,int d){
 	return _max((_max(a,b)),(_max(c,d)));
@@ -111,12 +111,26 @@ static inline void resetLetters(struct Letter_T* Letters){
 	}
 }
 
+void POG_doubletest(struct POGseq* contig){
+	int i;
+	int end = contig->length;
+	printf(">%s\n",contig->name);
+	for(i=0;i<end;i++){
+		if(i%50==0 && i) printf("\n");
+		if(i%50==0) printf("%i:  ",i);
+		printf(" %i",Letters[i].counter);
+		if(!Letters[i].right) printf("No right edge\n");
+
+	}
+}
+
 void POG_writeBackbone(struct POGseq* contig,char* fastaFile){
 	FILE* fasta = fopen(fastaFile,"a");
 	char* seq = (char*)malloc(sizeof(char)*1000000);
 	struct Letter_T current = Letters[contig->startLetter.dest];
 	int i = 0;
 	seq[i++] = current.letter;
+	fprintf(fasta,">%s\n",contig->name);
 	while(current.right){
 		current = Letters[current.right->dest];
 		seq[i++] = current.letter;
@@ -486,172 +500,6 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 	return pogreads;
 }
 
-struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char heuristic, struct para* para){
-	char verbose = 0;
-
-#ifdef TIMEM
-	struct timespec consenusSt;
-	struct timespec consenusEnd;
-	static long consensusTime = 0;
-#endif
-
-	printf("Checkpoint: ConsensusCaller (CC)\n");
-//	para = NULL;
-	struct scaffold_set* aS;
-	if(scaffolding){
-		printf("Checkpoint: Init Scaffold Correction\n");
-		aS = scaffold_init2();
-	}
-	else{
-		printf("Checkpoint: Init Contig Correction\n");
-		aS = contigs_init(G); // ,reads
-	}
-
-	aS = scaffold_stats(aS);
-
-
-	int i,j;
-    printf("MaxReadLen: %i\n",maxReadLen);
-    char* name = (char*)malloc(1000);
-    char* dotPath = (char*)malloc(1000);
-
-    // Init Graph structure
-    struct POGset* pog = (struct POGset*)malloc(sizeof(struct POGset));
-    pog->contigNum = 0;
-    pog->maxNum = 1000;
-    pog->contig = (struct POGseq*)malloc(sizeof(struct POGseq)*pog->maxNum);
-    if(!Letters){
-    	printf("Malloc new Letters\n");
-    	Letters = (struct Letter_T*)malloc(sizeof(struct Letter_T)*maxNumNodes);
-        for(i=0;i<maxNumNodes;i++){
-        	Letters[i].left = NULL;
-        	Letters[i].right = NULL;
-        	Letters[i].junction = 0;
-        	Letters[i].score = 0;
-        	Letters[i].vFlag = 0;
-        }
-    }
-
-    if(!alMatrix_Letter){
-    	printf("Init MatrixLetter\n");
-    	int16_t data[maxReadLen*MATRIX_MAX_BR+1][maxReadLen+1];
-    	alMatrix = (int16_t**)malloc(sizeof(int16_t*)*(maxReadLen*MATRIX_MAX_BR+1)); // Convention that the aligning part of the graph do not contain more than 5*maxReadLen nodes
-    	alMatrix_Letter = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*(maxReadLen*MATRIX_MAX_BR+1));
-        for(i=0;i<=maxReadLen*MATRIX_MAX_BR;i++){
-        	alMatrix[i] = &data[i][0];
-        	alMatrix_Letter[i] = NULL;
-        	for(j=0;j<=maxReadLen;j++){
-        		alMatrix[i][j] = j * GAP_PENALTY;
-        	}
-        }
-    }
-
-    struct POGreadsSet* pogreadsset;
-
-    for(i=0;i<aS->numbridge;i++){
-    	if(aS->scaff[i].len > MIN_SCAFF_LEN || i >= aS->num){
-    		if(i>=aS->num) printf("\t\tGebridgetes Scaffold (%i)\n",i);
-    		pogreadsset = OLC_backbone(&pog->contig[pog->contigNum],reads,G,aS,i);
-    		printf("Contig_%i:%i_%i_len:%i\n",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID,pog->contig[pog->contigNum].length);
-    		POG_align(reads,pogreadsset, heuristic);
-//    		POG_writeBackbone(&pog->contig[pog->contigNum],"test.fasta");
-			if((float)numNodes/(float)aS->scaff[i].len < 2){
-				if(scaffolding) sprintf(name,"Scaff_%i:%i_%i_len:",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID);
-				else sprintf(name,"Contig_%i:%i_%i_len:",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID);
-				pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+100);
-				strcpy(pog->contig[pog->contigNum].name,name);
-#ifdef TIMEM
-				clock_gettime(CLOCK_MONOTONIC, &consenusSt);
-#endif
-				POG_alignConsensus(&pog->contig[pog->contigNum]);
-#ifdef TIMEM
-	    		clock_gettime(CLOCK_MONOTONIC, &consenusEnd);
-	    		consensusTime += (((consenusEnd.tv_sec * 1000000000) + consenusEnd.tv_nsec) - ((consenusSt.tv_sec * 1000000000) + consenusSt.tv_nsec));
-#endif
-	    		if(verbose){
-	    			sprintf(dotPath,"%s/%s.dot",para->asemblyFolder,pog->contig[pog->contigNum].name);
-	    			poa_toDot(dotPath);
-	    		}
-
-	    		aS->scaff[i].scaffoldID = pog->contigNum;
-	    		printf("i: %i , scaffID: %i\n",i,aS->scaff[i].scaffoldID);
-	    		if(aS->scaff[i].next>=0){
-	    			printf("Scaffold %i has a connection\n",pog->contigNum);
-	    			pog->contig[pog->contigNum].seqEdge = (struct sequenceEdge*)malloc(sizeof(struct sequenceEdge));
-	//    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[i].next->first->bridge->estLen;
-	    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[aS->scaff[i].next].first->bridge->estLen;
-	    			pog->contig[pog->contigNum].seqEdge->ori = 0;
-	    		}
-	    		else pog->contig[pog->contigNum].seqEdge = NULL;
-	    		if(i >= aS->num) pog->contig[pog->contigNum].vflag = 1;
-	    		else pog->contig[pog->contigNum].vflag = 0;
-	    		pog->contigNum++;
-			}
-			else if(i>=aS->num){
-				aS->scaff[i].scaffoldID = -1;
-			}
-    		resetLetters(Letters);
-    		numNodes = 0;
-    		printf("Aligned Reads: %i\n",alignedReads);
-#ifdef TIMEM
-    		printf("Init time:      %.3f s\n",(float)alignmentTime/1000000000);
-    		printf("Alignment time: %.3f s\n",(float)sumMatrix/1000000000);
-    		printf("Backtrack time: %.3f s\n",(float)sumTrace/1000000000);
-    		printf("Consensus time: %.3f s\n",(float)consensusTime/1000000000);
-
-#endif
-    	}
-		if(pog->contigNum == pog->maxNum){
-			printf("ContigList full, Realloc memory\n");
-			pog->contig = (struct POGseq*)realloc(pog->contig,sizeof(struct POGseq)*(pog->maxNum*2));
-			pog->maxNum *= 2;
-		}
-    }
-    printf("POG Finisched\n");
-    verbose = 0;
-
-    for(i=0;i<aS->numbridge;i++){
-    	if(aS->scaff[i].len > MIN_SCAFF_LEN || i >= aS->num){
-    		if(aS->scaff[i].next >= 0){
-        		if(aS->scaff[aS->scaff[i].next].scaffoldID<0){
-        			free(pog->contig[aS->scaff[i].scaffoldID].seqEdge);
-        			pog->contig[aS->scaff[i].scaffoldID].seqEdge = NULL;
-        			continue;
-        		}
-    			printf("Bild Bridge to %i\n",aS->scaff[i].next);
-//    			pog->contig[aS->scaff[i].scaffoldID].seqEdge->nextScaff = aS->scaff[i].next->scaffoldID;
-    			pog->contig[aS->scaff[i].scaffoldID].seqEdge->nextScaff = aS->scaff[aS->scaff[i].next].scaffoldID;
-//    			printf("Connect Scaffold %i with %i bp to scaffold %i\n",aS->scaff[i].scaffoldID,pog->contig[aS->scaff[i].scaffoldID].seqEdge->insertLen,aS->scaff[i].next->scaffoldID);
-    			if(verbose) printf("Connect Scaffold %i with %i bp to scaffold %i\n",aS->scaff[i].scaffoldID,pog->contig[aS->scaff[i].scaffoldID].seqEdge->insertLen,aS->scaff[aS->scaff[i].next].scaffoldID);
-    		}
-    	}
-    }
-
-    // _________ Scaffold Consensus Calling
-    if(verbose)printf("Free ScaffoldsSet\n");
-    free_schaffoldSet(aS);
-    if(verbose)printf("Free ScaffoldsSeqs\n");
-
-    struct POG* realpog = (struct POG*)malloc(sizeof(struct POG));
-    realpog->contigNum = pog->contigNum;
-    realpog->maxNum = pog->maxNum;
-    realpog->contig = (struct Sequence*)malloc(sizeof(struct Sequence)*pog->contigNum);
-    for(i=0;i<pog->contigNum;i++){
-    	realpog->contig[i].name = pog->contig[i].name;
-    	realpog->contig[i].length = pog->contig[i].length;
-    	realpog->contig[i].seqEdge = pog->contig[i].seqEdge;
-    	realpog->contig[i].startLetter = pog->contig[i].startLetter;
-    	realpog->contig[i].vflag = pog->contig[i].vflag;
-    	realpog->contig[i].sequence = pog->contig[i].sequence;
-    	realpog->contig[i].var = pog->contig[i].var;
-
-    }
-    free(pog->contig);
-    free(pog);
-    free(name);
-	return realpog;
-}
-
 /**
  * TODO: All Fine, May have a look at the real end node!!! Seems to cause a problem at some point.
  * 1. Alignment Function
@@ -924,6 +772,7 @@ static inline int POG_alignFillMatrix(int* new_numG, struct Letter_T** new_lette
 				}
 			}
 			else{
+//				printf("ENDNODE FOUND\n");
 				// Critical
 //				old_letters[old_num]->junction--;
 //				if(old_letters[old_num]->junction == 0) end_letters[end_num++] = end_node;
@@ -1251,10 +1100,103 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 	return align;
 }
 
-static inline void POG_alignUpdateGraph(unsigned char* seq, struct pairAlign* align, char print_Message, int len){
+static inline char POG_alignUpdateGraph(unsigned char* seq, struct pairAlign* align, char print_Message, int len){
 	// --> 6. BEGINN Connect to matrix origin
 	// Connect to matrix origin
 	char verbose = 0;
+	int j = align->j;
+	int i;
+	struct Letter_T* current = align->current;
+	int length = align->len;
+	char* readseq = align->readSeq;
+	char* refseq = align->refSeq;
+	int k = j-1;
+	if(print_Message) printf("Current Alignment Length: %i;  pos of the seq: %i\n",length,k);
+
+	if(print_Message){
+		if(j>0) printf("Connect to matrix origin j (score: %i) (%c/%c): %i\n",current->ml[j],current->letter,seq[k],j);
+	}
+	if(verbose) poa_showAlignment(readseq,refseq,length);
+	while(j!=0){
+		k = j-1;
+		if(print_Message){
+			if(j>0) printf("%li -> %i = %i + %i\n",current->ml - alMatrix[0],current->ml[j], alMatrix[0][j-1],SM1[codes[current->letter]][codes[seq[k]]]);
+		}
+		if(j>0 && current->ml[j] == alMatrix[0][j-1] + SM1[codes[current->letter]][codes[seq[k]]]){
+			// Entry from Diagonal
+//			if(print_Message) printf("Origin Diagonal\n");
+			readseq[length] = seq[k];
+			refseq[length++] = current->letter;
+			if(current->letter == seq[k]){
+				current->counter++;
+			}
+			else{
+				printf("MISMATCH Origin of the Problem????????????\n");
+				// make new letter
+				// how to connect???
+			}
+			j--;
+			for(;j>0;j--){
+				k = j-1;
+				readseq[length] = seq[k];
+				refseq[length++] = '-';
+				if(print_Message) printf("go left till origin is reached\n");
+			}
+			break;
+		}
+		else if(j>0 && current->ml[j] == current->ml[j-1] + GAP_PENALTY){
+			// Entry from left -> Gap in ref -> Stay in current matrix line;
+			if(print_Message) printf("Origin left\n");
+			readseq[length] = seq[k];
+			refseq[length++] = '-';
+			j--;
+			continue;
+		}
+		else if(current->ml[j] == alMatrix[0][j] + GAP_PENALTY){
+			// Entry from above -> Gap in seq
+			if(print_Message) printf("Origin top\n");
+			readseq[length] = '-';
+			refseq[length++] = current->letter;
+			for(;j>0;j--){
+				k = j-1;
+				readseq[length] = seq[k];
+				refseq[length++] = '-';
+				if(print_Message) printf("go left till origin is reached\n");
+			}
+			break;
+		}
+		else{
+			if(verbose){
+				printf("%c (j: %i from %i)\n",seq[k],j,align->j);
+				printf("-\t");
+				for(i=0;i<=len;i++){
+					printf(" %i",alMatrix[0][i]);
+				}
+				printf("\n");
+				printf("%c\t",current->letter);
+				for(i=0;i<=len;i++){
+					printf(" %i",current->ml[i]);
+				}
+				printf("\n");
+//				printf("Number of ends: %i\n",end_num);
+//				printf("Depth: %i\n", depth);
+				printf("Matrixline: %li\n",current->ml - alMatrix[0]);
+				printf("Nothing is true: This Case should not happen\n");
+				poa_showAlignment(readseq,refseq,length);
+			}
+			return 0;
+//			exit(1);
+
+		}
+	}
+	if(print_Message && j!= 0) printf("j: %i\n",j);
+	return 1;
+}
+
+static inline char POG_alignUpdateGraph2(unsigned char* seq, struct pairAlign* align, char print_Message, int len){
+	// --> 6. BEGINN Connect to matrix origin
+	// Connect to matrix origin
+	char verbose = 1;
 	int j = align->j;
 	int i;
 	struct Letter_T* current = align->current;
@@ -1316,7 +1258,7 @@ static inline void POG_alignUpdateGraph(unsigned char* seq, struct pairAlign* al
 		}
 		else{
 			if(verbose){
-				printf("%c (j: %i)\n",seq[k],j);
+				printf("%c (j: %i from %i)\n",seq[k],j,align->j);
 				printf("-\t");
 				for(i=0;i<=len;i++){
 					printf(" %i",alMatrix[0][i]);
@@ -1333,12 +1275,13 @@ static inline void POG_alignUpdateGraph(unsigned char* seq, struct pairAlign* al
 				printf("Nothing is true: This Case should not happen\n");
 				poa_showAlignment(readseq,refseq,length);
 			}
-			return;
+			return 0;
 //			exit(1);
 
 		}
 	}
 	if(print_Message && j!= 0) printf("j: %i\n",j);
+	return 1;
 }
 
 char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_pos, uint32_t end_pos){
@@ -1357,6 +1300,7 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 		end_letters = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*10000);
 	}
 
+	char fin = 0;
 	int i;
 	int new_num = 0;
 	int end_num = 0;
@@ -1415,6 +1359,7 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 //				printf("seq: %s\n",(char*)seq);
 //				printf("\n");
 //				printf("Error in Alignment Matrix -> Abort Contig\n");
+				printf("\tFILL MATRIX BREAK\n");
 				return 0;
 			}
 
@@ -1439,7 +1384,7 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 				continue;
 			}
 			else{
-				printf("No Best Letter\n");
+				printf("\tEND MATRIX BREAK\n");
 				return 0;
 			}
 		}
@@ -1449,18 +1394,17 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 		#endif
 
 
-			// 5. Make backtrace
-		align = POG_alignBacktrack(seq,current,print_Message,seqlen);
-
+//		if(!align && fullMatrix) printf("\tBACKTRACK BREAK\n");
 		if(fullMatrix || best_Letter>=0){
-			if(!align && !fullMatrix){
-				fullMatrix=1;
-				numFull++;
-			}
-			else{
-				numPart++;
-				break;
-			}
+			break;
+//			if(!align && !fullMatrix){
+//				fullMatrix=1;
+//				numFull++;
+//			}
+//			else{
+//				numPart++;
+//				break;
+//			}
 		}
 		else{
 			fullMatrix=1;
@@ -1472,15 +1416,17 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 			}
 		}
 	}
-//	if(!align->current){
-//		if(print_Message) printf("Alignment Break\n");
-//	//		poa_resetMatrix(line,seqlen);
-//		return 0;
-//	}
+
+	// 5. Make backtrace
+	align = POG_alignBacktrack(seq,current,print_Message,seqlen);
 
 	// 6. Connect to Matrix origin
-	if(align) POG_alignUpdateGraph(seq,align,print_Message,seqlen);
+	if(align){
+		fin = POG_alignUpdateGraph(seq,align,print_Message,seqlen);
+		if(!fin) printf("\tUPDATE GRAPH BREAK\n");
+	}
 	else return 0;
+
 	char* refseq = align->refSeq;
 	char* readseq = align->readSeq;
 
@@ -1497,13 +1443,14 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 	free(refseq);
 	free(readseq);
 	free(align);
-	return 1;
+	return fin;
 }
 
 
-char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuristic){
+char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuristic, uint32_t contigLen){
 	printf("CHECKPOINT: Start Alignments\n");
 	char verbose = 0;
+	char fin;
 	int i;
 	int readID;
 	int readLen;
@@ -1524,11 +1471,184 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 			revReadSt(readseq,revreadseq);
 			strcpy(readseq,revreadseq);
 		}
-		if(verbose) printf("Aligning read: %i\n",i);
-		POG_readAlign((unsigned char*)readseq,readLen,heuristic,st_pos,end_pos);
+		if(verbose) printf("Aligning read: %i (%i -> %i)\n",i,st_pos,end_pos);
+		if(st_pos < 5) st_pos = 0;
+		else st_pos -= 5;
+		if(end_pos+5 > contigLen) end_pos = contigLen;
+		else end_pos += 5;
+		fin = POG_readAlign((unsigned char*)readseq,readLen,heuristic,st_pos,end_pos);
+		if(verbose && !fin) printf("\tAligning Denied\n");
 
 	}
 	free(readseq);
 	free(revreadseq);
 	return 1;
+}
+
+
+struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char heuristic, struct para* para){
+	char verbose = 1;
+
+#ifdef TIMEM
+	struct timespec consenusSt;
+	struct timespec consenusEnd;
+	static long consensusTime = 0;
+#endif
+
+	printf("Checkpoint: ConsensusCaller (CC)\n");
+//	para = NULL;
+	struct scaffold_set* aS;
+	if(scaffolding){
+		printf("Checkpoint: Init Scaffold Correction\n");
+		aS = scaffold_init2();
+	}
+	else{
+		printf("Checkpoint: Init Contig Correction\n");
+		aS = contigs_init(G); // ,reads
+	}
+
+	aS = scaffold_stats(aS);
+
+
+	int i,j;
+    printf("MaxReadLen: %i\n",maxReadLen);
+    char* name = (char*)malloc(1000);
+    char* dotPath = (char*)malloc(1000);
+
+    // Init Graph structure
+    struct POGset* pog = (struct POGset*)malloc(sizeof(struct POGset));
+    pog->contigNum = 0;
+    pog->maxNum = 1000;
+    pog->contig = (struct POGseq*)malloc(sizeof(struct POGseq)*pog->maxNum);
+    if(!Letters){
+    	printf("Malloc new Letters\n");
+    	Letters = (struct Letter_T*)malloc(sizeof(struct Letter_T)*maxNumNodes);
+        for(i=0;i<maxNumNodes;i++){
+        	Letters[i].left = NULL;
+        	Letters[i].right = NULL;
+        	Letters[i].junction = 0;
+        	Letters[i].score = 0;
+        	Letters[i].vFlag = 0;
+        }
+    }
+
+    if(!alMatrix_Letter){
+    	printf("Init MatrixLetter\n");
+    	int16_t data[maxReadLen*MATRIX_MAX_BR+1][maxReadLen+1];
+    	alMatrix = (int16_t**)malloc(sizeof(int16_t*)*(maxReadLen*MATRIX_MAX_BR+1)); // Convention that the aligning part of the graph do not contain more than 5*maxReadLen nodes
+    	alMatrix_Letter = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*(maxReadLen*MATRIX_MAX_BR+1));
+        for(i=0;i<=maxReadLen*MATRIX_MAX_BR;i++){
+        	alMatrix[i] = &data[i][0];
+        	alMatrix_Letter[i] = NULL;
+        	for(j=0;j<=maxReadLen;j++){
+        		alMatrix[i][j] = j * GAP_PENALTY;
+        	}
+        }
+    }
+
+    struct POGreadsSet* pogreadsset;
+
+    for(i=0;i<aS->numbridge;i++){
+    	if(aS->scaff[i].len > MIN_SCAFF_LEN || i >= aS->num){
+    		if(i>=aS->num) printf("\t\tGebridgetes Scaffold (%i)\n",i);
+    		pogreadsset = OLC_backbone(&pog->contig[pog->contigNum],reads,G,aS,i);
+    		printf("Contig_%i:%i_%i_len:%i\n",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID,pog->contig[pog->contigNum].length);
+			if(scaffolding) sprintf(name,"Scaff_%i:%i_%i_len:",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID);
+			else sprintf(name,"Contig_%i:%i_%i_len:",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID);
+			pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+100);
+			strcpy(pog->contig[pog->contigNum].name,name);
+//    		POG_writeBackbone(&pog->contig[pog->contigNum],"test.fasta");
+    		POG_align(reads,pogreadsset, heuristic,pog->contig[pog->contigNum].length-1);
+//    		POG_doubletest(&pog->contig[pog->contigNum]);
+			if((float)numNodes/(float)aS->scaff[i].len < 2){
+#ifdef TIMEM
+				clock_gettime(CLOCK_MONOTONIC, &consenusSt);
+#endif
+				POG_alignConsensus(&pog->contig[pog->contigNum]);
+#ifdef TIMEM
+	    		clock_gettime(CLOCK_MONOTONIC, &consenusEnd);
+	    		consensusTime += (((consenusEnd.tv_sec * 1000000000) + consenusEnd.tv_nsec) - ((consenusSt.tv_sec * 1000000000) + consenusSt.tv_nsec));
+#endif
+	    		if(verbose){
+	    			sprintf(dotPath,"%s/%s.dot",para->asemblyFolder,pog->contig[pog->contigNum].name);
+	    			poa_toDot(dotPath);
+	    		}
+
+	    		aS->scaff[i].scaffoldID = pog->contigNum;
+	    		printf("i: %i , scaffID: %i\n",i,aS->scaff[i].scaffoldID);
+	    		if(aS->scaff[i].next>=0){
+	    			printf("Scaffold %i has a connection\n",pog->contigNum);
+	    			pog->contig[pog->contigNum].seqEdge = (struct sequenceEdge*)malloc(sizeof(struct sequenceEdge));
+	//    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[i].next->first->bridge->estLen;
+	    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[aS->scaff[i].next].first->bridge->estLen;
+	    			pog->contig[pog->contigNum].seqEdge->ori = 0;
+	    		}
+	    		else pog->contig[pog->contigNum].seqEdge = NULL;
+	    		if(i >= aS->num) pog->contig[pog->contigNum].vflag = 1;
+	    		else pog->contig[pog->contigNum].vflag = 0;
+	    		pog->contigNum++;
+			}
+			else if(i>=aS->num){
+				aS->scaff[i].scaffoldID = -1;
+			}
+    		resetLetters(Letters);
+    		numNodes = 0;
+    		printf("Aligned Reads: %i\n",alignedReads);
+#ifdef TIMEM
+    		printf("Init time:      %.3f s\n",(float)alignmentTime/1000000000);
+    		printf("Alignment time: %.3f s\n",(float)sumMatrix/1000000000);
+    		printf("Backtrack time: %.3f s\n",(float)sumTrace/1000000000);
+    		printf("Consensus time: %.3f s\n",(float)consensusTime/1000000000);
+
+#endif
+    	}
+		if(pog->contigNum == pog->maxNum){
+			printf("ContigList full, Realloc memory\n");
+			pog->contig = (struct POGseq*)realloc(pog->contig,sizeof(struct POGseq)*(pog->maxNum*2));
+			pog->maxNum *= 2;
+		}
+    }
+    printf("POG Finisched\n");
+    verbose = 0;
+
+    for(i=0;i<aS->numbridge;i++){
+    	if(aS->scaff[i].len > MIN_SCAFF_LEN || i >= aS->num){
+    		if(aS->scaff[i].next >= 0){
+        		if(aS->scaff[aS->scaff[i].next].scaffoldID<0){
+        			free(pog->contig[aS->scaff[i].scaffoldID].seqEdge);
+        			pog->contig[aS->scaff[i].scaffoldID].seqEdge = NULL;
+        			continue;
+        		}
+    			printf("Bild Bridge to %i\n",aS->scaff[i].next);
+//    			pog->contig[aS->scaff[i].scaffoldID].seqEdge->nextScaff = aS->scaff[i].next->scaffoldID;
+    			pog->contig[aS->scaff[i].scaffoldID].seqEdge->nextScaff = aS->scaff[aS->scaff[i].next].scaffoldID;
+//    			printf("Connect Scaffold %i with %i bp to scaffold %i\n",aS->scaff[i].scaffoldID,pog->contig[aS->scaff[i].scaffoldID].seqEdge->insertLen,aS->scaff[i].next->scaffoldID);
+    			if(verbose) printf("Connect Scaffold %i with %i bp to scaffold %i\n",aS->scaff[i].scaffoldID,pog->contig[aS->scaff[i].scaffoldID].seqEdge->insertLen,aS->scaff[aS->scaff[i].next].scaffoldID);
+    		}
+    	}
+    }
+
+    // _________ Scaffold Consensus Calling
+    if(verbose)printf("Free ScaffoldsSet\n");
+    free_schaffoldSet(aS);
+    if(verbose)printf("Free ScaffoldsSeqs\n");
+
+    struct POG* realpog = (struct POG*)malloc(sizeof(struct POG));
+    realpog->contigNum = pog->contigNum;
+    realpog->maxNum = pog->maxNum;
+    realpog->contig = (struct Sequence*)malloc(sizeof(struct Sequence)*pog->contigNum);
+    for(i=0;i<pog->contigNum;i++){
+    	realpog->contig[i].name = pog->contig[i].name;
+    	realpog->contig[i].length = pog->contig[i].length;
+    	realpog->contig[i].seqEdge = pog->contig[i].seqEdge;
+    	realpog->contig[i].startLetter = pog->contig[i].startLetter;
+    	realpog->contig[i].vflag = pog->contig[i].vflag;
+    	realpog->contig[i].sequence = pog->contig[i].sequence;
+    	realpog->contig[i].var = pog->contig[i].var;
+
+    }
+    free(pog->contig);
+    free(pog);
+    free(name);
+	return realpog;
 }
