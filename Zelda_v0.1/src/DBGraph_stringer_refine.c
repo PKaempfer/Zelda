@@ -573,7 +573,7 @@ struct string_graph* catOVLgraph(struct myovlList *ovlGraph, char* pathAssembly)
     S->side = side;
 
 	// Fill String graph
-	ovlToString(ovlGraph,S, pathAssembly);
+//	ovlToString(ovlGraph,S, pathAssembly);
 
 	return S;
 }
@@ -797,6 +797,7 @@ void ovlToString(struct myovlList *G, struct string_graph *S, char* pathAssembly
     if(verbose) printf("CHECKPOINT: StringGraphList\n");
 	if(verbose) print_string_graph_list(S,"Test_label");
 	char* tempPath = (char*) malloc(200);
+	printf("Write DotFile\n");
 	sprintf(tempPath,"%s/stringGraph.dot",pathAssembly);
 	print_overlap_graph_dot(S,tempPath,"StringGraph");
 	free(tempPath);
