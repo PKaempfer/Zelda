@@ -33,7 +33,7 @@
 int main(int argc, char* argv[]) {
 	char scaffolding = 1;
 	char heuristic = 1;
-	char prefilter = 0;
+	char prefilter = 1;
 	char findotdump = 0;
 	char dotdump = 0;
 	char sleeptime = 0;
