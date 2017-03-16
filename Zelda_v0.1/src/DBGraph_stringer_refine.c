@@ -573,7 +573,7 @@ struct string_graph* catOVLgraph(struct myovlList *ovlGraph, char* pathAssembly)
     S->side = side;
 
 	// Fill String graph
-//	ovlToString(ovlGraph,S, pathAssembly);
+	ovlToString(ovlGraph,S, pathAssembly);
 
 	return S;
 }
