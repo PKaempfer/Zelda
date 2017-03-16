@@ -236,7 +236,7 @@ int main(int argc, char* argv[]) {
 //	poa_deleteVariant(contigs_pog);
 //	if(contigs_pog) free_POG(contigs_pog);
 
-
+	exit(1);
 	// Scaffolds
 	if(scaffolding){
 //		contigs_pog = OLC(G,reads,1,heuristic, para);
