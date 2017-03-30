@@ -19,6 +19,8 @@ extern volatile unsigned char resize_mutex;
 extern volatile unsigned char fin_mutex;
 extern unsigned char pthr_runN;
 extern KmerBitBuffer NULL_KMER;
+extern KmerBitBuffer NULL_KMER_LASTBITS;
+extern KmerBitBuffer NULL_KMER_FIRSTBITS;
 
 struct readEnd{
 	readID read;

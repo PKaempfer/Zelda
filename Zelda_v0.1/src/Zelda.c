@@ -31,8 +31,8 @@
 #include "read_filter.h"
 
 int main(int argc, char* argv[]) {
-	char scaffolding = 1;
-	char heuristic = 1;
+	char scaffolding = 0;
+	char heuristic = 0;
 	char prefilter = 1;
 	char findotdump = 0;
 	char dotdump = 0;
@@ -238,15 +238,16 @@ int main(int argc, char* argv[]) {
 
 //	exit(1);
 	// Scaffolds
+
+	contigs_pog = OLC(G,reads,scaffolding,heuristic, para);
+	time(&stop);
+	printf("POA: %0.2f\n",difftime (stop,start));
+	printf("Wait after POA\n");
+	sleep(sleeptime);
+	printf("continue\n");
 	if(scaffolding){
-//		contigs_pog = OLC(G,reads,1,heuristic, para);
 //		exit(1);
-		contigs_pog = make_poaScaff(G,reads,1,para,heuristic);
-		time(&stop);
-		printf("POA: %0.2f\n",difftime (stop,start));
-		printf("Wait after POA\n");
-		sleep(sleeptime);
-		printf("continue\n");
+//		contigs_pog = make_poaScaff(G,reads,1,para,heuristic);
 		char* contigPath = (char*)malloc(100);
 		sprintf(contigPath,"%s/scaff.fasta",para->asemblyFolder);
 		printf("CHECKPOINT: FastaOut\n");
@@ -255,19 +256,29 @@ int main(int argc, char* argv[]) {
 		sprintf(tempPath,"%s/scaff.vcf",para->asemblyFolder);
 		printf("CHECKPOINT: Variation Calling\n");
 		poa_reportVariant(contigs_pog,tempPath,contigPath);
-		time(&stop);
-		printf("FASTA Out: %0.2f\n",difftime (stop,start));
-		printf("Wait after FastaOut\n");
-		sleep(sleeptime);
-		printf("continue\n");
-		poa_deleteVariant(contigs_pog);
-		if(contigs_pog) free_POG(contigs_pog);
-		freeDB(reads);
-		freeMyOvlList(G,S);
 		free(contigPath);
-		free(tempPath);
-		finished(para);
-		free(Letters);
-//		free(readStartList);
 	}
+	else{
+		char* contigPath = (char*)malloc(100);
+		sprintf(contigPath,"%s/contigs.fasta",para->asemblyFolder);
+		printf("CHECKPOINT: FastaOut\n");
+		time(&start);
+		poa_printContigs(contigs_pog,contigPath);
+		sprintf(tempPath,"%s/contigs.vcf",para->asemblyFolder);
+		printf("CHECKPOINT: Variation Calling\n");
+		poa_reportVariant(contigs_pog,tempPath,contigPath);
+		free(contigPath);
+	}
+	time(&stop);
+	printf("FASTA Out: %0.2f\n",difftime (stop,start));
+	printf("Wait after FastaOut\n");
+	sleep(sleeptime);
+	printf("continue\n");
+	poa_deleteVariant(contigs_pog);
+	if(contigs_pog) free_POG(contigs_pog);
+	freeDB(reads);
+	freeMyOvlList(G,S);
+	free(tempPath);
+	finished(para);
+	free(Letters);
 }

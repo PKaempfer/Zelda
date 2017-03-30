@@ -27,6 +27,8 @@ volatile unsigned char fin_mutex = 0;
 unsigned char pthr_runN = 0;
 // Set dependent on the given k size in mt_fileScheduler_DB
 KmerBitBuffer NULL_KMER;
+KmerBitBuffer NULL_KMER_LASTBITS;
+KmerBitBuffer NULL_KMER_FIRSTBITS;
 
 void createHashTable_oa(){
 	printf("CHECKPOINT: Create HashTable\n");
@@ -36,7 +38,12 @@ void createHashTable_oa(){
 		NULL_KMER = NULL_KMER << 2;
 		NULL_KMER |= 3;
 	}
-
+	NULL_KMER_LASTBITS = NULL_KMER - 3;
+	NULL_KMER_FIRSTBITS = 0;
+	for(i=0;i<nK-1;i++){
+		NULL_KMER_FIRSTBITS = NULL_KMER_FIRSTBITS << 2;
+		NULL_KMER_FIRSTBITS |= 3;
+	}
 
 	empty = 0;
 	for(i=0;i<sizeof(KmerBitBuffer)*4;i++){
@@ -312,8 +319,9 @@ uint32_t findKmer128_oa(KmerBitBuffer current_new){
 	while(dbHash_oa[bucket].count && dbHash_oa[bucket].kmer != current_new){
 		bucket++;
 	}
+	if(dbHash_oa[bucket].kmer == current_new) return bucket;
 
-	return bucket;
+	return 0;
 }
 
 

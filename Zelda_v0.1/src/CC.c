@@ -836,7 +836,7 @@ static inline int POG_alignEndpoint(int line, char fullMatrix,int len){
 	return best_Letter;
 }
 
-static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Letter_T* current,char print_Message, int j){ // Parameter 4:  int readID,
+static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Letter_T* current,char print_Message, int j, int line, int readID){ // Parameter 4:  int readID,
 	char verbose = 0;
 //	static int alignmentcounter = 0;
 //	alignmentcounter++;
@@ -844,8 +844,9 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 
 
 	if(print_Message) printf("Start back tracing (j:%i)\n",j);
-	char suspectVerbose = 0;
+	char suspectVerbose = 1;
 	int k;
+	int seqlen = j;
 	struct LetterEdge* edge;
 
 	struct pairAlign* align = NULL;
@@ -855,6 +856,7 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 	char leftbool = 0;
 
 //	struct LetterEdge* counteredge;
+	struct Letter_T* ringletter;
 	struct Letter_T* newLetter;
 	struct Letter_T* left;
 	struct Letter_T* newLetterRight = NULL;
@@ -964,6 +966,12 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 //						newLetter->source.iseq = readID;
 //						newLetter->source.next = NULL;
 						// Make, Close alignment ring
+						// ToDo: look if the align-ring already contains the correct letter
+						ringletter = current->align_ring;
+						while(ringletter && ringletter != current){
+							if(ringletter->letter == seq[k]) printf("CASE 1: New letter is created, although the letter is already in the align ring\n");
+							ringletter = ringletter->align_ring;
+						}
 						if(current->align_ring){
 							newLetter->align_ring = current->align_ring;
 							current->align_ring = newLetter;
@@ -989,6 +997,10 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 						}
 						newLetterRightID = numNodes;
 						newLetterRight = newLetter;
+
+						// ToDo: Does this make sense, or any difference at all
+						current_Right = current; // ToDo: Does this make sense, or any difference at all
+
 						numNodes++;
 						poa_LetterSizeCheck();
 					}
@@ -1038,7 +1050,11 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 					if(print_Message) printf("Gap in Seq\n");
 					readseq[len] = '-';
 					refseq[len++] = (char)current->letter;
-					current_Right = NULL;
+
+					// ToDo: Does this make sense, or any difference at all
+					current_Right = current;
+//					current_Right = NULL;
+
 					current = left;
 					break;
 				}
@@ -1053,12 +1069,12 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 		else leftbool = 0;
 		if(!nextbool){
 			// TODO: Circumvent in another way!!! Not just return NULL and break the contig
-			if(suspectVerbose) printf("Captured in infinite loop (j=%i), Abort\n",j);
-
-			free(refseq);
-			free(readseq);
-			return align;
-
+			if(suspectVerbose) printf("Read %i: Captured in infinite loop (j=%i), line: %lu, Abort\n",readID,j,(int)(current->ml-alMatrix[0])/((maxReadLen+1)*sizeof(int16_t)));
+			POG_showMatrix(seqlen,line,seq);
+//			free(refseq);
+//			free(readseq);
+//			return align;
+			align = (struct pairAlign*)malloc(sizeof(struct pairAlign));
 			readseq[len] = '\0';
 			refseq[len] = '\0';
 			align->len = strlen(readseq);
@@ -1069,12 +1085,13 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 			strcpy(align->refSeq,refseq);
 			align->j = j;
 			align->current = current;
-
+			poa_showAlignment(readseq,refseq,align->len);
 			free(refseq);
 			free(readseq);
 //			align.current = NULL;
-			return align;
 			exit(1);
+			return align;
+
 			if(j==99) exit(1);
 		}
 	}
@@ -1284,12 +1301,12 @@ static inline char POG_alignUpdateGraph2(unsigned char* seq, struct pairAlign* a
 	return 1;
 }
 
-char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_pos, uint32_t end_pos){
+char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_pos, uint32_t end_pos, int readID){
 	static struct timespec alignmentSt;
 	static struct timespec alignmentEnd;
 	char print_Message = 0;
 	char print_align = 0;
-	int line = 0;
+	static int line = 0;
 	struct Letter_T* current;
 	struct Letter_T* end_node;
 	struct pairAlign* align;
@@ -1418,7 +1435,7 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 	}
 
 	// 5. Make backtrace
-	align = POG_alignBacktrack(seq,current,print_Message,seqlen);
+	align = POG_alignBacktrack(seq,current,print_Message,seqlen, line, readID);
 
 	// 6. Connect to Matrix origin
 	if(align){
@@ -1450,6 +1467,7 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuristic, uint32_t contigLen){
 	printf("CHECKPOINT: Start Alignments\n");
 	char verbose = 0;
+	char verbose2 = 1;
 	char fin;
 	int i;
 	int readID;
@@ -1476,8 +1494,8 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 		else st_pos -= 5;
 		if(end_pos+5 > contigLen) end_pos = contigLen;
 		else end_pos += 5;
-		fin = POG_readAlign((unsigned char*)readseq,readLen,heuristic,st_pos,end_pos);
-		if(verbose && !fin) printf("\tAligning Denied\n");
+		fin = POG_readAlign((unsigned char*)readseq,readLen,heuristic,st_pos,end_pos,i);
+		if(verbose2 && !fin) printf("\tAligning Denied\n");
 
 	}
 	free(readseq);
@@ -1487,7 +1505,7 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 
 
 struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char heuristic, struct para* para){
-	char verbose = 1;
+	char verbose = 0;
 
 #ifdef TIMEM
 	struct timespec consenusSt;

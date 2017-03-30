@@ -2628,7 +2628,7 @@ struct POG* make_poaScaff(struct myovlList* G, struct reads* reads, char scaffol
 		aS = contigs_init(G); // ,reads
 	}
 
-		aS = scaffold_stats(aS);
+	aS = scaffold_stats(aS);
 	exit(1);
 
     int i,j;

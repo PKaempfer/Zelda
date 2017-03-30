@@ -18,6 +18,247 @@
  * Multi threaded reads filter function. Set length of erroneous reads to zero.
  * Is not used in next hash table construction.
  */
+void* mt_filter_reads_correction(void* filter_block){
+	printf("Checkpoint: Create Mapping Thread\n");
+	KmerBitBuffer kmercp;
+	KmerBitBuffer tempCor;
+	KmerBitBuffer temp;
+	KmerBitBuffer revtemp;
+	KmerBitBuffer precurser;
+	uint32_t bucket;
+
+	char verbose = 0;
+
+	struct filter_block block = *((struct filter_block*)filter_block);
+	struct reads* reads = block.reads;
+	long i = block.start;
+	long end = block.end;
+
+	int cov_tot;
+	int cov_one;
+	int cov;
+	int pre_cov = 0;
+
+	int len;
+
+	int readPos;
+	int bitpos;
+	int shift;
+	int shift2;
+	char lastbyte;
+	int byte;
+	int cpByte;
+	char* decomRead = NULL;
+//	char* decomRead = (char*)malloc(sizeof(char)*(len+1));
+	char* readSeq;
+	char* readSeqC=(char*)malloc(150000);
+	int max_one;
+	char* readSeqOrg = (char*)malloc((maxReadLen+3)/4);
+//	char* readSeqInter = (char*)malloc((maxReadLen+3)/4);
+	char redo = 0;
+
+	if(verbose) printf("MaxReadLen: %i\n",maxReadLen);
+
+	for(;i<=end;i++){
+		len = reads[i].len;
+		if(len >= nK){
+//			decomRead = decompressRead(reads[i].seq,len);
+//			printf("read: %s\n",decomRead);
+//			printf("Thread: %i with read: %i (len: %i nK: %i)\n",block.pthr_id,reads[i].ID, len, nK);
+//			free(decomRead);
+			cov_tot = 0;
+			cov_one = 0;
+			readPos = 0;
+			bitpos = 0;
+			shift = 0;
+			shift2 = 0;
+			byte = ((len+3)/4);
+			cpByte = 16;
+			if(byte < cpByte) cpByte = byte;
+//			printf("Init bytes: %i (len: %i)\n",byte,cpByte);
+			byte-=(cpByte);
+			memcpy(&readSeqC[16],reads[i].seq,(len+3)/4);
+			readSeq=&readSeqC[16];
+			while(readPos + nK < len){
+				temp = 0;
+				if(bitpos==0){
+//					printf("Copy bytes: %i (len: %i)\n",byte,cpByte);
+					memcpy(&kmercp,&readSeq[byte],cpByte);
+				}
+				shift = ((8*cpByte) - (nK*2)) - (bitpos%8);
+				if(shift>=0) temp = kmercp >> shift;
+				else{
+					shift2 = 8+shift;
+					shift*=-1;
+					lastbyte = readSeq[byte-1];
+					temp = kmercp << shift;
+					lastbyte = lastbyte >> shift2;
+					lastbyte &= (char)pow(2,shift) - 1;
+					temp |= lastbyte;
+				}
+				temp &= NULL_KMER;
+				tempCor = temp;
+				revtemp = revKmer(temp);
+				if(revtemp < temp){
+					temp = revtemp;
+				}
+				bucket = findKmer128_oa(temp);
+				if(!bucket){
+					if(verbose) printf("Read: %li -> Kmer is not existent. Undo Base substitution\n",i);
+					memcpy(reads[i].seq,readSeqOrg,(len+3)/4);
+					redo = -1;
+					i--;
+					break;
+				}
+				cov = dbHash_oa[bucket].count;
+				cov_tot += cov;
+				if(cov==1) cov_one++;
+				bitpos += 2;
+
+				// Read Correction
+				if(readPos && redo != -2){
+					// Case 1
+					if(pre_cov < 3 && cov > 10){
+						if(verbose) printf("END-Error - Read %li \n",i);
+//						if(redo == 0) memcpy(readSeqOrg,reads[i].seq,(len+3)/4);
+						char found = 0;
+						precurser &= NULL_KMER_FIRSTBITS;
+						char bestj;
+						unsigned char newCov = 0;
+						for(char j=0;j<4;j++){
+							KmerBitBuffer mask = (KmerBitBuffer)j << (nK-1)*2;
+							precurser |= mask;
+
+							revtemp = revKmer(precurser);
+							if(revtemp < precurser){
+								precurser = revtemp;
+							}
+							bucket = findKmer128_oa(precurser);
+							if(bucket && dbHash_oa[bucket].count > 5){
+								newCov = dbHash_oa[bucket].count;
+								found ++;
+								bestj = j;
+							}
+
+							precurser &= NULL_KMER_FIRSTBITS;
+						}
+						if(found==1){
+							if(verbose) printf("Found: %i -> Best: %c (old / new. %i/%i)\n",(int)found,rev_codes[(int)bestj],pre_cov,(int)newCov);
+							if(redo == 0) memcpy(readSeqOrg,reads[i].seq,(len+3)/4);
+//							memcpy(readSeqInter,reads[i].seq,(len+3/4));
+							decomRead = decompressRead(reads[i].seq,len);
+							if(verbose) printf("Old read: %s\n",decomRead);
+							decomRead[readPos-1]=rev_codes[(int)bestj];
+							memcpy(reads[i].seq,compressRead(decomRead),(len+3)/4);
+							if(verbose) printf("New read: %s\n",decomRead);
+							free(decomRead);
+							redo = 1;
+							if(verbose) printf("Thread: %i with read: %i (len: %i nK: %i)\n",block.pthr_id,reads[i].ID, len, nK);
+							i--;
+							break;
+//							memcpy(readSeqOrg,reads[i].seq,(len+3)/4);
+
+						}
+						else{
+							if(verbose) printf("No alternative base found\n");
+						}
+					}
+					// Case 2
+					else if(cov < 3 && pre_cov > 10){
+						if(verbose) printf("BEGIN-Error - Read %li\n",i);
+						char found = 0;
+						tempCor &= NULL_KMER_LASTBITS;
+						char bestj;
+						unsigned char newCov = 0;
+						for(char j=0;j<4;j++){
+							revtemp = revKmer(tempCor);
+							if(revtemp < tempCor){
+								tempCor = revtemp;
+							}
+							bucket = findKmer128_oa(tempCor);
+							if(bucket && dbHash_oa[bucket].count > 5){
+								newCov = dbHash_oa[bucket].count;
+								found ++;
+								bestj = j;
+							}
+							tempCor ++;
+						}
+						if(found==1){
+							if(verbose) printf("Found: %i -> Best: %c (old / new. %i/%i)\n",(int)found,rev_codes[(int)bestj],cov,(int)newCov);
+							if(redo == 0) memcpy(readSeqOrg,reads[i].seq,(len+3)/4);
+//							memcpy(readSeqInter,reads[i].seq,(len+3/4));
+							decomRead = decompressRead(reads[i].seq,len);
+							decomRead[readPos+(nK-1)]=rev_codes[(int)bestj];
+							memcpy(reads[i].seq,compressRead(decomRead),(len+3)/4);
+							if(verbose) printf("read: %s\n",decomRead);
+							free(decomRead);
+							redo = 1;
+							if(verbose) printf("Thread: %i with read: %i (len: %i nK: %i)\n",block.pthr_id,reads[i].ID, len, nK);
+							i--;
+							break;
+						}
+						else{
+							if(verbose) printf("No alternative base found\n");
+						}
+
+					}
+				}
+
+				pre_cov = cov;
+				precurser = tempCor;
+
+				readPos ++;
+				if(bitpos==8){
+					byte--;
+					bitpos = 0;
+				}
+			}
+			if(redo == 1 || redo == -1){
+				if(redo == -1) redo = -2;
+				else redo = 2;
+				continue;
+			}
+			if(bitpos==0){
+				memcpy(&kmercp,&readSeq[byte],cpByte);
+			}
+			shift = ((8*cpByte) - (nK*2)) - (bitpos%8);
+			if(shift>=0) temp = kmercp >> shift;
+			else{
+				shift2 = 8+shift;
+				shift*=-1;
+				lastbyte = readSeq[byte-1];
+				temp = kmercp << shift;
+				lastbyte = lastbyte >> shift2;
+				lastbyte &= (char)pow(2,shift) - 1;
+				temp |= lastbyte;
+			}
+			temp &= NULL_KMER;
+			revtemp = revKmer(temp);
+			if(revtemp < temp){
+				temp = revtemp;
+			}
+			bucket = findKmer128_oa(temp);
+			cov = dbHash_oa[bucket].count;
+//			printf("Number of error Kmers: %i\n",cov_one);
+			max_one =_min(nK,((len-nK)+1));
+			if(cov_one >= max_one-15){
+				if(verbose) printf("Read %li -> Deleted\n",i);
+				reads[i].len = 0;
+				free(reads[i].seq);
+				reads[i].seq = NULL;
+			}
+			if(redo==2 && verbose) printf("Read %li -> Corrected\n",i);
+			redo = 0;
+		}
+	}
+	free(readSeqC);
+	return NULL;
+}
+
+//void mt_correct_reads(void* filter_block){
+//
+//}
+
 void* mt_filter_reads(void* filter_block){
 	printf("Checkpoint: Create Mapping Thread\n");
 	KmerBitBuffer kmercp;
@@ -43,7 +284,7 @@ void* mt_filter_reads(void* filter_block){
 	char lastbyte;
 	int byte;
 	int cpByte;
-	char* decomRead;
+//	char* decomRead;
 	char* readSeq;
 	char* readSeqC=(char*)malloc(150000);
 	int max_one;
@@ -135,10 +376,6 @@ void* mt_filter_reads(void* filter_block){
 	return NULL;
 }
 
-//void mt_correct_reads(void* filter_block){
-//
-//}
-
 void filter_reads(struct reads* reads, const int pthr_num, pthread_t* threads){
 	printf("TEst\n");
 	printf("CHECKPOINT: Filter Reads\n");
@@ -160,7 +397,8 @@ void filter_reads(struct reads* reads, const int pthr_num, pthread_t* threads){
 		filter_block[i].pthr_id = i;
 		filter_block[i].pthr_num = pthr_num;
 		filter_block[i].reads = reads;
-		pthread_create(&threads[i],NULL,mt_filter_reads,(void*)&filter_block[i]);
+		pthread_create(&threads[i],NULL,mt_filter_reads_correction,(void*)&filter_block[i]);
+//		pthread_create(&threads[i],NULL,mt_filter_reads,(void*)&filter_block[i]);
 	}
 
 	void* status;

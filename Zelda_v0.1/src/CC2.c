@@ -504,7 +504,7 @@ void POG_showMatrix(int row, int column, char* seq){
 	}
 	printf("\n");
 	for(j=1;j<column;j++){
-		printf("%c",alMatrix_Letter[j]->letter);
+		printf("%c (%i)",alMatrix_Letter[j]->letter,j);
 		for(i=0;i<=row;i++){
 			printf("\t%i",alMatrix[j][i]);
 		}
