@@ -151,7 +151,7 @@ void* mt_filter_reads_correction(void* filter_block){
 							if(verbose) printf("Old read: %s\n",decomRead);
 							decomRead[readPos-1]=rev_codes[(int)bestj];
 							comRead = compressRead(decomRead);
-							memcpy(reads[i].seq,decomRead,(len+3)/4);
+							memcpy(reads[i].seq,comRead,(len+3)/4);
 							free(decomRead);
 							free(comRead);
 //							memcpy(reads[i].seq,compressRead(decomRead),(len+3)/4);
@@ -195,7 +195,7 @@ void* mt_filter_reads_correction(void* filter_block){
 							decomRead = decompressRead(reads[i].seq,len);
 							decomRead[readPos+(nK-1)]=rev_codes[(int)bestj];
 							comRead = compressRead(decomRead);
-							memcpy(reads[i].seq,decomRead,(len+3)/4);
+							memcpy(reads[i].seq,comRead,(len+3)/4);
 							free(decomRead);
 							free(comRead);
 //							memcpy(reads[i].seq,compressRead(decomRead),(len+3)/4);
