@@ -1,10 +1,9 @@
 /*
  * CC.c
  *
- *  Created on: Mar 9, 2017
+ *  Created on: Mar 13, 2017
  *      Author: lkaempfpp
  */
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -838,6 +837,7 @@ static inline int POG_alignEndpoint(int line, char fullMatrix,int len){
 
 static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Letter_T* current,char print_Message, int j, int line, int readID){ // Parameter 4:  int readID,
 	char verbose = 0;
+	char verbose2 = 0;
 //	static int alignmentcounter = 0;
 //	alignmentcounter++;
 //	if(alignmentcounter > 2262) verbose = 1;
@@ -854,6 +854,7 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 	char* refseq = (char*)malloc(j*2);
 	int len=0;
 	char leftbool = 0;
+	char breakF = 0;
 
 //	struct LetterEdge* counteredge;
 	struct Letter_T* ringletter;
@@ -969,7 +970,10 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 						// ToDo: look if the align-ring already contains the correct letter
 						ringletter = current->align_ring;
 						while(ringletter && ringletter != current){
-							if(ringletter->letter == seq[k]) printf("CASE 1: New letter is created, although the letter is already in the align ring\n");
+							if(ringletter->letter == seq[k]){
+								printf("CASE 1: New letter is created, although the letter is already in the align ring\n");
+								breakF = 1;
+							}
 							ringletter = ringletter->align_ring;
 						}
 						if(current->align_ring){
@@ -1002,6 +1006,7 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 						current_Right = current; // ToDo: Does this make sense, or any difference at all
 
 						numNodes++;
+						if(breakF) return NULL;
 						poa_LetterSizeCheck();
 					}
 
@@ -1059,8 +1064,8 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 					break;
 				}
 				else{
-					if(verbose) printf("Noting is true, there must be an alternative path!\n");
-					if(verbose) printf("j: %i",j);
+					if(verbose2) printf("Noting is true, there must be an alternative path!\n");
+					if(verbose2) printf("j: %i",j);
 				}
 			}
 			edge = edge->next;
@@ -1107,6 +1112,7 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 	strcpy(align->refSeq,refseq);
 	align->j = j;
 	align->current = current;
+	printf("J at the end of Backtracking: %i\n",j);
 //	printf("Alignment Length: %i\n",align->len);
 //	printf("refSeq: %s\n",refseq);
 //	printf("seqSeq: %s\n",readseq);
@@ -1124,6 +1130,7 @@ static inline char POG_alignUpdateGraph(unsigned char* seq, struct pairAlign* al
 	int j = align->j;
 	int i;
 	struct Letter_T* current = align->current;
+	struct Letter_T* align_ring;
 	int length = align->len;
 	char* readseq = align->readSeq;
 	char* refseq = align->refSeq;
@@ -1149,6 +1156,7 @@ static inline char POG_alignUpdateGraph(unsigned char* seq, struct pairAlign* al
 			}
 			else{
 				printf("MISMATCH Origin of the Problem????????????\n");
+				align_ring = current;
 				// make new letter
 				// how to connect???
 			}
@@ -1495,7 +1503,10 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 		if(end_pos+5 > contigLen) end_pos = contigLen;
 		else end_pos += 5;
 		fin = POG_readAlign((unsigned char*)readseq,readLen,heuristic,st_pos,end_pos,i);
-		if(verbose2 && !fin) printf("\tAligning Denied\n");
+		if(verbose2 && !fin){
+			printf("\tAlignment Denied\n");
+			return 0;
+		}
 
 	}
 	free(readseq);
@@ -1505,7 +1516,7 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 
 
 struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char heuristic, struct para* para){
-	char verbose = 0;
+	char verbose = 1;
 
 #ifdef TIMEM
 	struct timespec consenusSt;
@@ -1565,6 +1576,7 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
     }
 
     struct POGreadsSet* pogreadsset;
+    char dotverbose;
 
     for(i=0;i<aS->numbridge;i++){
     	if(aS->scaff[i].len > MIN_SCAFF_LEN || i >= aS->num){
@@ -1576,7 +1588,14 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 			pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+100);
 			strcpy(pog->contig[pog->contigNum].name,name);
 //    		POG_writeBackbone(&pog->contig[pog->contigNum],"test.fasta");
-    		POG_align(reads,pogreadsset, heuristic,pog->contig[pog->contigNum].length-1);
+    		dotverbose = POG_align(reads,pogreadsset, heuristic,pog->contig[pog->contigNum].length-1);
+
+    		// debug
+    		if(verbose && !dotverbose){
+    			sprintf(dotPath,"%s/%s.dot",para->asemblyFolder,pog->contig[pog->contigNum].name);
+    			poa_toDot(dotPath);
+    		}
+
 //    		POG_doubletest(&pog->contig[pog->contigNum]);
 			if((float)numNodes/(float)aS->scaff[i].len < 2){
 #ifdef TIMEM

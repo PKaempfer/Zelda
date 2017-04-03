@@ -23,7 +23,8 @@ SOURCES += src/ConsensusCaller.c src/ConsensusCaller2.c src/CC.c src/CC2.c
 SOURCES += src/misc_hash.c
 
 
-OBJECTS = $(SOURCES:.c=.o) 
+OBJECTS = $(SOURCES:.c=.o)
+BINDIR = bin
 
 TODAY=`date +%Y-%m-%d`
 
@@ -31,10 +32,13 @@ all: Zelda
 
 %.o: src/%.c
 	$(CC) $(CFLAGS) -c $<
-
-Zelda: Zelda.o
-	$(CC) $(CFLAGS) src/Zelda.o $(OBJECTS) -o bin/Zelda $(LINKFLAGS) -v
+Zelda: Zelda.o $(BINDIR)
+	$(CC) $(CFLAGS) src/Zelda.o $(OBJECTS) -o $(BINDIR)/Zelda $(LINKFLAGS) -v
 Zelda.o: $(OBJECTS)
 	$(CC) $(CFLAGS) -c src/Zelda.c -o src/Zelda.o
+$(BINDIR):
+	if [ ! -d "./$(BINDIR)" ]; then\
+		mkdir $(BINDIR);\
+	fi
 clean:
 	rm -f src/*.o Zelda
