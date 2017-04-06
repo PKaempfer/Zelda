@@ -32,7 +32,7 @@
 
 int main(int argc, char* argv[]) {
 	char scaffolding = 0;
-	char heuristic = 0;
+	char heuristic = 1;
 	char prefilter = 1;
 	char findotdump = 0;
 	char dotdump = 0;

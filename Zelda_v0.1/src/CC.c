@@ -625,11 +625,7 @@ static inline int POG_alignInitMatrix(struct Letter_T* current, struct Letter_T*
 		for(j=1;j<=mat_end;j++){
 			// k is pos in seq, j-1, because j==0 is first gap position;
 			k = j-1;
-//			current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(alMatrix[0][j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(alMatrix[0][j]+GAP_PENALTY));
-//			printf("%i -> %i (j: %i)/n",current->ml[j],current->ml[j-1],j);
-//			current->ml[j] = _max((_max((current->ml[j-1]+GAP_PENALTY),(alMatrix[0][j-1] + SM1[codes[current->letter]][codes[seq[k]]]))),(alMatrix[0][j]+GAP_PENALTY));
 			current->ml[j] = max_func2(current->ml[j-1]+GAP_PENALTY,alMatrix[0][j-1] + SM1[codes[current->letter]][codes[seq[k]]],alMatrix[0][j]+GAP_PENALTY);
-//			current->ml[j] = _max((current->ml[j]),(j*GAP_PENALTY + SM1[codes[current->letter]][codes[seq[k]]]));
 			if(current->ml[best_sc] < current->ml[j]) best_sc = j;
 
 		}
@@ -742,28 +738,13 @@ static inline int POG_alignFillMatrix(int* new_numG, struct Letter_T** new_lette
 						// k is pos in seq, j-1, because j==0 is first gap position;
 						k = j-1;
 						// Smith-Waterman Scoring function: Best of itself, left, diagonal, top
-//						current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
 						if(rightbool%2==0){
 							current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
 
 						}
 						else{
-//							if(current->ml[j] <= left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]) current->ml[j] = left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]];
-//							else{
-//								printf("%i > %i (at i: %i ,j: %i)\n",current->ml[j],left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]],depth,j);
-//							}
-//							current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
 							current->ml[j] = max_func2((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
 						}
-//						current->ml[j] = _max((_max((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]))),(left->ml[j]+GAP_PENALTY));
-//						current->ml[j] = max_func2((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
-//						if(current->ml[j] <= left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]) current->ml[j] = left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]];
-//						else{
-//							printf("%i > %i\n",current->ml[j],left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]);
-//						}
-//						if(current->ml[j] < current->ml[j-1]+GAP_PENALTY) current->ml[j] = current->ml[j-1]+GAP_PENALTY;
-//						if(current->ml[j] < left->ml[j]+GAP_PENALTY) current->ml[j] = left->ml[j]+GAP_PENALTY;
-//
 						if(current->ml[best_sc] < current->ml[j]) best_sc = j;
 					}
 					if(current->ml[current->score] < current->ml[best_sc]) current->score = best_sc;
@@ -805,12 +786,8 @@ static inline int POG_alignEndpoint(int line, char fullMatrix,int len){
 	int i;
 	int best_Letter = 0;
 	int best_Score = 0;
-//	for(i=0;i<end_num;i++){
-//		if(end_letters[i]->ml[len] > best_Score){
-//			best_Letter = i;
-//			best_Score = end_letters[i]->ml[len];
-//		}
-//	}
+
+	// Detect best global read alignment local in the POG (Line with the highest score in the last column)
 	for(i=1;i<line;i++){
 		if(alMatrix_Letter[i]->ml[len] > best_Score){
 			best_Letter = i;
@@ -863,6 +840,7 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 	struct Letter_T* newLetterRight = NULL;
 	int32_t newLetterRightID = -1;
 	struct LetterEdge* newEdge;
+	struct LetterEdge* edge2;
 	struct Letter_T* current_Right = NULL;
 
 	// Find correct letter for local end point of contained sequence alignments
@@ -889,20 +867,22 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 				left = &Letters[edge->dest];
 				k = j-1;
 
+				// 1. Entry from Diagonal
 				if(j>0 && current->ml[j] == left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]){
 					nextbool = 1;
-					// Entry from Diagonal
 					readseq[len] = (char)seq[k];
 					refseq[len++] = (char)current->letter;
 
-					// Update POG
+					// 1.1 Match: Just Count up
 					if(current->letter == seq[k]){
 						if(verbose)	printf("Match\n");
 						// Same Letter -> Match: increase counter of existing letter
 						if(current->counter<255) current->counter++;
 						// Position Calculations depends on endianess.
 						// Check if the right letter was already a match or if it comes from a new path
+						// 1.1.1 There was a previous letter before: Create new Letter Edges
 						if(newLetterRight){
+							// 1.1.1.1 Last Letter was a match
 							if(current_Right == newLetterRight){
 								// Update edge counts
 								newEdge = current->right;
@@ -923,9 +903,9 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 									}
 									newEdge = newEdge->next;
 								}
-								// last letter matched already
 								if(verbose) printf("\t->Last letter was a ref-match\n");
 							}
+							// 1.1.1.2 Last Letter was a Mismatch
 							else{
 								// Last Letter was a mismatch and newly created
 								if(verbose) printf("\t->Last letter was NO ref-match\n");
@@ -957,33 +937,43 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 						if(verbose) printf("Old ID for next connection = %i\n",newLetterRightID);
 
 					}
+					// 1.2 Mismatch: look if the align-ring already contains the correct letter
 					else{
-						// Differnt letters -> Mismatch: Create new Letter and new edges
-						if(verbose) printf("Mismatch\n");
-						newLetter = &Letters[numNodes];
-						newLetter->counter = 1;
-						newLetter->letter = seq[k];
-//						newLetter->source.ipos = k;
-//						newLetter->source.iseq = readID;
-//						newLetter->source.next = NULL;
-						// Make, Close alignment ring
-						// ToDo: look if the align-ring already contains the correct letter
+						breakF = 0;
 						ringletter = current->align_ring;
 						while(ringletter && ringletter != current){
 							if(ringletter->letter == seq[k]){
 								printf("CASE 1: New letter is created, although the letter is already in the align ring\n");
+								if(ringletter->ml){
+									printf("Crossjump to parallel Path\n");
+								}
+								else{
+									printf("Error: parallel Path is not in the matrix\n");
+								}
 								breakF = 1;
 							}
 							ringletter = ringletter->align_ring;
 						}
-						if(current->align_ring){
-							newLetter->align_ring = current->align_ring;
-							current->align_ring = newLetter;
+						// Mismatch: align-ring already doen't contains the correct letter -> Create a new
+						if(!breakF || breakF){
+							if(verbose) printf("Mismatch\n");
+							newLetter = &Letters[numNodes];
+							newLetter->counter = 1;
+							newLetter->letter = seq[k];
+
+							// Make, Close alignment ring
+							ringletter = current->align_ring;
+							if(current->align_ring){
+								newLetter->align_ring = current->align_ring;
+								current->align_ring = newLetter;
+							}
+							else{
+								current->align_ring = newLetter;
+								newLetter->align_ring = current;
+							}
+
 						}
-						else{
-							current->align_ring = newLetter;
-							newLetter->align_ring = current;
-						}
+						// Differnt letters -> Mismatch: Create new Letter and new edges
 						// Connect new letter and take the new latter as new current point -> Close path if next step is match
 						if(newLetterRight){
 							newEdge = newLetterRight->left;
@@ -998,6 +988,49 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 							newLetter->right->counter = 1;
 							newLetter->right->vFlag = 0;
 							newLetter->right->next = NULL;
+							// Set Edges between the new mismatch letter and all letters in alignment ring of last set letter
+							ringletter = newLetterRight->align_ring;
+							while(ringletter && ringletter != newLetterRight){
+								printf("Set 0-conter edge of mismatch letter and ring-letters of the precursor\n");
+								newEdge = ringletter->left;
+								ringletter->left = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
+								ringletter->left->dest = numNodes;
+								ringletter->left->counter = 0;
+								ringletter->left->next = newEdge;
+
+								newEdge = newLetter->right;
+								newLetter->right = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
+								newLetter->right->dest = ringletter-Letters;
+								if(verbose) printf("dest: %i\n",newLetter->right->dest);
+								newLetter->right->counter = 0;
+								newLetter->right->vFlag = 0;
+								newLetter->right->next = newEdge;
+
+								ringletter = ringletter->align_ring;
+							}
+							// Last Letter was a mismatch -> Connect last newly created node with ringletters of the new created one
+							if(current_Right != newLetterRight){
+								ringletter  = newLetter->align_ring;
+								while(ringletter && ringletter != newLetter){
+									newEdge = newLetterRight->left;
+									newLetterRight->left = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
+									newLetterRight->left->dest = ringletter-Letters;
+									newLetterRight->left->counter = 0;
+									newLetterRight->left->next = newEdge;
+
+									newEdge = ringletter->right;
+									ringletter->right = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
+									ringletter->right->dest = newLetterRight - Letters;
+									ringletter->right->counter = 0;
+									ringletter->right->vFlag = 0;
+									ringletter->right->next = newEdge;
+									ringletter = ringletter->align_ring;
+								}
+							}
+						}
+						// Important !!!
+						else{
+
 						}
 						newLetterRightID = numNodes;
 						newLetterRight = newLetter;
@@ -1014,6 +1047,7 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 					j--;
 					break;
 				}
+				// 2. Insertion / Entry from left (create new Nodes without any ring)
 				else if(j>0 && current->ml[j] == current->ml[j-1] + GAP_PENALTY){
 					nextbool = 1;
 					// Entry from left -> Gap in ref -> Stay in current matrix line;
@@ -1041,6 +1075,27 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 						newLetter->right->vFlag = 0;
 						newLetter->right->next = NULL;
 					}
+					// Insert at the read end is connected to the last matrix line node
+					// Creats a circle. Does not work!!!
+//					else{
+//						edge2 = current->right;
+//						while(edge2){
+//							ringletter = &Letters[edge2->dest];
+//							newEdge = ringletter->left;
+//							ringletter->left = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
+//							ringletter->left->dest = numNodes;
+//							ringletter->left->counter = 0;
+//							ringletter->left->next = newEdge;
+//
+//							newLetter->right = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
+//							newLetter->right->dest = ringletter-Letters;
+//							newLetter->right->counter = 0;
+//							newLetter->right->vFlag = 0;
+//							newLetter->right->next = NULL;
+//
+//							edge2 = edge2->next;
+//						}
+//					}
 					newLetterRightID = numNodes;
 					newLetterRight = newLetter;
 					numNodes++;
@@ -1075,7 +1130,7 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 		if(!nextbool){
 			// TODO: Circumvent in another way!!! Not just return NULL and break the contig
 			if(suspectVerbose) printf("Read %i: Captured in infinite loop (j=%i), line: %lu, Abort\n",readID,j,(int)(current->ml-alMatrix[0])/((maxReadLen+1)*sizeof(int16_t)));
-			POG_showMatrix(seqlen,line,seq);
+//			POG_showMatrix(seqlen,line,seq);
 //			free(refseq);
 //			free(readseq);
 //			return align;
@@ -1090,7 +1145,7 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 			strcpy(align->refSeq,refseq);
 			align->j = j;
 			align->current = current;
-			poa_showAlignment(readseq,refseq,align->len);
+//			poa_showAlignment(readseq,refseq,align->len);
 			free(refseq);
 			free(readseq);
 //			align.current = NULL;
@@ -1112,7 +1167,7 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 	strcpy(align->refSeq,refseq);
 	align->j = j;
 	align->current = current;
-	printf("J at the end of Backtracking: %i\n",j);
+//	printf("J at the end of Backtracking: %i\n",j);
 //	printf("Alignment Length: %i\n",align->len);
 //	printf("refSeq: %s\n",refseq);
 //	printf("seqSeq: %s\n",readseq);
@@ -1476,6 +1531,7 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 	printf("CHECKPOINT: Start Alignments\n");
 	char verbose = 0;
 	char verbose2 = 1;
+	int offset = 10;
 	char fin;
 	int i;
 	int readID;
@@ -1498,14 +1554,14 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 			strcpy(readseq,revreadseq);
 		}
 		if(verbose) printf("Aligning read: %i (%i -> %i)\n",i,st_pos,end_pos);
-		if(st_pos < 5) st_pos = 0;
-		else st_pos -= 5;
-		if(end_pos+5 > contigLen) end_pos = contigLen;
-		else end_pos += 5;
+		if(st_pos < offset) st_pos = 0;
+		else st_pos -= offset;
+		if(end_pos+offset > contigLen) end_pos = contigLen;
+		else end_pos += offset;
 		fin = POG_readAlign((unsigned char*)readseq,readLen,heuristic,st_pos,end_pos,i);
 		if(verbose2 && !fin){
 			printf("\tAlignment Denied\n");
-			return 0;
+//			return 0;
 		}
 
 	}

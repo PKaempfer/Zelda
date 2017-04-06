@@ -445,9 +445,9 @@ void POG_alignConsensus(struct POGseq* contig){
 //				current = current->align_ring;
 //			}
 			if(!edge){
-				printf("No edge found, break CC\n");
 				backb_pos++;
-				if(backb_pos < contig->length){
+				if(backb_pos < (contig->length/4)*3){
+					printf("No edge found, break CC\n");
 					printf("Jump to back to Backbone (%i)\n",backb_pos);
 					current = &Letters[backb_pos];
 					bestRing = NULL;
