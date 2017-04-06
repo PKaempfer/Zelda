@@ -173,7 +173,7 @@ void* mt_filter_reads_correction(void* filter_block){
 					}
 					// Case 2
 					else if(cov < 3 && pre_cov > 10){
-						if(verbose) printf("BEGIN-Error - Read %li\n",i);
+						if(verbose) printf("BEGIN-Error - Read %li (redo=%i) pos: %i\n",i,(int)redo,readPos+(nK-1));
 						char found = 0;
 						tempCor &= NULL_KMER_LASTBITS;
 						char bestj;
