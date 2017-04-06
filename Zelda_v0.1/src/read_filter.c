@@ -61,6 +61,7 @@ void* mt_filter_reads_correction(void* filter_block){
 	if(verbose) printf("MaxReadLen: %i\n",maxReadLen);
 
 	for(;i<=end;i++){
+		if((i-block.start)%500000) printf("Thread: %i: %i reads corrected\n",block.pthr_id,i-block.start);
 		len = reads[i].len;
 		if(len >= nK){
 //			decomRead = decompressRead(reads[i].seq,len);
@@ -260,6 +261,7 @@ void* mt_filter_reads_correction(void* filter_block){
 			redo = 0;
 		}
 	}
+	printf("Tread %i finished correction\n",block.pthr_id);
 	free(readSeqC);
 	return NULL;
 }
