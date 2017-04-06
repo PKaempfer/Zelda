@@ -831,7 +831,7 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 	char* refseq = (char*)malloc(j*2);
 	int len=0;
 	char leftbool = 0;
-	char breakF = 0;
+//	char breakF = 0;
 
 //	struct LetterEdge* counteredge;
 	struct Letter_T* ringletter;
@@ -939,40 +939,42 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 					}
 					// 1.2 Mismatch: look if the align-ring already contains the correct letter
 					else{
-						breakF = 0;
-						ringletter = current->align_ring;
-						while(ringletter && ringletter != current){
-							if(ringletter->letter == seq[k]){
-								printf("CASE 1: New letter is created, although the letter is already in the align ring\n");
-								if(ringletter->ml){
-									printf("Crossjump to parallel Path\n");
-								}
-								else{
-									printf("Error: parallel Path is not in the matrix\n");
-								}
-								breakF = 1;
-							}
-							ringletter = ringletter->align_ring;
-						}
+//						breakF = 0;
+//						ringletter = current->align_ring;
+//						while(ringletter && ringletter != current){
+//							if(ringletter->letter == seq[k]){
+//								printf("CASE 1: New letter is created, although the letter is already in the align ring\n");
+//								if(ringletter->ml){
+//									printf("Crossjump to parallel Path\n");
+//								}
+//								else{
+//									printf("Error: parallel Path is not in the matrix\n");
+//								}
+//								breakF = 1;
+//							}
+//							ringletter = ringletter->align_ring;
+//						}
 						// Mismatch: align-ring already doen't contains the correct letter -> Create a new
-						if(!breakF || breakF){
-							if(verbose) printf("Mismatch\n");
-							newLetter = &Letters[numNodes];
-							newLetter->counter = 1;
-							newLetter->letter = seq[k];
+						// _____
+//						if(!breakF || breakF){
+						if(verbose) printf("Mismatch\n");
+						newLetter = &Letters[numNodes];
+						newLetter->counter = 1;
+						newLetter->letter = seq[k];
 
-							// Make, Close alignment ring
-							ringletter = current->align_ring;
-							if(current->align_ring){
-								newLetter->align_ring = current->align_ring;
-								current->align_ring = newLetter;
-							}
-							else{
-								current->align_ring = newLetter;
-								newLetter->align_ring = current;
-							}
-
+						// Make, Close alignment ring
+						ringletter = current->align_ring;
+						if(current->align_ring){
+							newLetter->align_ring = current->align_ring;
+							current->align_ring = newLetter;
 						}
+						else{
+							current->align_ring = newLetter;
+							newLetter->align_ring = current;
+						}
+
+//						}
+							// _____
 						// Differnt letters -> Mismatch: Create new Letter and new edges
 						// Connect new letter and take the new latter as new current point -> Close path if next step is match
 						if(newLetterRight){
@@ -991,7 +993,7 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 							// Set Edges between the new mismatch letter and all letters in alignment ring of last set letter
 							ringletter = newLetterRight->align_ring;
 							while(ringletter && ringletter != newLetterRight){
-								printf("Set 0-conter edge of mismatch letter and ring-letters of the precursor\n");
+//								printf("Set 0-counter edge of mismatch letter and ring-letters of the precursor\n");
 								newEdge = ringletter->left;
 								ringletter->left = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
 								ringletter->left->dest = numNodes;
@@ -1039,7 +1041,7 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 						current_Right = current; // ToDo: Does this make sense, or any difference at all
 
 						numNodes++;
-						if(breakF) return NULL;
+//						if(breakF) return NULL;
 						poa_LetterSizeCheck();
 					}
 
@@ -1210,7 +1212,8 @@ static inline char POG_alignUpdateGraph(unsigned char* seq, struct pairAlign* al
 				current->counter++;
 			}
 			else{
-				printf("MISMATCH Origin of the Problem????????????\n");
+				// ToDo: Handle
+//				printf("MISMATCH Origin of the Problem????????????\n");
 				align_ring = current;
 				// make new letter
 				// how to connect???
