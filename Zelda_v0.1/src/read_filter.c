@@ -200,7 +200,9 @@ void* mt_filter_reads_correction(void* filter_block){
 							if(redo == 0) memcpy(readSeqOrg,reads[i].seq,(len+3)/4);
 //							memcpy(readSeqInter,reads[i].seq,(len+3/4));
 							decomRead = decompressRead(reads[i].seq,len);
+							if(verbose) printf("Old read: %s\n",decomRead);
 							decomRead[readPos+(nK-1)]=rev_codes[(int)bestj];
+							if(verbose) printf("New read: %s\n",decomRead);
 							comRead = compressRead(decomRead);
 							memcpy(reads[i].seq,comRead,(len+3)/4);
 							free(decomRead);
