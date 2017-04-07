@@ -135,7 +135,7 @@ void* mt_filter_reads_correction(void* filter_block){
 							tempCor2 = precurser | mask;
 
 							revtemp = revKmer(tempCor2);
-							if(revtemp < precurser){
+							if(revtemp < tempCor2){
 								tempCor2 = revtemp;
 							}
 							bucket = findKmer128_oa(tempCor2);
@@ -165,7 +165,6 @@ void* mt_filter_reads_correction(void* filter_block){
 							if(verbose) printf("Thread: %i with read: %i (len: %i nK: %i)\n",block.pthr_id,reads[i].ID, len, nK);
 							i--;
 							break;
-//							memcpy(readSeqOrg,reads[i].seq,(len+3)/4);
 
 						}
 						else{
