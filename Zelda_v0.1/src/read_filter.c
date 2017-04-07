@@ -22,6 +22,7 @@ void* mt_filter_reads_correction(void* filter_block){
 	printf("Checkpoint: Create Mapping Thread\n");
 	KmerBitBuffer kmercp;
 	KmerBitBuffer tempCor;
+	KmerBitBuffer tempCor2;
 	KmerBitBuffer temp;
 	KmerBitBuffer revtemp;
 	KmerBitBuffer precurser;
@@ -131,13 +132,13 @@ void* mt_filter_reads_correction(void* filter_block){
 						unsigned char newCov = 0;
 						for(char j=0;j<4;j++){
 							KmerBitBuffer mask = (KmerBitBuffer)j << (nK-1)*2;
-							precurser |= mask;
+							tempCor2 = precurser | mask;
 
-							revtemp = revKmer(precurser);
+							revtemp = revKmer(tempCor2);
 							if(revtemp < precurser){
-								precurser = revtemp;
+								tempCor2 = revtemp;
 							}
-							bucket = findKmer128_oa(precurser);
+							bucket = findKmer128_oa(tempCor2);
 							if(bucket && dbHash_oa[bucket].count > 5){
 								newCov = dbHash_oa[bucket].count;
 								found ++;
@@ -183,11 +184,12 @@ void* mt_filter_reads_correction(void* filter_block){
 						// printf actual base and corrected and position
 
 						for(char j=0;j<4;j++){
-							revtemp = revKmer(tempCor);
-							if(revtemp < tempCor){
-								tempCor = revtemp;
+							tempCor2 = tempCor;
+							revtemp = revKmer(tempCor2);
+							if(revtemp < tempCor2){
+								tempCor2 = revtemp;
 							}
-							bucket = findKmer128_oa(tempCor);
+							bucket = findKmer128_oa(tempCor2);
 							if(bucket && dbHash_oa[bucket].count > 5){
 								newCov = dbHash_oa[bucket].count;
 								found ++;
