@@ -111,6 +111,11 @@ void* mt_filter_reads_correction(void* filter_block){
 				if(!bucket){
 					if(verbose) printf("Read: %li -> Kmer is not existent. Undo Base substitution\n",i);
 					memcpy(reads[i].seq,readSeqOrg,(len+3)/4);
+					if(redo == -2){
+						decomRead = decompressRead(reads[i].seq,len);
+						printf("res read: %s\n",decomRead);
+						exit(1);
+					}
 					redo = -1;
 					i--;
 					break;
