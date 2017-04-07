@@ -175,9 +175,13 @@ void* mt_filter_reads_correction(void* filter_block){
 					else if(cov < 3 && pre_cov > 10){
 						if(verbose) printf("BEGIN-Error - Read %li (redo=%i) pos: %i\n",i,(int)redo,readPos+(nK-1));
 						char found = 0;
+						char oldj = tempCor & 3;
+						oldj = rev_codes((int)oldj);
 						tempCor &= NULL_KMER_LASTBITS;
 						char bestj;
 						unsigned char newCov = 0;
+						// printf actual base and corrected and position
+
 						for(char j=0;j<4;j++){
 							revtemp = revKmer(tempCor);
 							if(revtemp < tempCor){
@@ -192,7 +196,7 @@ void* mt_filter_reads_correction(void* filter_block){
 							tempCor ++;
 						}
 						if(found==1){
-							if(verbose) printf("Found: %i -> Best: %c (old / new. %i/%i)\n",(int)found,rev_codes[(int)bestj],cov,(int)newCov);
+							if(verbose) printf("Found: %i (Base %c->%c (Pos: %i)) -> Best: %c (old / new. %i/%i)\n",(int)found,oldj,rev_codes[(int)bestj],readPos+(nK-1),rev_codes[(int)bestj],cov,(int)newCov);
 							if(redo == 0) memcpy(readSeqOrg,reads[i].seq,(len+3)/4);
 //							memcpy(readSeqInter,reads[i].seq,(len+3/4));
 							decomRead = decompressRead(reads[i].seq,len);
