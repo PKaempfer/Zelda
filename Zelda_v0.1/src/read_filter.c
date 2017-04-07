@@ -109,18 +109,24 @@ void* mt_filter_reads_correction(void* filter_block){
 				}
 				bucket = findKmer128_oa(temp);
 				if(!bucket){
-					if(verbose) printf("Read: %li -> Kmer is not existent. Undo Base substitution\n",i);
-					decomRead = decompressRead(reads[i].seq,len);
-					if(verbose) printf("old read: %s\n",decomRead);
-					memcpy(reads[i].seq,readSeqOrg,(len+3)/4);
-					if(redo == -2 && verbose){
-						decomRead = decompressRead(reads[i].seq,len);
-						printf("res read: %s\n",decomRead);
-						exit(1);
+					if(temp==dbHash_oa[bucket].kmer && dbHash_oa[bucket].count){
+						// Go ahead
 					}
-					redo = -1;
-					i--;
-					break;
+					else{
+						if(verbose) printf("Read: %li -> Kmer is not existent. Undo Base substitution\n",i);
+						decomRead = decompressRead(reads[i].seq,len);
+						if(verbose) printf("old read: %s\n",decomRead);
+						memcpy(reads[i].seq,readSeqOrg,(len+3)/4);
+						if(redo == -2 && verbose){
+							decomRead = decompressRead(reads[i].seq,len);
+							printf("res read: %s\n",decomRead);
+							exit(1);
+						}
+						redo = -1;
+						i--;
+						break;
+					}
+
 				}
 				cov = dbHash_oa[bucket].count;
 				cov_tot += cov;
