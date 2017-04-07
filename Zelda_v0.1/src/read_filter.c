@@ -110,6 +110,8 @@ void* mt_filter_reads_correction(void* filter_block){
 				bucket = findKmer128_oa(temp);
 				if(!bucket){
 					if(verbose) printf("Read: %li -> Kmer is not existent. Undo Base substitution\n",i);
+					decomRead = decompressRead(reads[i].seq,len);
+					if(verbose) printf("old read: %s\n",decomRead);
 					memcpy(reads[i].seq,readSeqOrg,(len+3)/4);
 					if(redo == -2 && verbose){
 						decomRead = decompressRead(reads[i].seq,len);
@@ -159,6 +161,7 @@ void* mt_filter_reads_correction(void* filter_block){
 							decomRead = decompressRead(reads[i].seq,len);
 							if(verbose) printf("Old read: %s\n",decomRead);
 							decomRead[readPos-1]=rev_codes[(int)bestj];
+							if(verbose) printf("New read: %s\n",decomRead);
 							comRead = compressRead(decomRead);
 							memcpy(reads[i].seq,comRead,(len+3)/4);
 							free(decomRead);
