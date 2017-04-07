@@ -124,7 +124,7 @@ void* mt_filter_reads_correction(void* filter_block){
 				if(readPos && redo != -2){
 					// Case 1
 					if(pre_cov < 3 && cov > 10){
-						if(verbose) printf("END-Error - Read %li \n",i);
+						if(verbose || redo == 2) printf("END-Error - Read %li \n",i);
 //						if(redo == 0) memcpy(readSeqOrg,reads[i].seq,(len+3)/4);
 						char found = 0;
 						precurser &= NULL_KMER_FIRSTBITS;
@@ -148,11 +148,11 @@ void* mt_filter_reads_correction(void* filter_block){
 							precurser &= NULL_KMER_FIRSTBITS;
 						}
 						if(found==1){
-							if(verbose) printf("Found: %i -> Best: %c (old / new. %i/%i)\n",(int)found,rev_codes[(int)bestj],pre_cov,(int)newCov);
+							if(verbose || redo == 2) printf("Found: %i -> Best: %c (old / new. %i/%i)\n",(int)found,rev_codes[(int)bestj],pre_cov,(int)newCov);
 							if(redo == 0) memcpy(readSeqOrg,reads[i].seq,(len+3)/4);
 //							memcpy(readSeqInter,reads[i].seq,(len+3/4));
 							decomRead = decompressRead(reads[i].seq,len);
-							if(verbose) printf("Old read: %s\n",decomRead);
+							if(verbose || redo == 2) printf("Old read: %s\n",decomRead);
 							decomRead[readPos-1]=rev_codes[(int)bestj];
 							comRead = compressRead(decomRead);
 							memcpy(reads[i].seq,comRead,(len+3)/4);
@@ -174,7 +174,7 @@ void* mt_filter_reads_correction(void* filter_block){
 					}
 					// Case 2
 					else if(cov < 3 && pre_cov > 10){
-						if(verbose) printf("BEGIN-Error - Read %li (redo=%i) pos: %i\n",i,(int)redo,readPos+(nK-1));
+						if(verbose || redo == 2) printf("BEGIN-Error - Read %li (redo=%i) pos: %i\n",i,(int)redo,readPos+(nK-1));
 						char found = 0;
 						char oldj = tempCor & 3;
 						oldj = rev_codes[(int)oldj];
@@ -196,13 +196,13 @@ void* mt_filter_reads_correction(void* filter_block){
 							tempCor ++;
 						}
 						if(found==1){
-							if(verbose) printf("Found: %i (Base %c->%c (Pos: %i)) -> Best: %c (old / new. %i/%i)\n",(int)found,oldj,rev_codes[(int)bestj],readPos+(nK-1),rev_codes[(int)bestj],cov,(int)newCov);
+							if(verbose || redo == 2) printf("Found: %i (Base %c->%c (Pos: %i)) -> Best: %c (old / new. %i/%i)\n",(int)found,oldj,rev_codes[(int)bestj],readPos+(nK-1),rev_codes[(int)bestj],cov,(int)newCov);
 							if(redo == 0) memcpy(readSeqOrg,reads[i].seq,(len+3)/4);
 //							memcpy(readSeqInter,reads[i].seq,(len+3/4));
 							decomRead = decompressRead(reads[i].seq,len);
-							if(verbose) printf("Old read: %s\n",decomRead);
+							if(verbose || redo == 2) printf("Old read: %s\n",decomRead);
 							decomRead[readPos+(nK-1)]=rev_codes[(int)bestj];
-							if(verbose) printf("New read: %s\n",decomRead);
+							if(verbose || redo == 2) printf("New read: %s\n",decomRead);
 							comRead = compressRead(decomRead);
 							memcpy(reads[i].seq,comRead,(len+3)/4);
 							free(decomRead);
@@ -211,7 +211,7 @@ void* mt_filter_reads_correction(void* filter_block){
 //							if(verbose) printf("read: %s\n",decomRead);
 //							free(decomRead);
 							redo = 1;
-							if(verbose) printf("Thread: %i with read: %i (len: %i nK: %i)\n",block.pthr_id,reads[i].ID, len, nK);
+							if(verbose || redo == 2) printf("Thread: %i with read: %i (len: %i nK: %i)\n",block.pthr_id,reads[i].ID, len, nK);
 							i--;
 							break;
 						}
