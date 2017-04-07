@@ -35,7 +35,7 @@ void* mt_filter_reads_correction(void* filter_block){
 	long i = block.start;
 	long end = block.end;
 
-	if(block.pthr_id == 6) verbose = 1;
+//	if(block.pthr_id == 6) verbose = 1;
 
 	int cov_tot;
 	int cov_one;
@@ -181,8 +181,6 @@ void* mt_filter_reads_correction(void* filter_block){
 						tempCor &= NULL_KMER_LASTBITS;
 						char bestj;
 						unsigned char newCov = 0;
-						// printf actual base and corrected and position
-
 						for(char j=0;j<4;j++){
 							tempCor2 = tempCor;
 							revtemp = revKmer(tempCor2);
