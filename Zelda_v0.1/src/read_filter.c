@@ -176,7 +176,7 @@ void* mt_filter_reads_correction(void* filter_block){
 						if(verbose) printf("BEGIN-Error - Read %li (redo=%i) pos: %i\n",i,(int)redo,readPos+(nK-1));
 						char found = 0;
 						char oldj = tempCor & 3;
-						oldj = rev_codes((int)oldj);
+						oldj = rev_codes[(int)oldj];
 						tempCor &= NULL_KMER_LASTBITS;
 						char bestj;
 						unsigned char newCov = 0;
