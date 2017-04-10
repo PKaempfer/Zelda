@@ -1133,8 +1133,11 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 			// TODO: Circumvent in another way!!! Not just return NULL and break the contig
 			if(suspectVerbose) printf("Read %i: Captured in infinite loop (j=%i), line: %lu, Abort\n",readID,j,(int)(current->ml-alMatrix[0])/((maxReadLen+1)*sizeof(int16_t)));
 //			POG_showMatrix(seqlen,line,seq);
-//			free(refseq);
-//			free(readseq);
+
+			free(refseq);
+			free(readseq);
+			return NULL;
+
 //			return align;
 			align = (struct pairAlign*)malloc(sizeof(struct pairAlign));
 			readseq[len] = '\0';
