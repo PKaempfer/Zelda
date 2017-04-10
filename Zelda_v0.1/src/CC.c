@@ -1578,7 +1578,7 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 
 
 struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char heuristic, struct para* para){
-	char verbose = 1;
+	char verbose = 0;
 
 #ifdef TIMEM
 	struct timespec consenusSt;
