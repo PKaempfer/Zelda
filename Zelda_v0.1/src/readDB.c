@@ -290,7 +290,9 @@ void write_filteredDB(char* outDB, int blocks, struct readFiles* files, struct r
 	temp = strlen(readDB);
 	fwrite(&temp,sizeof(int),1,db);
 	fwrite(readDB,sizeof(char),temp,db);
-	fwrite(&readTotNum,sizeof(int),1,db);
+	fwrite(&numreads,sizeof(int),1,db);
+	printf("readTotNum: %i\n",readTotNum);
+//	fwrite(&readTotNum,sizeof(int),1,db);
 	fwrite(&blocks,sizeof(int),1,db);
 	fwrite(blocksPos[0],sizeof(uint64_t),blocks,db);
 	fwrite(blocksPos[1],sizeof(uint64_t),blocks,db);
