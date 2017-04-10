@@ -524,8 +524,8 @@ static inline int POG_alignPrepro(int len, uint32_t st_pos, uint32_t end_pos){
 	struct Letter_T** temp_letters;
 
 	if(!new_letters){
-		new_letters = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*1000); // Max breadth of graph = 100
-		old_letters = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*1000);
+		new_letters = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*10000); // Max breadth of graph = 100
+		old_letters = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*10000);
 	}
 
 	struct Letter_T* end_node = &Letters[end_pos];
@@ -784,7 +784,7 @@ static inline int POG_alignFillMatrix(int* new_numG, struct Letter_T** new_lette
 static inline int POG_alignEndpoint(int line, char fullMatrix,int len){
 	char verbose = 0;
 	int i;
-	int best_Letter = 0;
+	int best_Letter = -1;
 	int best_Score = 0;
 
 	// Detect best global read alignment local in the POG (Line with the highest score in the last column)
@@ -851,7 +851,6 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 //		}
 //		current = alMatrix_Letter[bestline];
 //	}
-
 
 	int nextbool = 0;
 	while(j){
@@ -923,6 +922,7 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 								newLetterRight->left = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
 								newLetterRight->left->dest = newLetterRightID;
 								newLetterRight->left->counter = 1;
+								newLetterRight->left->vFlag = 0;
 								newLetterRight->left->next = newEdge;
 							}
 						}
@@ -1069,6 +1069,7 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 						newLetterRight->left = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
 						newLetterRight->left->dest = numNodes;
 						newLetterRight->left->counter = 1;
+						newLetterRight->left->vFlag = 0;
 						newLetterRight->left->next = newEdge;
 
 						newLetter->right = (struct LetterEdge*)malloc(sizeof(struct LetterEdge));
