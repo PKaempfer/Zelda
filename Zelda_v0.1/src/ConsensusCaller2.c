@@ -928,6 +928,7 @@ static inline void poa_resetMatrix(int line, int len){
 
 long alignmentTime = 0;
 int alignedReads = 0;
+int unalignedReads = 0;
 
 /**
  * Aligns a read sequence to the part of the poa graph, provided by the overlap information of the string graph.

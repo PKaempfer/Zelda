@@ -1460,6 +1460,7 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 //				printf("Error in Alignment Matrix -> Abort Contig\n");
 //				if(verbose)
 					printf("\tFILL MATRIX BREAK by read: %i (numNode: %i)\n",readID,numNodes);
+				unalignedReads++;
 				return 0;
 			}
 
@@ -1485,6 +1486,7 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 			}
 			else{
 				printf("\tEND MATRIX BREAK\n");
+				unalignedReads++;
 				return 0;
 			}
 		}
@@ -1525,7 +1527,10 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 		fin = POG_alignUpdateGraph(seq,align,print_Message,seqlen);
 		if(!fin) printf("\tUPDATE GRAPH BREAK\n");
 	}
-	else return 0;
+	else{
+		unalignedReads++;
+		return 0;
+	}
 
 	char* refseq = align->refSeq;
 	char* readseq = align->readSeq;
@@ -1542,6 +1547,7 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 	}
 
 	if(verbose) printf("Alignment Complete: %i\n",readID);
+	alignedReads++;
 
 	free(refseq);
 	free(readseq);
@@ -1556,7 +1562,7 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 	char verbose2 = 1;
 	int offset = 10;
 	char fin;
-	int i;
+	int i,j;
 	int readID;
 	int readLen;
 	uint32_t st_pos;
@@ -1567,6 +1573,16 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 	char* revreadseq = (char*)malloc(sizeof(char)*maxReadLen+1);
 
 	for(i=0;i<pogreadsSet->number;i++){
+		if(Letters[pogreads[i].start].counter==255){
+			j=i;
+			i++;
+			while(i<pogreadsSet->number && Letters[pogreads[i].start].counter==255){
+
+				i++;
+			}
+			printf("Countershift, jump by %i reads\n",i-j);
+			if(i==pogreadsSet->number && Letters[pogreads[i].start].counter==255) break;
+		}
 		readID = pogreads[i].ID;
 		readLen = reads[readID].len;
 		st_pos = pogreads[i].start;
@@ -1709,7 +1725,8 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 			}
     		resetLetters(Letters);
     		numNodes = 0;
-    		printf("Aligned Reads: %i\n",alignedReads);
+    		printf("Aligned Reads:  %i\n",alignedReads);
+    		printf("Unligned Reads: %i\n",unalignedReads);
 #ifdef TIMEM
     		printf("Init time:      %.3f s\n",(float)alignmentTime/1000000000);
     		printf("Alignment time: %.3f s\n",(float)sumMatrix/1000000000);

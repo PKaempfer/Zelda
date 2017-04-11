@@ -17,7 +17,7 @@
 #include "readDB.h"
 
 #define GAP_PENALTY  -1
-#define MATRIX_MAX_BR 20
+#define MATRIX_MAX_BR 100
 #define TIMEM
 
 // Substitution Matrix 1 		  A, C, G, T, -
@@ -155,6 +155,7 @@ extern uint32_t maxNumNodes;
 extern int16_t** alMatrix;
 extern int *alMatrix_Best;
 extern int alignedReads;
+extern int unalignedReads;
 extern struct Letter_T** alMatrix_Letter;
 extern struct timespec ts_start;
 extern struct timespec ts_finish;
