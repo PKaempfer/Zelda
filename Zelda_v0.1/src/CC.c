@@ -1577,7 +1577,6 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 			j=i;
 			i++;
 			while(i<pogreadsSet->number && Letters[pogreads[i].start].counter==255){
-
 				i++;
 			}
 			printf("Countershift, jump by %i reads\n",i-j);
