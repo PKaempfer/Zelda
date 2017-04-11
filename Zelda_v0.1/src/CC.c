@@ -16,6 +16,7 @@
 #define MIN_CONTIG_LEN 100
 #define MIN_SCAFF_LEN 	200
 #define H_RANGE 		6
+#define MAXBR			300
 
 static inline int max_func(int a,int b,int c,int d){
 	return _max((_max(a,b)),(_max(c,d)));
@@ -28,6 +29,7 @@ static inline int max_func2(int a,int b,int c){
 static inline void poa_resetMatrix(int line, int len){
 	// free the letters and set matrix to 0
 	int i,j;
+	char nonnull = 0;
 	static int16_t* nullLine = NULL;
 	if(!nullLine){
 		nullLine = (int16_t*)malloc(sizeof(int16_t)*10000);
@@ -40,10 +42,18 @@ static inline void poa_resetMatrix(int line, int len){
 		alMatrix_Letter[i]->score = 0;
 		alMatrix_Letter[i]->ml = NULL;
 		if(alMatrix_Letter[i]->junction!=0){
-			printf("Junction WRONGGGG in line: %i: %i\n",i,alMatrix_Letter[i]->junction);
+			nonnull = 1;
+			printf("Junction WRONGGGG in line: %i (node: %i): %i\n",i,alMatrix_Letter[i]-Letters,alMatrix_Letter[i]->junction);
 			alMatrix_Letter[i]->junction = 0;
 		}
 		memcpy(&alMatrix[i][1],nullLine,sizeof(int16_t)*len);
+	}
+	if(nonnull){
+		for(i=0;i<numNodes;i++){
+			if(Letters[i].junction){
+				printf("NonNull Junction at pos: %i\n",i);
+			}
+		}
 	}
 }
 
@@ -548,7 +558,7 @@ static inline int POG_alignPrepro(int len, uint32_t st_pos, uint32_t end_pos){
 
 //	if(overhang >= 30) printf("Wide range overhang could cause a problem\n");
 
-	while(new_num && depth <= len + 200){
+	while(new_num && depth <= len + MAXBR){
 		if(verbose && new_num >= 90) printf("Graph breadth > 100\n");
 		temp_letters = old_letters;
 		old_letters = new_letters;
@@ -667,7 +677,7 @@ static inline int POG_alignFillMatrix(int* new_numG, struct Letter_T** new_lette
 	if(!fullMatrix) range = H_RANGE;
 	else range = len;
 
-	while(new_num && depth <= len + 200){ //maxReadLen
+	while(new_num && depth <= len + MAXBR){ //maxReadLen
 		if(depth > len+5 && strictverbose) printf("Go deeper: %i\n",depth);
 //		memcpy(old_letters,new_letters,sizeof(struct Letter_T*)*new_num);
 		temp_letters = old_letters;
@@ -714,7 +724,7 @@ static inline int POG_alignFillMatrix(int* new_numG, struct Letter_T** new_lette
 						rightbool = 2;
 					}
 					else{
-						printf("This case should not happen (Junction Number < 1: %i -> (oldnum: %i / j: %i))\n",Letters[edge->dest].junction,old_num,j);
+						printf("This case should not happen (Junction Number == 0: %i -> (oldnum: %i / j: %i))\n",Letters[edge->dest].junction,old_num,j);
 						return -1;
 	//					exit(1);
 					}
@@ -1155,7 +1165,7 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 			free(refseq);
 			free(readseq);
 //			align.current = NULL;
-			exit(1);
+//			exit(1);
 			return align;
 
 			if(j==99) exit(1);
@@ -1372,6 +1382,7 @@ static inline char POG_alignUpdateGraph2(unsigned char* seq, struct pairAlign* a
 }
 
 char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_pos, uint32_t end_pos, int readID){
+	char verbose = 0;
 	static struct timespec alignmentSt;
 	static struct timespec alignmentEnd;
 	char print_Message = 0;
@@ -1388,7 +1399,6 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 	}
 
 	char fin = 0;
-	int i;
 	int new_num = 0;
 	int end_num = 0;
 	int best_Letter;
@@ -1431,14 +1441,16 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 		end_node = &Letters[end_pos];
 		end_num = POG_alignFillMatrix(&new_num, new_letters, seq, end_node, end_letters, fullMatrix, seqlen);
 		if(end_num <= 0){
-			printf("EndNum<0 . RETURN\n");
+			printf("EndNum<=0 . RETURN\n");
 			if(!fullMatrix){
 				fullMatrix = 1;
 				numFull++;
 				continue;
 			}
 			else{
-				POG_showMatrix(seqlen,line,(char*)seq);
+				verbose = 1;
+//				if(verbose)
+					POG_showMatrix(seqlen,line,(char*)seq);
 //				printf("Ref: ");
 //				for(i=0;i<line;i++){
 //					printf("%c",alMatrix_Letter[i]->letter);
@@ -1446,7 +1458,8 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 //				printf("seq: %s\n",(char*)seq);
 //				printf("\n");
 //				printf("Error in Alignment Matrix -> Abort Contig\n");
-				printf("\tFILL MATRIX BREAK\n");
+//				if(verbose)
+					printf("\tFILL MATRIX BREAK by read: %i (numNode: %i)\n",readID,numNodes);
 				return 0;
 			}
 
@@ -1527,6 +1540,9 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 		current = align->current;
 		poa_showAlignment(readseq,refseq,length);
 	}
+
+	if(verbose) printf("Alignment Complete: %i\n",readID);
+
 	free(refseq);
 	free(readseq);
 	free(align);

@@ -399,7 +399,7 @@ void POG_alignConsensus(struct POGseq* contig){
 //		printf("Seqpos: %i",i);
 		if(current->counter < 5) seq[i++] = current->letter+32;
 		else seq[i++] = current->letter;
-		if(current->vFlag) printf("Flag was set\n");
+//		if(current->vFlag) printf("Flag was set\n");
 		current->vFlag = 1;
 		edge = current->right;
 		resetLetterSt(lettersSt);

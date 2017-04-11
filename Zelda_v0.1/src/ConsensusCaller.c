@@ -457,7 +457,7 @@ struct contigList* realBackbone2(struct myovlList* G, struct reads* reads){
 
 struct Letter_T* Letters     =      NULL;
 uint32_t          numNodes    =         0;	// Current number of elements in LPOLetter_T array
-uint32_t          maxNumNodes =   1000000;	// Initial max size of LPOLetter_T array
+uint32_t          maxNumNodes =  10000000;	// Initial max size of LPOLetter_T array
 
 int16_t **alMatrix = NULL;
 //int alMatrix[100*20+1][120];
