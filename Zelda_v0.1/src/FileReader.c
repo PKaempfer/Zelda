@@ -477,6 +477,9 @@ struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* thread
 		printf("Database not Found!\n");
 	}
 
+	resize_mutex = 0;
+	fin_mutex = 0;
+
 	int i;
 	int temp;
 	// Read MetaINFO

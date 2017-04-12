@@ -73,6 +73,7 @@ void freeHashTable_oa(){
 	printf("CHECKPOINT: Free HashTable\n");
 	free((void*)dbHash_oa);
 	dbHash_oa=NULL;
+	bitnum -= 2;
 }
 
 void freeEnds_oa(){
@@ -90,7 +91,7 @@ void freeEnds_oa(){
 }
 
 volatile struct hashkmer_oa* resizeHashTable(){
-	char verbose = 0;
+	char verbose = 1;
 	uint32_t i,j;
 	volatile struct hashkmer_oa* tempHash_oa;
 	if(verbose) hashStats_oa();
