@@ -292,7 +292,8 @@ void* mt_filter_reads_correction(void* filter_block){
 			max_one =_min(nK,((len-nK)+1));
 			if(cov_one){
 				if(cov_high > cov_one*3){
-
+					redo = 0;
+					continue;
 					best_len = 0;
 					best_st = 0;
 					best_end = 0;
