@@ -30,6 +30,9 @@ void* mt_filter_reads_correction(void* filter_block){
 
 	char verbose = 0;
 
+	FILE* correctedR;
+	if(verbose) correctedR = fopen("correctedReads","w");
+
 	struct filter_block block = *((struct filter_block*)filter_block);
 	struct reads* reads = block.reads;
 	long i = block.start;
@@ -39,8 +42,14 @@ void* mt_filter_reads_correction(void* filter_block){
 
 	int cov_tot;
 	int cov_one;
+	int cov_high;
 	int cov;
 	int pre_cov = 0;
+	uint16_t best_len;
+	uint16_t best_st;
+	uint16_t best_end;
+	int cutoff = 1;
+	int j;
 
 	int len;
 
@@ -56,9 +65,12 @@ void* mt_filter_reads_correction(void* filter_block){
 //	char* decomRead = (char*)malloc(sizeof(char)*(len+1));
 	char* readSeq;
 	char* readSeqC=(char*)malloc(150000);
+	char* cutSeq=(char*)malloc(150000);
 	int max_one;
 	char* readSeqOrg = (char*)malloc((maxReadLen+3)/4);
 //	char* readSeqInter = (char*)malloc((maxReadLen+3)/4);
+	unsigned char* cArray = (unsigned char*)malloc(sizeof(unsigned char)*((maxReadLen-nK)+1));
+	uint16_t cArraylen = 0;
 	char redo = 0;
 
 	if(verbose) printf("MaxReadLen: %i\n",maxReadLen);
@@ -73,6 +85,7 @@ void* mt_filter_reads_correction(void* filter_block){
 //			free(decomRead);
 			cov_tot = 0;
 			cov_one = 0;
+			cov_high = 0;
 			readPos = 0;
 			bitpos = 0;
 			shift = 0;
@@ -129,8 +142,10 @@ void* mt_filter_reads_correction(void* filter_block){
 
 				}
 				cov = dbHash_oa[bucket].count;
+				cArray[readPos] = (unsigned char)cov;
 				cov_tot += cov;
-				if(cov==1) cov_one++;
+				if(cov<=cutoff) cov_one++;
+				else cov_high++;
 				bitpos += 2;
 
 				// Read Correction
@@ -270,20 +285,72 @@ void* mt_filter_reads_correction(void* filter_block){
 			}
 			bucket = findKmer128_oa(temp);
 			cov = dbHash_oa[bucket].count;
+			if(cov<=cutoff) cov_one++;
+			else cov_high++;
+			cArray[readPos] = (unsigned char)cov;
 //			printf("Number of error Kmers: %i\n",cov_one);
 			max_one =_min(nK,((len-nK)+1));
-			if(cov_one >= max_one-15){
-				if(verbose) printf("Read %li -> Deleted\n",i);
-				reads[i].len = 0;
-				free(reads[i].seq);
-				reads[i].seq = NULL;
+			if(cov_one){
+				if(cov_high > cov_one*3){
+
+					best_len = 0;
+					best_st = 0;
+					best_end = 0;
+					for(j=0;j<=readPos;j++){
+						if(cArray[j]>cutoff) best_len++;
+						else{
+							if(best_len > (best_end - best_st) + 1){
+								best_end = j-1;
+								best_st = best_end - (best_len - 1);
+							}
+							best_len = 0;
+						}
+						if(verbose) printf("%i  ",cArray[j]);
+					}
+					if(verbose)printf("\n");
+					if(best_len > (best_end - best_st) + 1){
+						best_end = j-1;
+						best_st = best_end - (best_len - 1);
+					}
+					best_len = (best_end - best_st) + (nK);
+					decomRead = decompressRead(reads[i].seq,len);
+					if(verbose) printf("Cut from %i to %i\n",best_st,best_end+(nK-1));
+					if(verbose) printf("Old Read: %s\n",decomRead);
+					memcpy(cutSeq,&decomRead[best_st],best_len);
+					cutSeq[best_len]='\0';
+					if(verbose)printf("New Read: %s\n",cutSeq);
+					comRead = compressRead(cutSeq);
+					if(verbose) printf("Read %li -> Cut: %i bp -> %i bp\n",i,len,best_len);
+					if(verbose) fprintf(correctedR,">%i\n",i);
+					if(verbose) fprintf(correctedR,"%s\n",cutSeq);
+					reads[i].len = best_len;
+					memcpy(reads[i].seq,comRead,(best_len+3)/4);
+					free(comRead);
+					free(decomRead);
+				}
+				else{
+					if(verbose) printf("Read %li -> Deleted\n",i);
+					reads[i].len = 0;
+					free(reads[i].seq);
+					reads[i].seq = NULL;
+				}
 			}
+
+//			if(cov_one >= max_one-15){
+//
+//				if(verbose) printf("Read %li -> Deleted\n",i);
+//				reads[i].len = 0;
+//				free(reads[i].seq);
+//				reads[i].seq = NULL;
+//			}
 			if(redo==2 && verbose) printf("Read %li -> Corrected\n",i);
 			redo = 0;
 		}
 	}
-	printf("Tread %i finished correction\n",block.pthr_id);
+	printf("Thread %i finished correction\n",block.pthr_id);
 	free(readSeqC);
+	free(cArray);
+	if(verbose) fclose(correctedR);
 	return NULL;
 }
 

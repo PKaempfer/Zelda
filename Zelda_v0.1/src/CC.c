@@ -1596,7 +1596,7 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 		else st_pos -= offset;
 		if(end_pos+offset > contigLen) end_pos = contigLen;
 		else end_pos += offset;
-		fin = POG_readAlign((unsigned char*)readseq,readLen,heuristic,st_pos,end_pos,i);
+		fin = POG_readAlign((unsigned char*)readseq,readLen,heuristic,st_pos,end_pos,readID);
 		if(verbose2 && !fin){
 			printf("\tAlignment Denied\n");
 //			return 0;
