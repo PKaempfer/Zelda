@@ -1719,8 +1719,8 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 			if(scaffEdge->next && scaffEdge->next->bridge){
 				oldscaffEdge = scaffEdge;
 			}
-			scaffEdge = scaffEdge->next;
 			len += scaffEdge->len;
+			scaffEdge = scaffEdge->next;
 		}
 		if(verbose2) printf("\n");
 	}

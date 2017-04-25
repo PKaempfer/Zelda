@@ -901,10 +901,12 @@ int collectInternalNodes_v2(int i,int Knoten){
 }
 
 static inline int countNodes(){
+//	printf("CountNodes\n");
 	int i;
 	int countNodes = 0;
 	struct AdjListNode *chnode;
 	for(i=1;i<=graph->V;i++){
+//		printf("Count %i\n",i);
 		if(graph->array[i].head || graph->array[i].tail){
 			chnode = graph->array[i].tail;
 			if(!chnode){
@@ -961,7 +963,8 @@ void initAllReads(){
  * 		   					(3) One Parent with more than one Child
  */
 void travToRedOVL_v2(){
-	char verbose = 0;
+	printf("travToRedOVL_v2\n");
+	char verbose = 1;
 	int i;
 //	int j,outdegree;
 	cNodeId = 1;

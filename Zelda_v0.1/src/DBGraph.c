@@ -132,7 +132,7 @@ void createGraph(int V)
     graph->vFlag = (char*) malloc((V+1) * sizeof(char));
 
     int i;
-    for (i = 0; i < V; ++i){
+    for (i = 0; i <= V; ++i){
         graph->array[i].head = NULL;
     	graph->array[i].tail = NULL;
     	graph->array[i].Link = NULL;
@@ -145,7 +145,7 @@ void freeGraph(){
 	uint32_t i;
 	struct AdjListNode* listNode;
 	struct LinkListNode* linkNode;
-	for(i = 0; i < graph->V; i++){
+	for(i = 0; i <= graph->V; i++){
 		listNode = graph->array[i].head;
 		while(listNode){
 			graph->array[i].head = listNode->next;

@@ -609,15 +609,18 @@ static inline int iter_collapse(int ori, int dir){
 }
 
 void indelHandle(int ori){
+//	printf("Check for InDels (ori: %i)\n",ori);
 	struct AdjListNode *node, *nextnode;
 	node = graph->array[ori].head;
+//	printf("1. While (node %p)\n",node);
 	while(node && node->dest == ori){
+//		printf("St of loop\n");
 		printf("Edge pointing to edge origin (InDel Artifact) ->  Delete Edge\n");
 		nextnode = node->next;
 		free(node);
 		graph->array[ori].head = nextnode;
 		node = graph->array[ori].head;
-
+//		printf("End of loop\n");
 	}
 	while(node && node->next){
 		nextnode = node->next;
@@ -645,6 +648,7 @@ void indelHandle(int ori){
 		}
 		node = node->next;
 	}
+//	printf("Check for InDels finished\n");
 }
 
 void perfectErrorCorrection(){
@@ -662,7 +666,7 @@ void perfectErrorCorrection(){
 		printf("ErrorCorrection Round %i\n",round);
 		countKmers();
 		change = 0;
-		for(i=1;i<graph->V;i++){
+		for(i=1;i<=graph->V;i++){
 			if(i%(graph->V/10)==0){
 				pro++;
 				printf("%.1f %% (%i) nodes Corrected\n",(float)pro*10,i);
@@ -700,6 +704,10 @@ void perfectErrorCorrection(){
 		printf("Deleted k-mers: %li\n",deletedKmer);
 	} while(change);
 	// Delete self pointing circles ?!?
-	indelHandle(i);
+	for(i=1;i<=graph->V;i++){
+		indelHandle(i);
+	}
+
+
 }
 
