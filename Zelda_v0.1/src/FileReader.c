@@ -531,7 +531,7 @@ struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* thread
 	printf("Path to readDB: %s\n",readDBFile);
 	int readNumber;
 	fread(&readNumber,sizeof(int),1,metaDB);
-	printf("readNumber(???): %i\n",readNumber);
+//	printf("readNumber(???): %i\n",readNumber);
 
 	fread(&blocks,sizeof(int),1,metaDB);
 	printf("Number of Block in this DB: %i\n",blocks);

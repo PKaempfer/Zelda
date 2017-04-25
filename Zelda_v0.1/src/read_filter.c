@@ -25,7 +25,7 @@ void* mt_filter_reads_correction(void* filter_block){
 	KmerBitBuffer tempCor2;
 	KmerBitBuffer temp;
 	KmerBitBuffer revtemp;
-	KmerBitBuffer precurser;
+	KmerBitBuffer precurser = 0;
 	uint32_t bucket;
 
 	char verbose = 0;
@@ -70,13 +70,12 @@ void* mt_filter_reads_correction(void* filter_block){
 	char* readSeqOrg = (char*)malloc((maxReadLen+3)/4);
 //	char* readSeqInter = (char*)malloc((maxReadLen+3)/4);
 	unsigned char* cArray = (unsigned char*)malloc(sizeof(unsigned char)*((maxReadLen-nK)+1));
-	uint16_t cArraylen = 0;
 	char redo = 0;
 
 	if(verbose) printf("MaxReadLen: %i\n",maxReadLen);
 
 	for(;i<=end;i++){
-		if((i-block.start)%100000==0) printf("Thread: %i: %i reads corrected\n",block.pthr_id,i-block.start);
+		if((i-block.start)%100000==0) printf("Thread: %i: %li reads corrected\n",block.pthr_id,i-block.start);
 		len = reads[i].len;
 		if(len >= nK){
 //			decomRead = decompressRead(reads[i].seq,len);
@@ -156,7 +155,7 @@ void* mt_filter_reads_correction(void* filter_block){
 //						if(redo == 0) memcpy(readSeqOrg,reads[i].seq,(len+3)/4);
 						char found = 0;
 						precurser &= NULL_KMER_FIRSTBITS;
-						char bestj;
+						char bestj = 0;
 						unsigned char newCov = 0;
 						for(char j=0;j<4;j++){
 							KmerBitBuffer mask = (KmerBitBuffer)j << (nK-1)*2;
@@ -207,7 +206,7 @@ void* mt_filter_reads_correction(void* filter_block){
 						char oldj = tempCor & 3;
 						oldj = rev_codes[(int)oldj];
 						tempCor &= NULL_KMER_LASTBITS;
-						char bestj;
+						char bestj = 0;
 						unsigned char newCov = 0;
 						for(char j=0;j<4;j++){
 							tempCor2 = tempCor;
@@ -322,7 +321,7 @@ void* mt_filter_reads_correction(void* filter_block){
 					if(verbose)printf("New Read: %s\n",cutSeq);
 					comRead = compressRead(cutSeq);
 					if(verbose) printf("Read %li -> Cut: %i bp -> %i bp\n",i,len,best_len);
-					if(verbose) fprintf(correctedR,">%i\n",i);
+					if(verbose) fprintf(correctedR,">%li\n",i);
 					if(verbose) fprintf(correctedR,"%s\n",cutSeq);
 					reads[i].len = best_len;
 					memcpy(reads[i].seq,comRead,(best_len+3)/4);

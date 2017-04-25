@@ -28,6 +28,10 @@ int pathsNum = 1;
 int maxPathNum = 100;
 /** Number of components in String Graph*/
 int componentNum;
+/** Total bp of the reads used for contig construction*/
+uint64_t pathsTotBase = 0;
+uint64_t pathsTotCov = 0;
+uint64_t pathsTotLen = 0;
 
 /**
  * This Function initializes all needed data structures for paired read annotation.
@@ -97,6 +101,7 @@ void junctionDFS(int readID, struct myovlList* G, struct reads* reads){
 	int overhang;
 	int counteroverhang = 0;
 	int pathlength;
+	uint32_t coverage;
 
 	if(verbose) printf("Start Annotation at Junction node: %i jDir: %i\n",i,dir);
 
@@ -108,6 +113,7 @@ void junctionDFS(int readID, struct myovlList* G, struct reads* reads){
 			// Flag path as visited
 			bread->dest->flag = 1;
 			pathlength = bread->dest->len;
+			coverage = bread->dest->len;
 			// Flag the other side of the unique path as already used, to not report the reverse path
 			counterbread =  G->read[bread->dest->ID]->first;
 			bread->dest->pathID = pathsNum;
@@ -142,6 +148,7 @@ void junctionDFS(int readID, struct myovlList* G, struct reads* reads){
 				while(internb){
 					if(G->read[internb->ID]->flag == CONTAINED){
 						// Read is not contained in the junction read, but in a proper overlap
+						coverage += reads[internb->ID].len;
 						pc_anno = (struct pc_anno*)reads[internb->ID].annotation;
 						if(!pc_anno) printf("No Annotation pointer allocated\n");
 						pc_anno->pathID = pathsNum;
@@ -162,6 +169,7 @@ void junctionDFS(int readID, struct myovlList* G, struct reads* reads){
 				internb = G->read[breadID]->first;
 				while(internb){
 					if(internb->sideflag == bdir && G->read[internb->ID]->flag == PROPER){
+						coverage += reads[internb->ID].len;
 						counterbread = G->read[internb->ID]->first;
 						while(counterbread){
 							if(counterbread->ID == breadID){
@@ -196,8 +204,11 @@ void junctionDFS(int readID, struct myovlList* G, struct reads* reads){
 				paths[pathsNum].rightJunction = breadID;
 				paths[pathsNum].rightPath = NULL;
 				paths[pathsNum].len = pathlength;
+				paths[pathsNum].cov = coverage / pathlength;
 				paths[pathsNum].flag = 0;
 				paths[pathsNum].pathdir = bdir;
+				pathsTotLen += pathlength;
+				pathsTotBase += coverage;
 				pathsNum++;
 				if(pathsNum==maxPathNum){
 					maxPathNum *= 2;
@@ -302,6 +313,8 @@ struct scaffold_set* contigs_init(struct myovlList* G){ //, struct reads* reads
     	aS->scaff[i-1].startJunction = paths[i].leftJunction;
     	aS->scaff[i-1].endJunction = paths[i].rightJunction;
     	aS->scaff[i-1].len = paths[i].len;
+    	aS->scaff[i-1].estim_Cov = paths[i].cov;
+    	aS->scaff[i-1].testVar_delete = paths[i].freq;
     	aS->scaff[i-1].type = 1; // Singletons
     	aS->scaff[i-1].first = (struct scaffEdge*)malloc(sizeof(struct scaffEdge));
     	aS->scaff[i-1].first->ID = paths[i].ID;

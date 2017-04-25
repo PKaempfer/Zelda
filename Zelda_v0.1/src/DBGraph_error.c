@@ -354,99 +354,100 @@ void rekCorrection(int a, int b, int up){
 	}
 }
 
-static inline int collapse(int ori, int dir){
-//	static int number = 0;
-	static int a,b, temp;
-	struct AdjListNode *node, *nextnode;
-	if(dir){
-//		printf("while0: %i\n",ori);
-		if(graph->array[ori].head && graph->array[ori].head->next){
-			node = graph->array[ori].head;
-// 			nextnode =  graph->array[ori].head->next; // ->
-			while(node){
-//				printf("while 1: %i\n",ori);
-				nextnode = node->next;
-				while(nextnode){
-					if((node->trans & TRANS_MASK) == (nextnode->trans & TRANS_MASK) && node->dest != nextnode->dest){
-						// Control the coverage of the nodes (Needs to be implemented)
-						// Previously it has to be implemented in hash to adjacency transformation functions
-						a = _min(node->dest,nextnode->dest);
-						b = _max(node->dest,nextnode->dest);
-#ifdef counterCorrection
-						if(graph->array[a].counter < graph->array[b].counter){
-							temp = a;
-							a = b;
-							b = temp;
-						}
-#endif
-						if(graph->array[a].counter > counterTrash && graph->array[b].counter > counterTrash){
-							nextnode = nextnode->next;
-							continue;
-						}
-						else if(ori == a || ori == b){
-							nextnode = nextnode->next;
-							continue;
-						}
-						else if(isChild(ori,a) || isChild(ori,b)){
-							nextnode = nextnode->next;
-							continue;
-						}
-						else rekCorrection(a,b,1);
-						return 1;
-					}
-					nextnode = nextnode->next;
-				}
-				node = node->next;
-//				printf("Nextnode\n");
-			}
-		}
-	}
-	else{
-		if(graph->array[ori].tail && graph->array[ori].tail->next){
-			node = graph->array[ori].tail;
-//			nextnode =  graph->array[ori].tail->next; // ->
-			while(node){
-				nextnode = node->next;
-				while(nextnode){
-					if((node->trans & TRANS_MASK) == (nextnode->trans & TRANS_MASK) && node->dest != nextnode->dest){
-						// Control the coverage of the nodes (Needs to be implemented)
-						// Previously it has to be implemented in hash to adjacency transformation functions
-						a = _min(node->dest,nextnode->dest);
-						b = _max(node->dest,nextnode->dest);
-#ifdef counterCorrection
-						if(graph->array[a].counter < graph->array[b].counter){
-							temp = a;
-							a = b;
-							b = temp;
-						}
-#endif
-						if(graph->array[a].counter > counterTrash && graph->array[b].counter > counterTrash){
-							nextnode = nextnode->next;
-							continue;
-						}
-//						printf("Collapse Paths starting: ori: %i (a:%i / b%i)\n",ori,a,b);
-						else if(ori == a || ori == b){
-							nextnode = nextnode->next;
-							continue;
-//							return 0;
-						}
-						else if(isParent(ori,a) || isParent(ori,b)){
-							nextnode = nextnode->next;
-							continue;
-//							return 0;
-						}
-						else rekCorrection(a,b,0);
-						return 1;
-					}
-					nextnode = nextnode->next;
-				}
-				node = node->next;
-//				printf("Nextnode\n");
-			}
-		}
-	}
-	return 0;
-}
+/** Recursive Error Correction Function - Not time efficient */
+//static inline int collapse(int ori, int dir){
+////	static int number = 0;
+//	static int a,b, temp;
+//	struct AdjListNode *node, *nextnode;
+//	if(dir){
+////		printf("while0: %i\n",ori);
+//		if(graph->array[ori].head && graph->array[ori].head->next){
+//			node = graph->array[ori].head;
+//// 			nextnode =  graph->array[ori].head->next; // ->
+//			while(node){
+////				printf("while 1: %i\n",ori);
+//				nextnode = node->next;
+//				while(nextnode){
+//					if((node->trans & TRANS_MASK) == (nextnode->trans & TRANS_MASK) && node->dest != nextnode->dest){
+//						// Control the coverage of the nodes (Needs to be implemented)
+//						// Previously it has to be implemented in hash to adjacency transformation functions
+//						a = _min(node->dest,nextnode->dest);
+//						b = _max(node->dest,nextnode->dest);
+//#ifdef counterCorrection
+//						if(graph->array[a].counter < graph->array[b].counter){
+//							temp = a;
+//							a = b;
+//							b = temp;
+//						}
+//#endif
+//						if(graph->array[a].counter > counterTrash && graph->array[b].counter > counterTrash){
+//							nextnode = nextnode->next;
+//							continue;
+//						}
+//						else if(ori == a || ori == b){
+//							nextnode = nextnode->next;
+//							continue;
+//						}
+//						else if(isChild(ori,a) || isChild(ori,b)){
+//							nextnode = nextnode->next;
+//							continue;
+//						}
+//						else rekCorrection(a,b,1);
+//						return 1;
+//					}
+//					nextnode = nextnode->next;
+//				}
+//				node = node->next;
+////				printf("Nextnode\n");
+//			}
+//		}
+//	}
+//	else{
+//		if(graph->array[ori].tail && graph->array[ori].tail->next){
+//			node = graph->array[ori].tail;
+////			nextnode =  graph->array[ori].tail->next; // ->
+//			while(node){
+//				nextnode = node->next;
+//				while(nextnode){
+//					if((node->trans & TRANS_MASK) == (nextnode->trans & TRANS_MASK) && node->dest != nextnode->dest){
+//						// Control the coverage of the nodes (Needs to be implemented)
+//						// Previously it has to be implemented in hash to adjacency transformation functions
+//						a = _min(node->dest,nextnode->dest);
+//						b = _max(node->dest,nextnode->dest);
+//#ifdef counterCorrection
+//						if(graph->array[a].counter < graph->array[b].counter){
+//							temp = a;
+//							a = b;
+//							b = temp;
+//						}
+//#endif
+//						if(graph->array[a].counter > counterTrash && graph->array[b].counter > counterTrash){
+//							nextnode = nextnode->next;
+//							continue;
+//						}
+////						printf("Collapse Paths starting: ori: %i (a:%i / b%i)\n",ori,a,b);
+//						else if(ori == a || ori == b){
+//							nextnode = nextnode->next;
+//							continue;
+////							return 0;
+//						}
+//						else if(isParent(ori,a) || isParent(ori,b)){
+//							nextnode = nextnode->next;
+//							continue;
+////							return 0;
+//						}
+//						else rekCorrection(a,b,0);
+//						return 1;
+//					}
+//					nextnode = nextnode->next;
+//				}
+//				node = node->next;
+////				printf("Nextnode\n");
+//			}
+//		}
+//	}
+//	return 0;
+//}
 
 struct timespec collapseSt;
 struct timespec collapseEnd;

@@ -17,6 +17,9 @@
 
 extern struct path* paths;
 extern int pathsNum;
+extern uint64_t pathsTotBase;
+extern uint64_t pathsTotCov;
+extern uint64_t pathsTotLen;
 
 struct pc_anno{ 				// Annotation for non junction reads (proper or contained)
 	int pathID;					// ID of path, the read belongs to
@@ -47,7 +50,8 @@ struct pathEdge{				// PE - Connection of the path to the following paths on the
 struct path{
 	int ID;						// ID of the path -> not necessary, because identical with the index
 	int len;					// length of the path/contig
-	int freq;					// Contig frequency
+	uint32_t cov;
+	uint32_t freq;				// Contig frequency (Means initially the coverage, to estimate the frequency the contig appears in the assembly)
 	char pathdir;				// 0 if the path was created over bread->sideflag == 0 from leftJunction; 1 if bread->sideflag was 1 from leftJunction
 	int leftJunction;			// left Junction read ID
 	struct pathEdge* leftPath;	// adjacency list of possible following paths with counter of read pairs supporting this connection
@@ -70,6 +74,8 @@ struct scaffEdge{
 struct scaffold{
 	int ID;
 	int len;
+	uint32_t estim_Cov;			// Estimated Coverage
+	uint32_t testVar_delete;
 	char type; 					// 0 -> Scaffold, 1 -> Singleton (unscaffolded contig)
 	int startJunction;
 	int endJunction;

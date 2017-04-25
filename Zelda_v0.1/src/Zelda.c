@@ -31,7 +31,7 @@
 #include "read_filter.h"
 
 int main(int argc, char* argv[]) {
-	char scaffolding = 0;
+	char scaffolding = 1;
 	char heuristic = 1;
 	char prefilter = 1;
 	char findotdump = 0;

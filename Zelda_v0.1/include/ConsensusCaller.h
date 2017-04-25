@@ -163,6 +163,8 @@ extern long sumMatrix;
 extern long sumTrace;
 extern long alignmentTime;
 
+void contig_repeatFinder();
+
 struct scaffold_set* scaffold_init2();
 
 struct scaffold_set* scaffold_stats(struct scaffold_set* aS);

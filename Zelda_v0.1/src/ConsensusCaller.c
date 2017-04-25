@@ -971,7 +971,7 @@ void poa_reportVariant(struct POG* pog, char* vcfFile, char* ref){
 //    fprintf(vcf,"##INFO=<ID=PQR,Number=1,Type=Float,Description=\"Reference allele quality sum in phred for partial observations\">\n");
 //    fprintf(vcf,"##INFO=<ID=PQA,Number=A,Type=Float,Description=\"Alternate allele quality sum in phred for partial observations\">\n");
 //    fprintf(vcf,"##INFO=<ID=SRF,Number=1,Type=Integer,Description=\"Number of reference observations on the forward strand\">\n");
-//    fprintf(vcf,"##INFO=<ID=SRR,Number=1,Type=Integer,Description=\"Number of reference observations on the reverse strand\">\
+//    fprintf(vcf,"##INFO=<ID=SRR,Number=1,Type=Integer,Description=\"Number of reference observations on the reverse strand\">\n");
 //    fprintf(vcf,"##INFO=<ID=SAF,Number=A,Type=Integer,Description=\"Number of alternate observations on the forward strand\">\n");
 //    fprintf(vcf,"##INFO=<ID=SAR,Number=A,Type=Integer,Description=\"Number of alternate observations on the reverse strand\">\n");
 //    fprintf(vcf,"##INFO=<ID=SRP,Number=1,Type=Float,Description=\"Strand balance probability for the reference allele: Phred-scaled upper-bounds estimate of the probability of observing the deviation between SRF and SRR given E(SRF/SRR) ~ 0.5, derived using Hoeffding's inequality\">\n");
@@ -1627,9 +1627,7 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
     	if(aS->scaff[v].len >= 200) nStat[anzlen++] = aS->scaff[v].len;
     }
 
-	int temp;
-
-	// Sort Scaffolds by length
+    // Sort Scaffolds by length
 	radixSort(anzlen,nStat);
 
 	for(i=0;i<anzlen;i++) gesLen += nStat[i];
@@ -1946,6 +1944,18 @@ struct scaffold_set* scaffold_init_old(){
 	return aS;
 }
 
+void contig_repeatFinder(){
+	int i;
+	int inter;
+	pathsTotCov = pathsTotBase / pathsTotLen;
+
+	for(i=1;i<pathsNum;i++){
+		inter = (paths[i].cov - (pathsTotCov/2));
+		if(inter<=0) paths[i].freq = 1;
+		else paths[i].freq = (inter / pathsTotCov) + 1;
+	}
+}
+
 struct scaffold_set* scaffold_init(){
     int i;
     struct scaffold_set* aS = (struct scaffold_set*)malloc(sizeof(struct scaffold_set));
@@ -2258,6 +2268,9 @@ struct scaffold_set* scaffold_init2(){
     struct contigScaff* left = (struct contigScaff*)malloc(sizeof(struct contigScaff)*lmaxelem);
     struct contigScaff* right = (struct contigScaff*)malloc(sizeof(struct contigScaff)*rmaxelem);
     struct pathEdge* edge; // = (struct pathEdge*)malloc(sizeof(struct pathEdge));
+
+    // Calculates the coverage of the contigs to estimate the number of contigs occurrences in the scaffolds
+//    contig_repeatFinder(reads);
 
     for(j=0;j<2;j++){
         for(i=1;i<pathsNum;i++){
