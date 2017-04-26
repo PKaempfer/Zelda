@@ -13,7 +13,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <unistd.h>
-#include <time.h>
+#include "time.h"
 #include <math.h>
 #include "kmer.h"
 #include "kmerHash.h"

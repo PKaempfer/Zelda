@@ -2,12 +2,13 @@
 CC = gcc  
 #CC = clang-3.5
 #CFLAGS = -Wall -Wextra -I../include -I./Jellyfish-2.2.4/include -I. -I../uthash/uthash-master/src -I/usr/local/include -mcpu=power8 -mcx16
-CFLAGS = -Wall -Wextra -D_POSIX_C_SOURCE=199309L -std=c99 -I./include -I/usr/include  #-mcpu=power8 -mcx16 
+CFLAGS = -D_POSIX_C_SOURCE=199309L -std=c99 -I./include -I/usr/include  #-mcpu=power8 -mcx16 
+CFLAGS += -Wall -Wextra  -Wno-unused-result -Wno-strict-aliasing -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-sign-compare
 
 LINKFLAGS = -pthread -lrt -lm 
 
 #CFLAGS += -O1 -fno-strict-aliasing -Wno-sign-compare -Wno-comment #-Wno-unused-but-set-variable
-CFLAGS += -g -O3 -Wno-sign-compare
+CFLAGS += -g -O3 
 # Adress sanitizer seeks for memory leaeks in address room
 #CFLAGS += -g -O1 -Wno-sign-compare
 #CFLAGS += -fsanitize=address
