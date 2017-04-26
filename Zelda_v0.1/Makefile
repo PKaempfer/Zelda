@@ -5,7 +5,7 @@ CC = gcc
 CFLAGS = -D_POSIX_C_SOURCE=199309L -std=c99 -I./include -I/usr/include  #-mcpu=power8 -mcx16 
 CFLAGS += -Wall -Wextra  -Wno-unused-result -Wno-strict-aliasing -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-sign-compare
 
-LINKFLAGS = -pthread -lrt -lm 
+LINKFLAGS = -pthread -lm #-lrt 
 
 #CFLAGS += -O1 -fno-strict-aliasing -Wno-sign-compare -Wno-comment #-Wno-unused-but-set-variable
 CFLAGS += -g -O3 
