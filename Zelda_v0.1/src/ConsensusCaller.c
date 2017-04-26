@@ -1241,9 +1241,11 @@ void poa_consensus2(struct Sequence* contig){
 	contig->sequence = seq;
 	contig->length = strlen(seq);
 	sprintf(contig->name,"%s%i",contig->name,contig->length);
+#ifdef RUSAGE
 	struct rusage r_usage;
 	getrusage(RUSAGE_SELF,&r_usage);
 	printf("Memory usage: %ld bytes\n",r_usage.ru_maxrss);
+#endif
 	poa_variantCalling(contig);
 	poa_avgCov(contig);
 	sprintf(contig->name,"%s_avgCov:%.2f",contig->name,contig->avgCov);
