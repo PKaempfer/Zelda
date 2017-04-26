@@ -15,6 +15,7 @@
 #include "kmer.h"
 #include "DBGraph.h"
 #include "DBGraph_error.h"
+#include "ConsensusCaller.h"
 
 #define IterError
 #define counterCorrection
@@ -460,7 +461,9 @@ long collapseCountDown = 0;
 
 static inline int iter_collapse(int ori, int dir){
 //	static int number = 0;
+#ifdef TIMEM
 	clock_gettime(CLOCK_MONOTONIC, &collapseSt);
+#endif
 	static int a,b, temp;
 	struct AdjListNode *node, *nextnode;
 	char found = 1;
@@ -515,10 +518,14 @@ static inline int iter_collapse(int ori, int dir){
 							else{
 								found=1;
 								foundany = 1;
+#ifdef TIMEM
 								clock_gettime(CLOCK_MONOTONIC, &iterSt);
+#endif
 								collapseNodes(a,b);
+#ifdef TIMEM
 								clock_gettime(CLOCK_MONOTONIC, &iterEnd);
 								sumIter += (((iterEnd.tv_sec * 1000000000) + iterEnd.tv_nsec) - ((iterSt.tv_sec * 1000000000) + iterSt.tv_nsec));
+#endif
 								collapseCountUp++;
 								ori = a;
 								break;
@@ -585,10 +592,14 @@ static inline int iter_collapse(int ori, int dir){
 							else{
 								found=1;
 								foundany = 1;
+#ifdef TIMEM
 								clock_gettime(CLOCK_MONOTONIC, &iterSt);
+#endif
 								collapseNodes(a,b);
+#ifdef TIMEM
 								clock_gettime(CLOCK_MONOTONIC, &iterEnd);
 								sumIter += (((iterEnd.tv_sec * 1000000000) + iterEnd.tv_nsec) - ((iterSt.tv_sec * 1000000000) + iterSt.tv_nsec));
+#endif
 								collapseCountDown++;
 								ori = a;
 								break;
@@ -602,8 +613,10 @@ static inline int iter_collapse(int ori, int dir){
 			}
 		}
 	}
+#ifdef TIMEM
 	clock_gettime(CLOCK_MONOTONIC, &collapseEnd);
 	sumcollapse += (((collapseEnd.tv_sec * 1000000000) + collapseEnd.tv_nsec) - ((collapseSt.tv_sec * 1000000000) + collapseSt.tv_nsec));
+#endif
 	if(foundany) return 1;
 	else return 0;
 }
