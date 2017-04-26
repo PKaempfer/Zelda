@@ -18,7 +18,7 @@
 
 #define GAP_PENALTY  -1
 #define MATRIX_MAX_BR 100
-#define TIMEM
+//#define TIMEM
 
 // Substitution Matrix 1 		  A, C, G, T, -
 //static const int SM1[5][5] = 	{

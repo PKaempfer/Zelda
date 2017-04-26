@@ -15,7 +15,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <pthread.h>
-#include "time.h"
+#include <time.h>
 #include <math.h>
 #include "readDB.h"
 #include "kmerHash_oa.h"
