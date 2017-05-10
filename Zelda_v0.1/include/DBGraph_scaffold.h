@@ -21,17 +21,11 @@ extern uint64_t pathsTotBase;
 extern uint64_t pathsTotCov;
 extern uint64_t pathsTotLen;
 
-struct pc_anno{ 				// Annotation for non junction reads (proper or contained)
-	int pathID;					// ID of path, the read belongs to
-	int lJunctionDist;			// Distance to the left junction in Path
-	int rJunctionDist;			// Distance to the right junction in Path
-};
-
-struct j_anno{		 			// Annotation for Junction reads
-//	int inDegree;				// number of paths into the junction
-//	int outDegree;				// number of paths out of the junction
-	char vFlag;					// Visited Flag
-//	int** counts;				// Number of read pair support from in to out path
+struct contigCircle{
+	int ID;						// ID of the circle
+	int dest;					// Junction readID of the next node of the circle
+	char vFlag;					// visited Flag - Edges not allowed to visit 2 times
+	struct contigCircle* next;	// Next circle, if the node is origin of more than one circles
 };
 
 struct pathEdge{				// PE - Connection of the path to the following paths on the way in concordance to the read pairings (order of the pathedges should be consistent with the depth of the path)
@@ -50,8 +44,9 @@ struct pathEdge{				// PE - Connection of the path to the following paths on the
 struct path{
 	int ID;						// ID of the path -> not necessary, because identical with the index
 	int len;					// length of the path/contig
-	uint32_t cov;
-	uint32_t freq;				// Contig frequency (Means initially the coverage, to estimate the frequency the contig appears in the assembly)
+	uint32_t cov;				// Contig frequency (Means initially the coverage, to estimate the frequency the contig appears in the assembly)
+	uint32_t freq;				// Number of allowed repeat usage of this contig path (without circle usage)
+	uint32_t circfreq;			// Circle frequency, not used in scaffold path finding
 	char pathdir;				// 0 if the path was created over bread->sideflag == 0 from leftJunction; 1 if bread->sideflag was 1 from leftJunction
 	int leftJunction;			// left Junction read ID
 	struct pathEdge* leftPath;	// adjacency list of possible following paths with counter of read pairs supporting this connection
@@ -60,6 +55,29 @@ struct path{
 	int component;				// Component ID, the path is a part of
 	char flag;					// nothing at the moment - just there
 	char scaffflag;				// first 4 bit left, last 4 bit right (0 - End, 1 - Proper, 2 - Ambiguous)
+};
+
+struct pc_anno{ 				// Annotation for non junction reads (proper or contained)
+	int pathID;					// ID of path, the read belongs to
+	int lJunctionDist;			// Distance to the left junction in Path
+	int rJunctionDist;			// Distance to the right junction in Path
+};
+
+struct jPath{
+	uint32_t pathID;
+	uint32_t sJID;
+	uint32_t eJID;
+	struct jPath* next;
+};
+
+struct j_anno{		 			// Annotation for Junction reads
+	int inDegree;				// number of paths into the junction
+	int outDegree;				// number of paths out of the junction
+	char vFlag;					// Visited Flag
+	struct contigCircle* circle; // Circles in the Contig Graph, not investigated in the Scaffold touring but substituted when one node is visited
+	struct jPath* inEdge;		// Paths out of the Junction
+	struct jPath* outEdge;		// Paths into the Junction
+//	int** counts;				// Number of read pair support from in to out path
 };
 
 struct scaffEdge{

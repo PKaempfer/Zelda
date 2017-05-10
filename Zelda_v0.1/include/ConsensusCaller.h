@@ -164,9 +164,15 @@ extern long sumMatrix;
 extern long sumTrace;
 extern long alignmentTime;
 
+void balancePaths(struct myovlList* G, struct reads* reads);
+
 void contig_repeatFinder();
 
+void hierholzerTourAll(struct myovlList* G, struct reads* reads);
+
 struct scaffold_set* scaffold_init2();
+
+struct scaffold_set* scaffold_init3();
 
 struct scaffold_set* scaffold_stats(struct scaffold_set* aS);
 

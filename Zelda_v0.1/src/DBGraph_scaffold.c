@@ -385,6 +385,8 @@ void scaffGraphDot(struct myovlList* G, struct reads* reads, char* dotfile){
 //	int counterDir;
 	int pathID;
 	int pathlen;
+	int outdegree;
+	int indegree;
 //	int junctionID;
 	char found;
 	struct bread* bread;
@@ -396,10 +398,17 @@ void scaffGraphDot(struct myovlList* G, struct reads* reads, char* dotfile){
 
 	for(i=1;i<=G->V;i++){
 		if(G->read[i] && G->read[i]->flag == JUNCTION){
-			fprintf(dot,"%i [label=\"%i\" ]\n",i,i);
 			j_anno = (struct j_anno*)reads[i].annotation;
 			j_anno->vFlag = 0;
 			dir = G->read[i]->dir;
+			indegree = j_anno->inDegree;
+			outdegree = j_anno->outDegree;
+			if(indegree != outdegree){
+				if(indegree + outdegree == 1) fprintf(dot,"%i [label=\"%i (%ix)\", color=\"yellow\" ]\n",i,i,indegree+outdegree);
+				else fprintf(dot,"%i [label=\"%i (%ix)\", color=\"red\" ]\n",i,i,indegree+outdegree);
+			}
+			else fprintf(dot,"%i [label=\"%i (%ix)\" ]\n",i,i,indegree+outdegree);
+
 			bread = G->read[i]->first;
 			while(bread){
 				if(bread->dest && !bread->dest->flag){
@@ -440,24 +449,28 @@ void scaffGraphDot(struct myovlList* G, struct reads* reads, char* dotfile){
 //						counterbread = counterbread->next;
 //					}
 					if(found){
-						if(pathID > 0){
-							fprintf(dot,"%i -> %i [dir=both, arrowtail=%s, arrowhead=%s, color=\"darkgreen\",label=\"%i (%i)\" ]\n",
+//						if(pathID > 0){
+						if(pathID > 0 && paths[pathID].freq){
+							fprintf(dot,"%i -> %i [dir=both, arrowtail=%s, arrowhead=%s, color=\"darkgreen\",label=\"%i (%i) %ix\" ]\n",
 									i,
 									breadDestID,
 									dir!=bread->sideflag ? "normal" : "inv",
 									G->read[breadDestID]->dir != counterbread->sideflag ? "normal" : "inv",
 									pathID,
-									pathlen);
+									pathlen,
+									paths[pathID].freq);
 						}
-						else if(pathID < 0){
+//						else if(pathID < 0){
+						else if(pathID < 0 && paths[-pathID].freq){
 							pathID *= -1;
-							fprintf(dot,"%i -> %i [dir=both, arrowtail=%s, arrowhead=%s, color= \"gray\",label=\"%i (%i)\"]\n",
+							fprintf(dot,"%i -> %i [dir=both, arrowtail=%s, arrowhead=%s, color= \"gray\",label=\"%i (%i) %ix\"]\n",
 									i,
 									breadDestID,
 									dir!=bread->sideflag ? "normal" : "inv",
 									G->read[breadDestID]->dir != counterbread->sideflag ? "normal" : "inv",
 									pathID,
-									pathlen);
+									pathlen,
+									paths[pathID].freq);
 						}
 
 					}

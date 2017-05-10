@@ -31,7 +31,7 @@
 #include "read_filter.h"
 
 int main(int argc, char* argv[]) {
-	char scaffolding = 0;
+	char scaffolding = 1;
 	char heuristic = 1;
 	char prefilter = 1;
 	char findotdump = 0;
@@ -201,11 +201,19 @@ int main(int argc, char* argv[]) {
 	sleep(sleeptime);
 	printf("continue\n");
 //		exit(1);
+	findotdump = 1;
+
+	contig_repeatFinder();
+	balancePaths(G,reads);
+	hierholzerTourAll(G,reads);
+
 	if(findotdump){
 		sprintf(tempPath,"%s/scaffGraph.dot",para->asemblyFolder);
 		scaffGraphDot(G,reads,tempPath);
 	}
-//		exit(1);
+
+
+	exit(1);
 //		No Scaffolding
 	time(&start);
 

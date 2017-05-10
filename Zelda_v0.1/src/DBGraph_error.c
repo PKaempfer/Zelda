@@ -717,9 +717,9 @@ void perfectErrorCorrection(){
 		printf("Deleted k-mers: %li\n",deletedKmer);
 	} while(change);
 	// Delete self pointing circles ?!?
-	for(i=1;i<=graph->V;i++){
-		indelHandle(i);
-	}
+//	for(i=1;i<=graph->V;i++){
+//		indelHandle(i);
+//	}
 
 
 }

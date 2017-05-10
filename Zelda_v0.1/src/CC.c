@@ -1618,12 +1618,12 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 
 	printf("Checkpoint: ConsensusCaller (CC)\n");
 //	para = NULL;
-	contig_repeatFinder();
 
 	struct scaffold_set* aS;
 	if(scaffolding){
 		printf("Checkpoint: Init Scaffold Correction\n");
-		aS = scaffold_init2();
+//		aS = scaffold_init2();
+		aS = scaffold_init3();
 	}
 	else{
 		printf("Checkpoint: Init Contig Correction\n");
