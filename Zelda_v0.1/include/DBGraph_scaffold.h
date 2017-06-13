@@ -24,6 +24,7 @@ extern uint64_t pathsTotLen;
 struct contigCircle{
 	int ID;						// ID of the circle
 	int dest;					// Junction readID of the next node of the circle
+	int pathID;					// ID of the following path, as part of the circle
 	char vFlag;					// visited Flag - Edges not allowed to visit 2 times
 	struct contigCircle* next;	// Next circle, if the node is origin of more than one circles
 };

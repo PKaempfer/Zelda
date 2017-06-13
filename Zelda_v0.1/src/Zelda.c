@@ -31,6 +31,7 @@
 #include "read_filter.h"
 
 int main(int argc, char* argv[]) {
+
 	char scaffolding = 1;
 	char heuristic = 1;
 	char prefilter = 1;
@@ -213,7 +214,7 @@ int main(int argc, char* argv[]) {
 	}
 
 
-	exit(1);
+//	exit(1);
 //		No Scaffolding
 	time(&start);
 

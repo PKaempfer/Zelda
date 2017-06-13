@@ -1619,11 +1619,14 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 	printf("Checkpoint: ConsensusCaller (CC)\n");
 //	para = NULL;
 
-	struct scaffold_set* aS;
+//	scaffold_printfreqs(reads,G);
+
+	struct scaffold_set* aS = NULL;
 	if(scaffolding){
 		printf("Checkpoint: Init Scaffold Correction\n");
-//		aS = scaffold_init2();
-		aS = scaffold_init3();
+		aS = scaffold_init3(reads);
+		scaffold_printfreqs(reads,G);
+		aS = scaffold_init4(aS);
 	}
 	else{
 		printf("Checkpoint: Init Contig Correction\n");
@@ -1632,6 +1635,7 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 
 	aS = scaffold_stats(aS);
 
+	exit(1);
 
 	int i,j;
     printf("MaxReadLen: %i\n",maxReadLen);

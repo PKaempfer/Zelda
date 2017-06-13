@@ -170,9 +170,17 @@ void contig_repeatFinder();
 
 void hierholzerTourAll(struct myovlList* G, struct reads* reads);
 
+//static inline int* scaffold_findcirclePath(struct scaffEdge* scaffedge, struct jPath* jPath, int jpos, char initRight, struct j_anno* j_anno,int nextpathNum, int uniPathMaxLen, struct contigScaff* uniPath, struct scaffold_set* aS, struct reads* reads,int* pos_len);
+
+void connectPathStats();
+
 struct scaffold_set* scaffold_init2();
 
-struct scaffold_set* scaffold_init3();
+struct scaffold_set* scaffold_init3(struct reads* reads);
+
+struct scaffold_set* scaffold_init4(struct scaffold_set* aS);
+
+void scaffold_printfreqs(struct reads* reads, struct myovlList* G);
 
 struct scaffold_set* scaffold_stats(struct scaffold_set* aS);
 

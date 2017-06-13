@@ -53,6 +53,7 @@ void initAnnotation(struct myovlList* G, struct reads* reads){
 		if(G->read[i] && G->read[i]->flag == JUNCTION){
 			j_anno = (struct j_anno*)malloc(sizeof(struct j_anno));
 			j_anno->vFlag = 0;
+			j_anno->circle = NULL;
 			if(verbose) printf("InitJunction Annotation for read: %i (flag:%i)\n",i,j_anno->vFlag);
 			reads[i].annotation = (void*)j_anno;
 		}
@@ -449,8 +450,8 @@ void scaffGraphDot(struct myovlList* G, struct reads* reads, char* dotfile){
 //						counterbread = counterbread->next;
 //					}
 					if(found){
-//						if(pathID > 0){
-						if(pathID > 0 && paths[pathID].freq){
+						if(pathID > 0){
+//						if(pathID > 0 && paths[pathID].freq){
 							fprintf(dot,"%i -> %i [dir=both, arrowtail=%s, arrowhead=%s, color=\"darkgreen\",label=\"%i (%i) %ix\" ]\n",
 									i,
 									breadDestID,
@@ -460,8 +461,8 @@ void scaffGraphDot(struct myovlList* G, struct reads* reads, char* dotfile){
 									pathlen,
 									paths[pathID].freq);
 						}
-//						else if(pathID < 0){
-						else if(pathID < 0 && paths[-pathID].freq){
+						else if(pathID < 0){
+//						else if(pathID < 0 && paths[-pathID].freq){
 							pathID *= -1;
 							fprintf(dot,"%i -> %i [dir=both, arrowtail=%s, arrowhead=%s, color= \"gray\",label=\"%i (%i) %ix\"]\n",
 									i,
@@ -688,7 +689,7 @@ void reportSib(struct pathEdge* pathEdge, int depth, int verbose){
 }
 
 void connectPathStats(){
-	int verbose = 0;
+	int verbose = 1;
 	int i;
 	struct pathEdge* pathEdge;
 	for(i=1;i<pathsNum;i++){
