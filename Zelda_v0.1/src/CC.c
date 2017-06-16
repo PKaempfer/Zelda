@@ -268,6 +268,29 @@ void POG_appendbackbone(struct POGseq* contig, char* seq, int overhang){
 	}
 }
 
+
+//for( i = 0, k = 1; i < NV-1; i++){
+//	.......
+//	......
+//	while(nblinks < m){ //  nblinks : no.of edges
+//		struct AdjListNode* temp = graph->array[i].head;
+//		printGraph(graph, &sum, temp);
+//		fprintf(ls,"\n AdjacentList of [%d] Head -> ",i);
+//		while(temp != NULL && temp->next != NULL){
+//			fprintf(ls,"%d->", temp->dest);
+//			temp = temp->next;
+//		}
+//		Calculation for Measured couplings A_ {ik}here:
+//		A1[i][k] = A_old[i][k] + learning rate *maxlikelihood;
+//	}
+//	fprintf(ed,"%d\n",...........);
+//}
+////I have collected the list of edges as follows in the output:
+//
+//AdjacentList of [0] Head -> 132->349->452->352->
+//AdjacentList of [1] Head -> 180->
+//AdjacentList of [2] Head ->
+
 struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, struct myovlList* G, struct scaffold_set* aS, int scaffID){
     char verbose = 0;
     char verbose2 = 0;
@@ -1635,7 +1658,7 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 
 	aS = scaffold_stats(aS);
 
-	exit(1);
+//	exit(1);
 
 	int i,j;
     printf("MaxReadLen: %i\n",maxReadLen);

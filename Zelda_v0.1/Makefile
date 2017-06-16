@@ -10,18 +10,18 @@ CFLAGS += -Wno-unused-parameter
 LINKFLAGS = -pthread -lm #-lrt 
 
 #CFLAGS += -O1 -fno-strict-aliasing -Wno-sign-compare -Wno-comment #-Wno-unused-but-set-variable
-#CFLAGS += -g -O3 
+CFLAGS += -g -O3 
 # Adress sanitizer seeks for memory leaeks in address room
-CFLAGS += -g -O1 -Wno-sign-compare
-CFLAGS += -fsanitize=address
-CFLAGS += -fsanitize=leak
+#CFLAGS += -g -O1
+#CFLAGS += -fsanitize=address
+#CFLAGS += -fsanitize=leak
 
 SOURCES =  src/DBGraph.c src/DBGraph_oa.c
 SOURCES += src/FileReader.c  src/kmer.c src/kmerHash.c src/kmerHash_oa.c src/readDB.c
 SOURCES += src/read_filter.c src/DBGraph_error.c
 SOURCES += src/DBGraph_reduced.c src/DBGraph_reduced_strong.c
 SOURCES += src/DBGraph_stringer_2.c src/DBGraph_stringer_refine.c
-SOURCES += src/DBGraph_scaffold.c DBGraph_scaffold_touring.c
+SOURCES += src/DBGraph_scaffold.c src/DBGraph_scaffold_touring.c
 SOURCES += src/ConsensusCaller.c src/ConsensusCaller2.c src/CC.c src/CC2.c
 SOURCES += src/misc_hash.c
 
