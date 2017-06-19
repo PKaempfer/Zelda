@@ -339,11 +339,11 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 		while(scaffEdge){
 			finJunction = scaffEdge->targetJunction;
 			scaffEdge = scaffEdge->next;
-			printf("FinJunction: %i\n",finJunction);
+			if(verbose) printf("FinJunction: %i\n",finJunction);
 		}
 		scaffEdge = aS->scaff[scaffID].first;
 		while(bread){
-			printf("destPathID: %i == scaffEdgeID: %i\n",bread->dest->pathID, scaffEdge->ID);
+			if(verbose) printf("destPathID: %i == scaffEdgeID: %i\n",bread->dest->pathID, scaffEdge->ID);
 			if(bread->dest && bread->dest->pathID == scaffEdge->ID) break;
 			bread = bread->next;
 		}
@@ -412,7 +412,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 		// Go on, insert all the rest
 		while(breadID != finJunction){
 			if(G->read[breadID]->flag == JUNCTION){
-				printf("bread (%i) is a JUNCTION (finjunction: %i)\n",breadID,finJunction);
+				if(verbose) printf("bread (%i) is a JUNCTION (finjunction: %i)\n",breadID,finJunction);
 				scaffEdge = scaffEdge->next;
 				if(scaffEdge->bridge){
 
@@ -1404,8 +1404,10 @@ static inline char POG_alignUpdateGraph(unsigned char* seq, struct pairAlign* al
 
 char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_pos, uint32_t end_pos, int readID){
 	char verbose = 0;
+#ifdef TIMEM
 	static struct timespec alignmentSt;
 	static struct timespec alignmentEnd;
+#endif
 	char print_Message = 0;
 	char print_align = 0;
 	static int line = 0;
@@ -1469,8 +1471,8 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 				continue;
 			}
 			else{
-				verbose = 1;
-//				if(verbose)
+//				verbose = 1;
+				if(verbose)
 					POG_showMatrix(seqlen,line,(char*)seq);
 //				printf("Ref: ");
 //				for(i=0;i<line;i++){
@@ -1600,7 +1602,7 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 			while(i<pogreadsSet->number && Letters[pogreads[i].start].counter==255){
 				i++;
 			}
-			printf("Countershift, jump by %i reads\n",i-j);
+			if(verbose) printf("Countershift, jump by %i reads\n",i-j);
 			if(i==pogreadsSet->number && Letters[pogreads[i].start].counter==255) break;
 		}
 		readID = pogreads[i].ID;
@@ -1647,9 +1649,11 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 	struct scaffold_set* aS = NULL;
 	if(scaffolding){
 		printf("Checkpoint: Init Scaffold Correction\n");
-		aS = scaffold_init3(reads);
-		scaffold_printfreqs(reads,G);
-		aS = scaffold_init4(aS);
+
+//		aS = scaffold_init3(reads);
+////		scaffold_printfreqs(reads,G);
+//		aS = scaffold_init4(aS);
+		aS = scaffold_init2(aS);
 	}
 	else{
 		printf("Checkpoint: Init Contig Correction\n");
@@ -1733,7 +1737,7 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 	    		}
 
 	    		aS->scaff[i].scaffoldID = pog->contigNum;
-	    		printf("i: %i , scaffID: %i\n",i,aS->scaff[i].scaffoldID);
+	    		if(verbose) printf("i: %i , scaffID: %i\n",i,aS->scaff[i].scaffoldID);
 	    		if(aS->scaff[i].next>=0){
 	    			printf("Scaffold %i has a connection\n",pog->contigNum);
 	    			pog->contig[pog->contigNum].seqEdge = (struct sequenceEdge*)malloc(sizeof(struct sequenceEdge));

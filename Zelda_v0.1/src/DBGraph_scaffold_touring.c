@@ -37,7 +37,7 @@ inline static void hierholzer_scaffConnection(struct pathEdge* pathedge, int ID1
 	}
 }
 
-inline static void hierholzer_altPath(struct jPath** jPath, int* parents, int* goals, int new, char* flags){
+inline static void hierholzer_altPath(struct jPath** jPath, int* parents, int new, char* flags){
 	char verbose = 0;
 	char verbose2 = 0;
 	int i,j,k,l,m;
@@ -90,9 +90,8 @@ inline static void hierholzer_altPath(struct jPath** jPath, int* parents, int* g
 	}
 }
 
-inline static char hierholzer_uniqCircles(struct jPath** jPath, int* parents, int* goals, int new, char* flags){
-	int i,j,k,l,m;
-	struct pathEdge* pathedge;
+inline static char hierholzer_uniqCircles(int* parents, int new, char* flags){
+	int i,j,k,l;
 	for(i=1;i<new;i++){
 		l=i;
 		while(l+1<new && parents[l+1]==parents[i]){
@@ -109,7 +108,7 @@ inline static char hierholzer_uniqCircles(struct jPath** jPath, int* parents, in
 	return 1;
 }
 
-inline static void hierholzer_cleanCircle(struct jPath** jPath, int* parents, int* goals, int goals_i, int new, char* flags){
+inline static void hierholzer_cleanCircle(int* parents, int* goals, int goals_i, char* flags){
 	int i;
 	int parentPos;
 	for(i=0;i<goals_i;i++){
@@ -122,7 +121,7 @@ inline static void hierholzer_cleanCircle(struct jPath** jPath, int* parents, in
 	}
 }
 
-inline static void hierholzer_backtracking(struct jPath** jPath, int* parents, int* goals, int goals_i, int new, char* flags, struct reads* reads, int* circleID){
+inline static void hierholzer_backtracking(struct jPath** jPath, int* parents, int* goals, int goals_i, char* flags, struct reads* reads, int* circleID){
 	int i;
 	int parent;
 	struct j_anno* j_anno;
@@ -265,8 +264,8 @@ inline static void hierholzerTourPath(int i, char inDir , struct reads* reads){
 			printf("\n");
 		}
 		// 2. Tour: identify alternative parts in the circle and validate their possibility
-		hierholzer_cleanCircle(jPath,parents,goals,goal_i,new,flags);
-		hierholzer_altPath(jPath,parents,goals,new,flags);
+		hierholzer_cleanCircle(parents,goals,goal_i,flags);
+		hierholzer_altPath(jPath,parents,new,flags);
 		if(verbose){
 			printf("Circle Tree:\n");
 			for(j=1;j<new;j++){
@@ -281,8 +280,8 @@ inline static void hierholzerTourPath(int i, char inDir , struct reads* reads){
 			if(flags[goals[j]]) goalNum++;
 		}
 		// ToDo: Look if any circle is fully part of another one
-		if(hierholzer_uniqCircles(jPath,parents,goals,new,flags)){
-			hierholzer_backtracking(jPath,parents,goals,goal_i,new,flags,reads,&circleID);
+		if(hierholzer_uniqCircles(parents,new,flags)){
+			hierholzer_backtracking(jPath,parents,goals,goal_i,flags,reads,&circleID);
 			printf("Found %i unique circle paths (Circles: %i)\n",goalNum,circleID);
 			// Backtracking - Find correct circle
 		}
@@ -1097,12 +1096,8 @@ static inline void scaffold_uniqPath(char initRight, char casus, int i, int next
     			if(circleNum != nextpathNum){
     				printf("Test if one of the circles should be worked first\n");
     			}
-
-
     		}
-
     		printf("Next Path is ambiguous --> End Path\n");
-
     		break;
     	}
 
@@ -1121,7 +1116,7 @@ struct scaffold_set* scaffold_init3(struct reads* reads){
 
 	connectPathStats();
 
-    int i,j;
+    int i;
     struct scaffold_set* aS = (struct scaffold_set*)malloc(sizeof(struct scaffold_set));
     aS->num = 0;
     aS->nummax = 1000;
@@ -1130,10 +1125,8 @@ struct scaffold_set* scaffold_init3(struct reads* reads){
 //    char verbose = 0;
     char initRight = 0;
 
-
 //    struct pathEdge* edge; // = (struct pathEdge*)malloc(sizeof(struct pathEdge));
 	struct scaffEdge* scaffedge;
-	struct scaffEdge* scaffedgenew;
 
     prepPathsFlag();
 
@@ -1141,12 +1134,10 @@ struct scaffold_set* scaffold_init3(struct reads* reads){
     struct j_anno* j_annoR;
     struct j_anno* j_anno;
     struct jPath* jPath;
-    struct jPath* tempjPath;
 
     int jpos;
     int lastPath;
     int nextpathNum;
-    int difpathNum;
     char incomming = 0;
 
     int x = 10;
@@ -1238,14 +1229,6 @@ struct scaffold_set* scaffold_init3(struct reads* reads){
         x--;
     }
 
-
-    // ___________________
-
-
-
-
-    // __________________
-
     printf("Finished Scaffold:\n");
     int startJunction;
     for(int a=0;a<aS->num;a++){
@@ -1260,8 +1243,6 @@ struct scaffold_set* scaffold_init3(struct reads* reads){
 		}
 		printf("\n");
     }
-
-//    exit(1);
 
 	return aS;
 }

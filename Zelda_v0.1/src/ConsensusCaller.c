@@ -2770,8 +2770,16 @@ struct scaffold_set* scaffold_init4(struct scaffold_set* aS){
 	return aS;
 }
 
+static inline void prepPathsFlag2(){
+	int i;
+	for(i=1;i<pathsNum;i++){
+		paths[i].flag = 0;
+//		paths[i].flag = paths[i].freq + paths[i].circfreq;
+	}
+}
+
 struct scaffold_set* scaffold_init2(struct scaffold_set* aS){
-	prepPathsFlag();
+	prepPathsFlag2();
     int i,j;
     if(!aS){
     	aS = (struct scaffold_set*)malloc(sizeof(struct scaffold_set));

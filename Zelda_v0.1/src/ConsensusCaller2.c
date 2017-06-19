@@ -939,8 +939,10 @@ int unalignedReads = 0;
  * @param backbone	Is a boolean value if the read was proper, than it is set as new reference point for the area in the PO-graph for the next read alignment
  */
 char poa_heuristic_align2(struct Sequence* contig, struct reads* read, unsigned char* seq, char backbone, char heuristic, int overhang, int backoverhang){
+#ifdef TIMEM
 	static struct timespec alignmentSt;
 	static struct timespec alignmentEnd;
+#endif
 	static int seqlen = 0;
 	static int line = 0;
 

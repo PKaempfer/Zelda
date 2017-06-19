@@ -433,8 +433,8 @@ void POG_alignConsensus(struct POGseq* contig){
 		}
 		else{
 			current->vFlag = 1;
-			printf("Break at POS: %i\n",i);
-			printf("Search for alignment ring\n");
+			if(verbose) printf("Break at POS: %i\n",i);
+			if(verbose) printf("Search for alignment ring\n");
 //			bestRing = current;
 //			current = current->align_ring;
 //			while(current && current != bestRing){
