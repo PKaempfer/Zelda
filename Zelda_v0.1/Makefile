@@ -31,7 +31,7 @@ BINDIR = bin
 
 TODAY=`date +%Y-%m-%d`
 
-all: Zelda Blast
+all: Zelda
 
 %.o: src/%.c
 	$(CC) $(CFLAGS) -c $<
