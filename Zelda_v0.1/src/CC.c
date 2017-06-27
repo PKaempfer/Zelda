@@ -305,6 +305,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 
 	struct scaffEdge* scaffEdge;
     int startJunction;
+    uint64_t totalBases = 0;
 
     int dir;
     int bdir;
@@ -372,6 +373,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 		else ori = 0;
 		POG_initbackbone(contig,readseq);
 		push_pogread(aS->scaff[scaffID].startJunction,pogreads,reads[aS->scaff[scaffID].startJunction].len,ori);
+		totalBases += reads[aS->scaff[scaffID].startJunction].len;
 
 		// Insert Contained reads in first Junction
 		internb = G->read[aS->scaff[scaffID].startJunction]->first;
@@ -382,6 +384,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
     			if(multidir%2==1 && !G->read[internb->ID]->dir)	ori = 1;
     			if(multidir%2==0 && G->read[internb->ID]->dir)	ori = 1;
     			push_pogread(internb->ID, pogreads, reads[internb->ID].len,ori);
+    			totalBases += reads[internb->ID].len;
     			if(verbose) printf("ALINGING CONTAINED READ IN JUNCTION\n");
     			if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
     			if(verbose) printf("Read: %s\n",readseq);
@@ -406,6 +409,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 		}
 		POG_appendbackbone(contig,readseq,overhang);
 		push_pogread(breadID,pogreads,strlen(readseq),ori);
+		totalBases += strlen(readseq);
 
 		inserts++;
 		internb = bread;
@@ -431,6 +435,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 	        			if(multidir%2==0 && G->read[internb->ID]->dir)	ori = 1;
 	        			overhang = internb->overhang;
 	        			push_pogread(internb->ID, pogreads, reads[internb->ID].len,ori);
+	        			totalBases += reads[internb->ID].len;
 	        			if(verbose) printf("ALINGING CONTAINED READ IN JUNCTION\n");
 	        			if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 	        			if(verbose) decompressReadSt(reads[internb->ID].seq,readseq,reads[internb->ID].len);
@@ -459,6 +464,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 	        			}
 	        			POG_appendbackbone(contig,readseq,overhang);
 	        			push_pogread(breadID,pogreads,strlen(readseq),ori);
+	        			totalBases += strlen(readseq);
 
 						if(verbose) printf("ALINING PROPER READ\n");
 						if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
@@ -486,6 +492,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 	            			ori = 1;
 	        			}
 	        			push_pogread(internb->ID,pogreads,reads[internb->ID].len,ori);
+	        			totalBases += reads[internb->ID].len;
 	        			if(verbose2) printf("ALIGING CONTAINED READ\n");
 	        			if(verbose2) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 	        			if(verbose2) decompressReadSt(reads[internb->ID].seq,readseq,reads[internb->ID].len);
@@ -514,6 +521,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 	        			}
 	        			POG_appendbackbone(contig,readseq,overhang);
 	        			push_pogread(breadID,pogreads,strlen(readseq),ori);
+	        			totalBases += strlen(readseq);
 						if(verbose2) printf("ALIGING PROPER READ\n");
 						if(verbose2) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 	        			if(verbose2) printf("Read: %s\n",readseq);
@@ -525,6 +533,11 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 			}
 		}
 	}
+
+	aS->scaff[scaffID].true_Cov = (float)totalBases/(float)aS->scaff[scaffID].len;
+
+	printf("%i: True Coverage after the Backbone: %.2f\n",scaffID,aS->scaff[scaffID].true_Cov);
+	printf("Bases: %lu Length: %i\n",totalBases,aS->scaff[scaffID].len);
 
 	free(readseq);
 	free(revreadseq);
@@ -1713,7 +1726,7 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
     		printf("i: %i\n",i);
     		if(i>=aS->num) printf("\t\tGebridgetes Scaffold (%i)\n",i);
     		pogreadsset = OLC_backbone(&pog->contig[pog->contigNum],reads,G,aS,i);
-    		printf("Contig_%i:%i_%i_len:%i -> Estimated Coverage: %i (!! %i x!!)\n",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID,pog->contig[pog->contigNum].length,aS->scaff[i].estim_Cov,aS->scaff[i].testVar_delete);
+    		printf("Contig_%i:%i_%i_len:%i -> Coverage: %.2f (!! %i x!!)\n",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID,pog->contig[pog->contigNum].length,aS->scaff[i].true_Cov,aS->scaff[i].testVar_delete);
 			if(scaffolding) sprintf(name,"Scaff_%i:%i_%i_len:",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID);
 			else sprintf(name,"Contig_%i:%i_%i_len:",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID);
 			pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+100);

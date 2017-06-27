@@ -94,6 +94,7 @@ struct scaffold{
 	int ID;
 	int len;
 	uint32_t estim_Cov;			// Estimated Coverage
+	float true_Cov;				// True Coverage
 	uint32_t testVar_delete;
 	char type; 					// 0 -> Scaffold, 1 -> Singleton (unscaffolded contig)
 	int startJunction;

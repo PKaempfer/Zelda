@@ -1954,6 +1954,7 @@ struct scaffold_set* scaffold_init_old(){
 }
 
 void balancePaths(struct myovlList* G, struct reads* reads){
+	printf("CHECKPOINT: Balance Paths\n");
 	int outdegree;
 	int indegree;
 	int i;
@@ -2038,6 +2039,7 @@ void balancePaths(struct myovlList* G, struct reads* reads){
 			while(bread){
 				breadID = bread->ID;
 				if(G->read[breadID]->flag == PROPER){
+					printf("BreadID: %i\n",breadID);
 					pc_anno = (struct pc_anno*)reads[breadID].annotation;
 					pathID = pc_anno->pathID;
 				}
@@ -2124,6 +2126,7 @@ void balancePaths(struct myovlList* G, struct reads* reads){
 
 
 void contig_repeatFinder(){
+	printf("CHECKPOINT: Estimate Contig Repeats\n");
 	int i;
 	int inter;
 	pathsTotCov = pathsTotBase / pathsTotLen;
