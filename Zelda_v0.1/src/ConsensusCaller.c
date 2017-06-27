@@ -1616,7 +1616,7 @@ int findLeftMostJunction(int i){
 
 struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 	char verbose = 1;
-	char verbose2 = 0;
+	char verbose2 = 1;
     int gesLen = 0;													// Sum over all scaffold length
 	int *nStat = (int*)malloc(sizeof(int)*aS->num);				// List of Scaffold length
 
@@ -1699,6 +1699,7 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 				aS->scaff[i].len = len - scaffEdge->len;
 //				aS->scaff[i].next = &aS->scaff[aS->numbridge];
 				aS->scaff[i].next = aS->numbridge;
+				printf("Set Next Bridge: from %i to %i\n",i,aS->numbridge);
 				oldscaffEdge->next = NULL;
 				if(verbose2) printf(" ..(%i)..> "KYEL"%i"KNRM,scaffEdge->bridge->estLen,bridgeJunction);
 				if(verbose2) printf(" -> "KGRN"%i"KNRM,scaffEdge->ID);
@@ -1726,6 +1727,12 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 		}
 		if(verbose2) printf("\n");
 	}
+
+	printf("Backtest\n");
+	for(i=0;i<aS->numbridge;i++){
+		if(aS->scaff[i].next>=0) printf("Set Next Bridge: from %i to %i\n",i,aS->scaff[i].next);
+	}
+
 
 	printf("\n");
 	printf("Largest Scaffold: %i bp\n",nStat[0]);
@@ -2455,7 +2462,349 @@ struct scaffold_set* scaffold_init4(struct scaffold_set* aS){
     struct contigScaff* right = (struct contigScaff*)malloc(sizeof(struct contigScaff)*rmaxelem);
     struct pathEdge* edge; // = (struct pathEdge*)malloc(sizeof(struct pathEdge));
 
-    for(j=0;j<2;j++){
+    for(j=0;j<5;j++){
+        for(i=1;i<pathsNum;i++){
+        	if(paths[i].flag){
+        		if(j || ((paths[i].scaffflag & 32) && (paths[i].scaffflag & 2))){
+        			continue;
+        		}
+        		if(verbose)
+        			printf("\t NEW SCAFFOLD --> Startpath: %i (Freq: %i)\n",i,paths[i].flag);
+        		paths[i].flag--;
+        		// initial left
+        		lpos = 0;
+        		rpos = 0;
+        		lelem = 0;
+        		relem = 0;
+        		edge = paths[i].leftPath;
+        		while(edge && paths[edge->ID].flag && !edge->sibl){
+        			if(verbose)
+        				printf("(%i) Set left %i\n",i,edge->ID);
+        			left[lelem].ID = edge->ID;
+        			if(edge->targetJunction == paths[edge->ID].leftJunction) left[lelem].sameside = 1;
+        			else left[lelem].sameside = 0;
+        			if(edge->junctionCon>=0){
+        				printf("\t--> is bridge\n");
+        				left[lelem].bridge = edge;
+        			}
+        			else left[lelem].bridge = NULL;
+        			lelem++;
+        			if(lelem == lmaxelem){
+        				lmaxelem *= 2;
+        				left = (struct contigScaff*)realloc(left,sizeof(struct contigScaff)*lmaxelem);
+        				if(!left){
+        					printf("Error in realloc lmaxelem in scaffold_init\n");
+        					exit(1);
+        				}
+        			}
+//        			paths[edge->ID].flag--;
+        			edge = edge->next;
+        		}
+        		// initial right
+        		edge = paths[i].rightPath;
+        		while(edge && paths[edge->ID].flag && !edge->sibl){
+        			if(verbose)
+        				printf("(%i) Set right %i\n",i,edge->ID);
+        			right[relem].ID = edge->ID;
+        			if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
+        			else right[relem].sameside = 0;
+        			if(edge->junctionCon>=0){
+        				printf("\t--> is bridge\n");
+        				right[relem].bridge = edge;
+        			}
+        			else right[relem].bridge = NULL;
+        			relem++;
+        			if(relem == rmaxelem){
+        				rmaxelem *= 2;
+        				right = (struct contigScaff*)realloc(right,sizeof(struct contigScaff)*rmaxelem);
+        				if(!right){
+        					printf("Error in realloc rmaxelem in scaffold_init\n");
+        					exit(1);
+        				}
+        			}
+//        			paths[edge->ID].flag--;
+        			edge = edge->next;
+        		}
+        		stopit = 0;
+        		while((lpos<lelem || rpos<relem) && !stopit){
+        			if(verbose) printf("Something was set, go deeper\n");
+        			// left
+        			while(lpos<lelem){
+        				if(!paths[left[lpos].ID].flag){
+        					stopit = 1;
+        					break;
+        				}
+        				current = left[lpos].ID;
+        				paths[current].flag--;
+        				// left -> left
+        				if(left[lpos].sameside) edge = paths[current].leftPath;
+        				else edge = paths[current].rightPath;
+        				while(edge && paths[edge->ID].flag && !edge->sibl){
+        					if(edge->depth + lpos == lelem){
+        						if(verbose) printf("(%i) (lpos: %i) Set left left %i (target: %i)\n",i,lpos,edge->ID,edge->targetJunction);
+        						left[lelem].ID = edge->ID;
+        		    			if(edge->targetJunction == paths[edge->ID].leftJunction) left[lelem].sameside = 1;
+        		    			else left[lelem].sameside = 0;
+        		    			if(edge->junctionCon>=0) left[lelem].bridge = edge;
+        		    			else left[lelem].bridge = NULL;
+        		    			lelem++;
+        		    			if(lelem == lmaxelem){
+        		    				lmaxelem *= 2;
+        		    				left = (struct contigScaff*)realloc(left,sizeof(struct contigScaff)*lmaxelem);
+        		    				if(!left){
+        		    					printf("Error in realloc lmaxelem in scaffold_init\n");
+        		    					exit(1);
+        		    				}
+        		    			}
+//        		    			paths[edge->ID].flag--;
+        					}
+        					edge = edge->next;
+        				}
+        				// left -> right
+        				if(left[lpos].sameside) edge = paths[current].rightPath;
+        				else edge = paths[current].leftPath;
+        				while(edge && paths[edge->ID].flag && !edge->sibl){
+        					if(edge->depth == lpos + relem +2){
+        						if(verbose) printf("(%i) (lpos: %i) Set left right %i",i,lpos,edge->ID);
+        						right[relem].ID = edge->ID;
+        		    			if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
+        		    			else right[relem].sameside = 0;
+        		    			if(edge->junctionCon>=0) right[relem].bridge = edge;
+        		    			else right[relem].bridge = NULL;
+        		    			relem++;
+        		    			if(relem == rmaxelem){
+        		    				rmaxelem *= 2;
+        		    				right = (struct contigScaff*)realloc(right,sizeof(struct contigScaff)*rmaxelem);
+        		    				if(!right){
+        		    					printf("Error in realloc rmaxelem in scaffold_init\n");
+        		    					exit(1);
+        		    				}
+        		    			}
+//        		    			paths[edge->ID].flag--;
+        					}
+        					edge = edge->next;
+        				}
+        				lpos++;
+        			}
+        			// right
+        			while(rpos < relem){
+        				if(!paths[right[rpos].ID].flag){
+        					stopit = 1;
+        					break;
+        				}
+        				current = right[rpos].ID;
+        				paths[current].flag--;
+        				// right -> right
+        				if(right[rpos].sameside) edge = paths[current].rightPath;
+        				else edge = paths[current].leftPath;
+        				while(edge && paths[edge->ID].flag && !edge->sibl){
+        					if(edge->depth + rpos == relem){
+        						right[relem].ID = edge->ID;
+        						if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
+        						else right[relem].sameside = 0;
+        		    			if(edge->junctionCon>=0) right[relem].bridge = edge;
+        		    			else right[relem].bridge = NULL;
+        						relem++;
+        		    			if(relem == rmaxelem){
+        		    				rmaxelem *= 2;
+        		    				right = (struct contigScaff*)realloc(right,sizeof(struct contigScaff)*rmaxelem);
+        		    				if(!right){
+        		    					printf("Error in realloc rmaxelem in scaffold_init\n");
+        		    					exit(1);
+        		    				}
+        		    			}
+//        		    			paths[edge->ID].flag--;
+        					}
+        					edge = edge->next;
+        				}
+        				// right -> left
+        				if(right[rpos].sameside) edge = paths[current].leftPath;
+        				else edge = paths[current].rightPath;
+        				while(edge && paths[edge->ID].flag && !edge->sibl){
+        					if(edge->depth == rpos + lelem +2){
+        						left[lelem].ID = edge->ID;
+        						if(edge->targetJunction == paths[edge->ID].leftJunction) left[lelem].sameside = 1;
+        						else left[lelem].sameside = 0;
+        		    			if(edge->junctionCon>=0) left[lelem].bridge = edge;
+        		    			else left[lelem].bridge = NULL;
+        						lelem++;
+        		    			if(lelem == lmaxelem){
+        		    				lmaxelem *= 2;
+        		    				left = (struct contigScaff*)realloc(left,sizeof(struct contigScaff)*lmaxelem);
+        		    				if(!left){
+        		    					printf("Error in realloc lmaxelem in scaffold_init\n");
+        		    					exit(1);
+        		    				}
+        		    			}
+//        		    			paths[edge->ID].flag--;
+        					}
+        					edge = edge->next;
+        				}
+        				rpos++;
+        			}
+        		}
+            	if(verbose){
+            		int a = lpos-1;
+            		printf("Scaffold Nodes (%i):\n",i);
+            		while(a>-1){
+            			printf("%i (%i) ",left[a].ID,left[a].sameside);
+            			a--;
+            		}
+            		printf("<- %i -> ",i);
+            		a = 0;
+            		while(a<rpos){
+            			printf("%i (%i) ",right[a].ID,right[a].sameside);
+            			a++;
+            		}
+            		printf("\n");
+            	}
+            	// save results in aS
+            	depth = 0;
+            	len = 0;
+            	int ID;
+            	struct scaffEdge* scaffedge;
+            	struct scaffEdge* scaffedgenew;
+            	aS->scaff[aS->num].ID = aS->num;
+        		aS->scaff[aS->num].type = 1;
+        		struct pathEdge* pathedge;
+            	if(lpos){
+        			aS->scaff[aS->num].type = 0;
+            		lpos--;
+            		scaffedge = (struct scaffEdge*)malloc(sizeof(struct scaffEdge));
+            		ID = left[lpos].ID;
+            		len += paths[ID].len;
+            		scaffedge->ID = ID;
+            		scaffedge->depth = depth;
+            		scaffedge->len = len;
+            		scaffedge->next = NULL;
+            		scaffedge->bridge = NULL;
+            		pathedge = left[lpos].bridge;
+            		if(left[lpos].sameside){
+            			aS->scaff[aS->num].startJunction = paths[ID].leftJunction;
+            			aS->scaff[aS->num].endJunction = paths[ID].rightJunction;
+            			scaffedge->targetJunction = paths[ID].rightJunction;
+            		}
+            		else{
+            			aS->scaff[aS->num].startJunction = paths[ID].rightJunction;
+            			aS->scaff[aS->num].endJunction = paths[ID].leftJunction;
+            			scaffedge->targetJunction = paths[ID].leftJunction;
+            		}
+            		depth ++;
+            		aS->scaff[aS->num].first = scaffedge;
+            		while(lpos){
+            			lpos--;
+            			scaffedgenew = (struct scaffEdge*)malloc(sizeof(struct scaffEdge));
+            			ID = left[lpos].ID;
+            			scaffedgenew->ID = ID;
+            			scaffedgenew->len = paths[ID].len;
+            			scaffedgenew->depth = depth;
+            			scaffedgenew->next = NULL;
+            			scaffedgenew->bridge = pathedge;
+            			pathedge = left[lpos].bridge;
+            			if(left[lpos].sameside) scaffedgenew->targetJunction = paths[ID].rightJunction;
+            			else scaffedgenew->targetJunction = paths[ID].leftJunction;
+            			depth ++;
+            			len += scaffedgenew->len;
+            			scaffedge->next = scaffedgenew;
+            			scaffedge = scaffedge->next;
+            		}
+            		scaffedgenew = (struct scaffEdge*)malloc(sizeof(struct scaffEdge));
+            		scaffedgenew->ID = i;
+            		scaffedgenew->next = NULL;
+            		scaffedgenew->depth = depth;
+            		scaffedgenew->targetJunction = paths[i].rightJunction;
+            		scaffedgenew->len = paths[i].len;
+            		scaffedgenew->bridge = pathedge;
+            		scaffedge->next = scaffedgenew;
+            		scaffedge = scaffedgenew;
+            		len += paths[i].len;
+            		depth++;
+               	}
+            	else{
+            		len += paths[i].len;
+            		scaffedge = (struct scaffEdge*)malloc(sizeof(struct scaffEdge));
+            		scaffedge->ID = i;
+            		scaffedge->next = NULL;
+            		scaffedge->depth = depth;
+            		scaffedge->targetJunction = paths[i].rightJunction;
+            		scaffedge->len = paths[i].len;
+            		scaffedge->bridge = NULL;
+    //        		aS->scaff[aS->num].type = 1;
+            		aS->scaff[aS->num].endJunction = paths[i].rightJunction;
+            		aS->scaff[aS->num].startJunction = paths[i].leftJunction;
+            		aS->scaff[aS->num].first = scaffedge;
+            		depth++;
+            	}
+            	rpos = 0;
+            	while(rpos < relem){
+        			aS->scaff[aS->num].type = 0;
+            		scaffedgenew = (struct scaffEdge*)malloc(sizeof(struct scaffEdge));
+            		ID = right[rpos].ID;
+            		scaffedgenew->ID = ID;
+            		scaffedgenew->next = NULL;
+            		scaffedgenew->depth = depth;
+            		scaffedgenew->len = paths[ID].len;
+            		// ____________________
+            		if(right[rpos].bridge) scaffedgenew->bridge = right[rpos].bridge;
+            		else scaffedgenew->bridge = NULL;
+            		// ____________________
+            		if(right[rpos].sameside) scaffedgenew->targetJunction = paths[ID].rightJunction;
+            		else scaffedgenew->targetJunction = paths[ID].leftJunction;
+            		scaffedge->next = scaffedgenew;
+            		scaffedge = scaffedgenew;
+            		len += paths[ID].len;
+            		depth++;
+            		rpos++;
+            	}
+            	aS->scaff[aS->num].len = len;
+            	aS->num++;
+            	if(aS->num == aS->nummax){
+            		aS->nummax *= 2;
+            		aS->scaff = (struct scaffold*)realloc(aS->scaff,sizeof(struct scaffold)*aS->nummax);
+            		if(!aS->scaff){
+            			printf("No realloc of struct scaffold possible\n Abort\n");
+            			exit(1);
+            		}
+            	}
+
+        	}
+        	// Rest singletons
+        }
+    }
+
+    free(left);
+    free(right);
+	return aS;
+}
+
+struct scaffold_set* scaffold_init5(struct scaffold_set* aS){
+	prepPathsFlag();
+    int i,j;
+    if(!aS){
+    	aS = (struct scaffold_set*)malloc(sizeof(struct scaffold_set));
+        aS->num = 0;
+        aS->nummax = 1000;
+        aS->scaff = (struct scaffold*)malloc(sizeof(struct scaffold)*aS->nummax);
+    }
+
+    char verbose = 1;
+    char stopit;
+
+    int depth = 0;
+    int len = 0;
+
+    int lpos = 0;
+    int rpos = 0;
+    int lelem = 0;
+    int relem = 0;
+    int lmaxelem = 1000;
+    int rmaxelem = 1000;
+    int current;
+    struct contigScaff* left = (struct contigScaff*)malloc(sizeof(struct contigScaff)*lmaxelem);
+    struct contigScaff* right = (struct contigScaff*)malloc(sizeof(struct contigScaff)*rmaxelem);
+    struct pathEdge* edge; // = (struct pathEdge*)malloc(sizeof(struct pathEdge));
+
+    for(j=0;j<4;j++){
         for(i=1;i<pathsNum;i++){
         	if(paths[i].flag){
         		if(j || ((paths[i].scaffflag & 32) && (paths[i].scaffflag & 2))){
@@ -2769,6 +3118,7 @@ struct scaffold_set* scaffold_init4(struct scaffold_set* aS){
     free(right);
 	return aS;
 }
+
 
 static inline void prepPathsFlag2(){
 	int i;

@@ -1651,9 +1651,9 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 		printf("Checkpoint: Init Scaffold Correction\n");
 
 //		aS = scaffold_init3(reads);
-////		scaffold_printfreqs(reads,G);
-//		aS = scaffold_init4(aS);
-		aS = scaffold_init2(aS);
+//		scaffold_printfreqs(reads,G);
+		aS = scaffold_init4(aS);
+//		aS = scaffold_init2(aS);
 	}
 	else{
 		printf("Checkpoint: Init Contig Correction\n");
@@ -1703,8 +1703,14 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
     struct POGreadsSet* pogreadsset;
     char dotverbose;
 
+	printf("Backtest2\n");
+	for(i=0;i<aS->numbridge;i++){
+		if(aS->scaff[i].next>=0) printf("Set Next Bridge: from %i to %i\n",i,aS->scaff[i].next);
+	}
+
     for(i=0;i<aS->numbridge;i++){
     	if(aS->scaff[i].len > MIN_SCAFF_LEN || i >= aS->num){
+    		printf("i: %i\n",i);
     		if(i>=aS->num) printf("\t\tGebridgetes Scaffold (%i)\n",i);
     		pogreadsset = OLC_backbone(&pog->contig[pog->contigNum],reads,G,aS,i);
     		printf("Contig_%i:%i_%i_len:%i -> Estimated Coverage: %i (!! %i x!!)\n",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID,pog->contig[pog->contigNum].length,aS->scaff[i].estim_Cov,aS->scaff[i].testVar_delete);
@@ -1745,7 +1751,10 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 	    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[aS->scaff[i].next].first->bridge->estLen;
 	    			pog->contig[pog->contigNum].seqEdge->ori = 0;
 	    		}
-	    		else pog->contig[pog->contigNum].seqEdge = NULL;
+	    		else{
+	    			printf("No Bridging Connection: from %i %i\n",i,aS->scaff[i].next);
+	    			pog->contig[pog->contigNum].seqEdge = NULL;
+	    		}
 	    		if(i >= aS->num) pog->contig[pog->contigNum].vflag = 1;
 	    		else pog->contig[pog->contigNum].vflag = 0;
 	    		pog->contigNum++;
@@ -1764,6 +1773,20 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
     		printf("Consensus time: %.3f s\n",(float)consensusTime/1000000000);
 
 #endif
+    	}
+    	else{
+    		if(aS->scaff[i].next>=0){
+    			printf("%i Part to short, replace beginning by end\n",i);
+    			printf("%i -> NextID: %i\n",aS->scaff[i].next,aS->scaff[aS->scaff[i].next].ID);
+    			printf("Before Memcpy: StJunction: %i -> New: %i \n",aS->scaff[i].startJunction,aS->scaff[aS->scaff[i].next].startJunction);
+    			j = aS->scaff[i].next;
+    			memcpy(&aS->scaff[i],&aS->scaff[aS->scaff[i].next],sizeof(struct scaffold));
+    			printf("After Memcpy: StJunction: %i",aS->scaff[i].startJunction);
+    			aS->scaff[j].len = 0;
+//    			aS->scaff[i] = aS->scaff[aS->scaff[i].next];
+    			i--;
+    			continue;
+    		}
     	}
 		if(pog->contigNum == pog->maxNum){
 			printf("ContigList full, Realloc memory\n");

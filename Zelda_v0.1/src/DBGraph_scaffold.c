@@ -351,16 +351,18 @@ void free_schaffoldSet(struct scaffold_set* aS){
 	struct scaffEdge* edge;
     for(int i = 0; i < aS->numbridge; i++){
     	if(verbose) printf("Loop: %i (%i)\n",i,aS->numbridge);
-    	while(aS->scaff[i].first){
-    		if(verbose) printf("-> Free First: \n");
-    		edge = aS->scaff[i].first->next;
-    		if(verbose) printf("\t -> take edge: \n");
-    		if(aS->scaff[i].first->bridge) free(aS->scaff[i].first->bridge);
-    		if(verbose) printf("\t -> free bridge: \n");
-    		free(aS->scaff[i].first);
-    		if(verbose) printf("\t -> free first: \n");
-    		aS->scaff[i].first = edge;
-    		if(verbose) printf("  -> Go Next: \n");
+    	if(aS->scaff[i].len){
+        	while(aS->scaff[i].first){
+        		if(verbose) printf("-> Free First: \n");
+        		edge = aS->scaff[i].first->next;
+        		if(verbose) printf("\t -> take edge: \n");
+        		if(aS->scaff[i].first->bridge) free(aS->scaff[i].first->bridge);
+        		if(verbose) printf("\t -> free bridge: \n");
+        		free(aS->scaff[i].first);
+        		if(verbose) printf("\t -> free first: \n");
+        		aS->scaff[i].first = edge;
+        		if(verbose) printf("  -> Go Next: \n");
+        	}
     	}
     }
     if(verbose) printf("FREE STRUCT\n");
@@ -2333,7 +2335,7 @@ void readTouring(struct myovlList* G, struct readFiles* files, struct reads* rea
 	printf("\n");
 
 	annotatePaths();
-	connectPathStats();
+	if(verbose) connectPathStats();
 
 }
 

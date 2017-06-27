@@ -2,7 +2,7 @@
 #CC = gcc  
 CC = clang-3.5
 #CFLAGS = -Wall -Wextra -I../include -I./Jellyfish-2.2.4/include -I. -I../uthash/uthash-master/src -I/usr/local/include -mcpu=power8 -mcx16
-CFLAGS = -D_POSIX_C_SOURCE=199309L -std=c99 -I./include -I/usr/include  #-mcpu=power8 -mcx16 
+CFLAGS = -D_POSIX_C_SOURCE=199309L -std=c99 -I./include -I/usr/include  #-mcpu=power8 -mcx16 -D_POSIX_C_SOURCE=199309L 
 CFLAGS += -Wall -Wextra  -Wno-unused-result -Wno-strict-aliasing -Wno-sign-compare #-Wno-unused-but-set-variable
 #CFLAGS += -Wno-unused-parameter 
 #CFLAGS += -Wno-unused-but-set-parameter 
@@ -31,7 +31,7 @@ BINDIR = bin
 
 TODAY=`date +%Y-%m-%d`
 
-all: Zelda
+all: Zelda Blast
 
 %.o: src/%.c
 	$(CC) $(CFLAGS) -c $<
@@ -39,6 +39,8 @@ Zelda: Zelda.o $(BINDIR)
 	$(CC) $(CFLAGS) src/Zelda.o $(OBJECTS) -o $(BINDIR)/Zelda $(LINKFLAGS) -v
 Zelda.o: $(OBJECTS)
 	$(CC) $(CFLAGS) -c src/Zelda.c -o src/Zelda.o
+Blast:
+	$(CC) $(CFLAGS) -o $(BINDIR)/BlastValidator src/BlastValidator.c $(LINKFLAGS) -v
 $(BINDIR):
 	if [ ! -d "./$(BINDIR)" ]; then\
 		mkdir $(BINDIR);\
