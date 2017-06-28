@@ -58,8 +58,11 @@ void initAnnotation(struct myovlList* G, struct reads* reads){
 			reads[i].annotation = (void*)j_anno;
 		}
 		else if(G->read[i]){
-			if(i==22673596) printf("Init annotation pc: %i\n",i);
-			printf("Flag: %i\n",G->read[i] && G->read[i]->flag);
+			if(i==22673596){
+				printf("Init annotation pc: %i\n",i);
+				printf("Flag: %i\n",G->read[i] && G->read[i]->flag);
+			}
+
 			pc_anno = (struct pc_anno*)malloc(sizeof(struct pc_anno));
 			pc_anno->pathID = 0;
 			pc_anno->lJunctionDist = 0;

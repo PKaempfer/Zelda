@@ -2043,7 +2043,6 @@ void balancePaths(struct myovlList* G, struct reads* reads){
 					printf("Init annotation pc: %i\n",i);
 					pc_anno = (struct pc_anno*)reads[breadID].annotation;
 					if(!pc_anno){
-
 						printf("Annotation is NULL\n");
 					}
 					pathID = pc_anno->pathID;
