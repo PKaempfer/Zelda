@@ -2049,6 +2049,7 @@ void balancePaths(struct myovlList* G, struct reads* reads){
 					if(!pc_anno){
 						printf("Annotation is NULL\n");
 					}
+					printf("PathID: %i\n",pc_anno->pathID);
 					pathID = pc_anno->pathID;
 				}
 				else{

@@ -25,7 +25,7 @@ struct path* paths = NULL;
 /** Number of all paths*/
 int pathsNum = 1;
 /** Threshold for path list reallocation */
-int maxPathNum = 100;
+int maxPathNum = 100000;
 /** Number of components in String Graph*/
 int componentNum;
 /** Total bp of the reads used for contig construction*/

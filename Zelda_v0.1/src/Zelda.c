@@ -195,6 +195,8 @@ int main(int argc, char* argv[]) {
 	struct reads* reads = readDB(para->readDB);
 	time(&start);
 	initScaff(G,reads);
+	struct pc_anno* pc_anno = (struct pc_anno*)reads[22673596].annotation;
+	printf("pc_anno of 22673596 pathID: %i\n",pc_anno->pathID);
 	readTouring(G,para->files,reads);
 	time(&stop);
 	printf("Scaffolding: %0.2f\n",difftime (stop,start));
