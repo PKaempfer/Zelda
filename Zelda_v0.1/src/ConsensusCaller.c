@@ -2053,7 +2053,7 @@ void balancePaths(struct myovlList* G, struct reads* reads){
 					pathID = pc_anno->pathID;
 					printf("DONE\n");
 				}
-				else{
+				else if(G->read[breadID]->flag == JUNCTION){
 					printf("Dest:\n");
 					printf("PathID: %i\n",bread->dest->pathID);
 					pathID = bread->dest->pathID;
@@ -2074,7 +2074,7 @@ void balancePaths(struct myovlList* G, struct reads* reads){
 					pc_anno = (struct pc_anno*)reads[breadID].annotation;
 					pathID = pc_anno->pathID;
 				}
-				else{
+				else if(G->read[breadID]->flag == JUNCTION){
 					pathID = bread->dest->pathID;
 				}
 				if(pathID == i) break;

@@ -30,6 +30,7 @@
 #include "CC.h"
 #include "read_filter.h"
 
+
 int main(int argc, char* argv[]) {
 
 	char scaffolding = 1;
