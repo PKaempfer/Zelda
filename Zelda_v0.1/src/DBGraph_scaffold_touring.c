@@ -1255,7 +1255,7 @@ void scaffold_printfreqs(struct reads* reads, struct myovlList* G){
 	struct jPath* jPath;
 	int freq,circfreq;
 
-    for(i=1; i < G->V; i++){
+    for(i=1; i <= G->V; i++){
     	if(G->read[i] && G->read[i]->flag == JUNCTION){
     		j_anno = (struct j_anno*)reads[i].annotation;
     		printf("Junction: %i (InDegree: %i / OutDegree: %i)\n",i,j_anno->inDegree,j_anno->outDegree);

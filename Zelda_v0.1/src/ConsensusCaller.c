@@ -120,7 +120,7 @@ void buildBackBone3(struct myovlList* G, struct reads* reads){
     int nextoverhang = 0;
     int multidir;
 
-    for(i=1; i < G->V; i++){
+    for(i=1; i <= G->V; i++){
     	printf("i %i\n",i);
     	if(G->read[i] && G->read[i]->flag == JUNCTION){
     		printf("JUNCTION found\n");
@@ -218,7 +218,7 @@ struct contigList* realBackbone(struct myovlList* G, struct reads* reads){
     cList->maxnum = 100;
     cList->contig = (struct contig*)malloc(sizeof(struct contig)*cList->maxnum);
 
-    for(i=1; i < G->V; i++){
+    for(i=1; i <= G->V; i++){
     	if(G->read[i] && G->read[i]->flag == JUNCTION){
     		printf("JUNCTION found\n");
 			dir=G->read[i]->dir;
@@ -334,7 +334,7 @@ struct contigList* realBackbone2(struct myovlList* G, struct reads* reads){
     cList->maxnum = 100;
     cList->contig = (struct contig*)malloc(sizeof(struct contig)*cList->maxnum);
 
-    for(i=1; i < G->V; i++){
+    for(i=1; i <= G->V; i++){
     	if(G->read[i] && G->read[i]->flag == JUNCTION){
     		printf("JUNCTION found\n");
 			dir=G->read[i]->dir;
@@ -1471,7 +1471,7 @@ int findLeftMostJunction(int i){
 //    int inserts = 0;
 //    struct bread* counterbread;
 //
-//    for(i=1; i < G->V; i++){
+//    for(i=1; i <= G->V; i++){
 //    	if(G->read[i] && G->read[i]->flag == JUNCTION){
 ////    		printf("JUNCTION found\n");
 //			dir=G->read[i]->dir;
@@ -1966,7 +1966,7 @@ void balancePaths(struct myovlList* G, struct reads* reads){
 	struct pc_anno* pc_anno;
 	struct jPath* edge;
 
-	for(i=1;i<=G->V;i++){
+	for(i=1; i <= G->V; i++){
 		if(G->read[i] && G->read[i]->flag == JUNCTION){
 			j_anno = (struct j_anno*)reads[i].annotation;
 			j_anno->vFlag = 0;

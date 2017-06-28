@@ -267,7 +267,7 @@ void initScaff(struct myovlList* G, struct reads* reads){
     struct j_anno* j_anno;
 //    paths = (struct path*)malloc(sizeof(struct path)*maxPathNum);
 
-    for(i=1; i < G->V; i++){
+    for(i=1; i <= G->V; i++){
     	if(G->read[i] && G->read[i]->flag == JUNCTION){
     		j_anno = (struct j_anno*)reads[i].annotation;
     		if(!j_anno->vFlag){
@@ -282,7 +282,7 @@ void initScaff(struct myovlList* G, struct reads* reads){
 
     struct bread* bread;
 
-    for(i=1; i < G->V; i++){
+    for(i=1; i <= G->V; i++){
     	if(G->read[i] && G->read[i]->flag == JUNCTION){
     		bread = G->read[i]->first;
     		while(bread){
@@ -331,7 +331,7 @@ struct scaffold_set* contigs_init(struct myovlList* G){ //, struct reads* reads
     struct bread* bread;
 
     // Reset flag to 0
-    for(i=1; i < G->V; i++){
+    for(i=1; i <= G->V; i++){
     	if(G->read[i] && G->read[i]->flag == JUNCTION){
     		bread = G->read[i]->first;
     		while(bread){
@@ -629,7 +629,7 @@ void scaffGraphDot(struct myovlList* G, struct reads* reads, char* dotfile){
 	fprintf(dot,"}");
 	fclose(dot);
 
-    for(i=1; i < G->V; i++){
+    for(i=1; i <= G->V; i++){
     	if(G->read[i] && G->read[i]->flag == JUNCTION){
     		bread = G->read[i]->first;
     		while(bread){
