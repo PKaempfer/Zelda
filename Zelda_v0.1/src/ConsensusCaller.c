@@ -2051,8 +2051,11 @@ void balancePaths(struct myovlList* G, struct reads* reads){
 					}
 					printf("PathID: %i\n",pc_anno->pathID);
 					pathID = pc_anno->pathID;
+					printf("DONE\n");
 				}
 				else{
+					printf("Dest:\n");
+					printf("PathID: %i\n",bread->dest->pathID);
 					pathID = bread->dest->pathID;
 				}
 				if(pathID == i) break;
