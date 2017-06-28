@@ -58,7 +58,8 @@ void initAnnotation(struct myovlList* G, struct reads* reads){
 			reads[i].annotation = (void*)j_anno;
 		}
 		else if(G->read[i]){
-//			printf("Init annotation pc: %i\n",i);
+			if(i==22673596) printf("Init annotation pc: %i\n",i);
+			printf("Flag: %i\n",G->read[i] && G->read[i]->flag);
 			pc_anno = (struct pc_anno*)malloc(sizeof(struct pc_anno));
 			pc_anno->pathID = 0;
 			pc_anno->lJunctionDist = 0;
@@ -2016,6 +2017,7 @@ void readTouring(struct myovlList* G, struct readFiles* files, struct reads* rea
 			for(j=startID;j<=endID;j+=2){
 //				if(j%10000==0 || j+1%10000==0)
 					if(debug) printf("ReadPair: %i, %i\n",j,j+1);
+					if(j == 22673596 || j+1 == 22673596)printf("ReadPair: %i, %i\n",j,j+1);
 				reads[j].flag = CONCORDANT;
 				reads[j+1].flag = CONCORDANT;
 				if(!G->read[j]){

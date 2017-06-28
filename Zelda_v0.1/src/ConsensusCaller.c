@@ -2040,7 +2040,12 @@ void balancePaths(struct myovlList* G, struct reads* reads){
 				breadID = bread->ID;
 				if(G->read[breadID]->flag == PROPER){
 					printf("BreadID: %i\n",breadID);
+					printf("Init annotation pc: %i\n",i);
 					pc_anno = (struct pc_anno*)reads[breadID].annotation;
+					if(!pc_anno){
+
+						printf("Annotation is NULL\n");
+					}
 					pathID = pc_anno->pathID;
 				}
 				else{
