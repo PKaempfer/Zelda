@@ -330,11 +330,10 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 	if(aS->scaff[scaffID].type == 1){
 		finJunction = aS->scaff[scaffID].endJunction;
 		while(bread){
-			if(verbose && bread->dest) printf("destID: %i == endJunction: %i\n",bread->dest->ID, aS->scaff[scaffID].endJunction);
+			if(verbose2 && bread->dest) printf("destID: %i == endJunction: %i\n",bread->dest->ID, aS->scaff[scaffID].endJunction);
 			if(bread->dest && bread->dest->ID == aS->scaff[scaffID].endJunction) break;
 			else bread = bread->next;
 		}
-
 	}
 	else{
 		while(scaffEdge){
@@ -344,7 +343,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 		}
 		scaffEdge = aS->scaff[scaffID].first;
 		while(bread){
-			if(verbose) printf("destPathID: %i == scaffEdgeID: %i\n",bread->dest->pathID, scaffEdge->ID);
+			if(verbose2) printf("destPathID: %i == scaffEdgeID: %i\n",bread->dest->pathID, scaffEdge->ID);
 			if(bread->dest && bread->dest->pathID == scaffEdge->ID) break;
 			bread = bread->next;
 		}
@@ -428,7 +427,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 				// Insert Contained reads of the intermediate Junction
 				internb = G->read[breadID]->first;
 				while(internb){
-					if(G->read[internb->ID]->flag != CONTAINED && verbose) printf("Found bread: %i (FLAG: %i) dest: %i (scaffedgeID: %i)\n",internb->ID,G->read[internb->ID]->flag,internb->dest->pathID,scaffEdge->ID);
+					if(G->read[internb->ID]->flag != CONTAINED && verbose2) printf("Found bread: %i (FLAG: %i) dest: %i (scaffedgeID: %i)\n",internb->ID,G->read[internb->ID]->flag,internb->dest->pathID,scaffEdge->ID);
 					if(G->read[internb->ID]->flag == CONTAINED){
 	        			ori = 0;
 	        			if(multidir%2==1 && !G->read[internb->ID]->dir)	ori = 1;
@@ -436,10 +435,10 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 	        			overhang = internb->overhang;
 	        			push_pogread(internb->ID, pogreads, reads[internb->ID].len,ori);
 	        			totalBases += reads[internb->ID].len;
-	        			if(verbose) printf("ALINGING CONTAINED READ IN JUNCTION\n");
-	        			if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
-	        			if(verbose) decompressReadSt(reads[internb->ID].seq,readseq,reads[internb->ID].len);
-	        			if(verbose) printf("Read: %s\n",readseq);
+	        			if(verbose2) printf("ALINGING CONTAINED READ IN JUNCTION\n");
+	        			if(verbose2) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
+	        			if(verbose2) decompressReadSt(reads[internb->ID].seq,readseq,reads[internb->ID].len);
+	        			if(verbose2) printf("Read: %s\n",readseq);
 	        			inserts++;
 					}
 					internb = internb->next;
@@ -448,6 +447,8 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 				internb = G->read[breadID]->first;
 				while(internb){
 					if(internb->dest && internb->dest->pathID == scaffEdge->ID){
+						if(verbose) printf("Found the correct bread out of the intermediate junction:\n");
+						if(verbose) printf("\t -> bread-PathID: %i, scaffedgeID: %i",internb->dest->pathID,scaffEdge->ID);
 		    			overhang = internb->overhang;
 		    			breadID = internb->ID;
 	        			decompressReadSt(reads[breadID].seq,readseq,reads[breadID].len);
@@ -466,14 +467,19 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 	        			push_pogread(breadID,pogreads,strlen(readseq),ori);
 	        			totalBases += strlen(readseq);
 
-						if(verbose) printf("ALINING PROPER READ\n");
-						if(verbose) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
-	        			if(verbose) printf("Read: %s\n",readseq);
+						if(verbose2) printf("ALINING PROPER READ\n");
+						if(verbose2) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
+	        			if(verbose2) printf("Read: %s\n",readseq);
 						inserts++;
 						break;
 					}
+					else{
+						if(verbose) printf("Found the wrong bread:\n");
+						if(verbose && internb->dest) printf("\t -> To Path: %i\n",internb->dest->pathID);
+					}
 					internb = internb->next;
 				}
+				if(!internb) printf("Did not found the correct bread to the next junction\n");
 			}
 			else{
 				// Insert the Contained reads of the proper bread
