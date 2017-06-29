@@ -292,7 +292,7 @@ void POG_appendbackbone(struct POGseq* contig, char* seq, int overhang){
 //AdjacentList of [2] Head ->
 
 struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, struct myovlList* G, struct scaffold_set* aS, int scaffID){
-    char verbose = 0;
+    char verbose = 1;
     char verbose2 = 0;
 
     static struct POGreadsSet* pogreads = NULL;
