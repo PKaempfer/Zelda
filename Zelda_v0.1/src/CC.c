@@ -346,6 +346,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 		scaffEdge = aS->scaff[scaffID].first;
 		// Test if the first path is a loop to the same junction: Find the correct bread on the correct side, to find the next path properly
 		if(scaffEdge->next && aS->scaff[scaffID].startJunction == scaffEdge->targetJunction){
+			printf("First PATH is a loop: Searching for the correct overlapside\n");
 			while(bread){
 				if(verbose2) printf("destPathID: %i == scaffEdgeID: %i\n",bread->dest->pathID, scaffEdge->ID);
 				if(bread->dest && bread->dest->pathID == scaffEdge->next->ID){
@@ -363,6 +364,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 			bread = G->read[startJunction]->first;
 			while(bread){
 				if(bread->dest && bread->dest->pathID == scaffEdge->ID) tempside += bread->sideflag;
+				bread = bread->next;
 			}
 			if(tempside != 1) startside = !startside;
 			bread = G->read[startJunction]->first;
