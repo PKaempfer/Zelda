@@ -314,6 +314,8 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 //    int oldbreadID;
     int multidir;
     char ori;
+    char startside;
+    char tempside;
     int overhang;
     int inserts = 0;
 
@@ -342,11 +344,42 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 			if(verbose) printf("FinJunction: %i\n",finJunction);
 		}
 		scaffEdge = aS->scaff[scaffID].first;
-		while(bread){
-			if(verbose2) printf("destPathID: %i == scaffEdgeID: %i\n",bread->dest->pathID, scaffEdge->ID);
-			if(bread->dest && bread->dest->pathID == scaffEdge->ID) break;
-			bread = bread->next;
+		// Test if the first path is a loop to the same junction: Find the correct bread on the correct side, to find the next path properly
+		if(scaffEdge->next && aS->scaff[scaffID].startJunction == scaffEdge->targetJunction){
+			while(bread){
+				if(verbose2) printf("destPathID: %i == scaffEdgeID: %i\n",bread->dest->pathID, scaffEdge->ID);
+				if(bread->dest && bread->dest->pathID == scaffEdge->next->ID){
+					startside = bread->sideflag;
+					break;
+				}
+				bread = bread->next;
+			}
+			if(!bread){
+				printf("Next Path not found\n");
+				exit(1);
+			}
+			tempside=0;
+			// Test whether the loop path has the same sideflag on both ends
+			bread = G->read[startJunction]->first;
+			while(bread){
+				if(bread->dest && bread->dest->pathID == scaffEdge->ID) tempside += bread->sideflag;
+			}
+			if(tempside != 1) startside = !startside;
+			bread = G->read[startJunction]->first;
+			while(bread){
+				if(verbose2) printf("destPathID: %i == scaffEdgeID: %i\n",bread->dest->pathID, scaffEdge->ID);
+				if(bread->dest && bread->dest->pathID == scaffEdge->ID && bread->sideflag == startside) break;
+				bread = bread->next;
+			}
 		}
+		else{
+			while(bread){
+				if(verbose2) printf("destPathID: %i == scaffEdgeID: %i\n",bread->dest->pathID, scaffEdge->ID);
+				if(bread->dest && bread->dest->pathID == scaffEdge->ID) break;
+				bread = bread->next;
+			}
+		}
+
 	}
 
 	if(bread){
@@ -445,10 +478,10 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 				}
 				// Insert the proper read intermediate junction along the scaffold
 				internb = G->read[breadID]->first;
-				while(internb){
+				while(internb){  // internb.sideflag == bdir???
 					if(internb->dest && internb->dest->pathID == scaffEdge->ID){
 						if(verbose) printf("Found the correct bread out of the intermediate junction:\n");
-						if(verbose) printf("\t -> bread-PathID: %i, scaffedgeID: %i",internb->dest->pathID,scaffEdge->ID);
+						if(verbose) printf("\t -> bread-PathID: %i, scaffedgeID: %i\n",internb->dest->pathID,scaffEdge->ID);
 		    			overhang = internb->overhang;
 		    			breadID = internb->ID;
 	        			decompressReadSt(reads[breadID].seq,readseq,reads[breadID].len);

@@ -1429,11 +1429,16 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
         aS->scaff = (struct scaffold*)malloc(sizeof(struct scaffold)*aS->nummax);
     }
 
-    char verbose = 1;
+    char verbose = 0;
     char stopit;
 
     int depth = 0;
     int len = 0;
+
+    int ltemp;
+    int rtemp;
+    int lastID;
+    char found;
 
     int lpos = 0;
     int rpos = 0;
@@ -1473,8 +1478,10 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
         				sibl = edge;
         			}
         			while(edge->sibl){
+        				if(verbose) printf("Sible Found: %i -> %i\n", edge->ID,edge->sibl->ID);
         				edge = edge->sibl;
         				if(paths[edge->ID].flag){
+        					if(verbose) printf("is Flagged\n");
         					siblNum++;
         					if(siblNum == 1) sibl = edge;
         					if(siblNum > 1) break;
@@ -1489,7 +1496,7 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
         			if(edge->targetJunction == paths[edge->ID].leftJunction) left[lelem].sameside = 1;
         			else left[lelem].sameside = 0;
         			if(edge->junctionCon>=0){
-        				printf("\t--> is bridge\n");
+        				if(verbose) printf("\t--> is bridge\n");
         				left[lelem].bridge = edge;
         			}
         			else left[lelem].bridge = NULL;
@@ -1531,7 +1538,7 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
         			if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
         			else right[relem].sameside = 0;
         			if(edge->junctionCon>=0){
-        				printf("\t--> is bridge\n");
+        				if(verbose) printf("\t--> is bridge\n");
         				right[relem].bridge = edge;
         			}
         			else right[relem].bridge = NULL;
@@ -1560,6 +1567,7 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
         				current = left[lpos].ID;
         				paths[current].flag--;
         				// left -> left
+        				if(verbose) printf("LL\n");
         				if(left[lpos].sameside) edge = paths[current].leftPath;
         				else edge = paths[current].rightPath;
         				while(edge){
@@ -1579,7 +1587,8 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
                 			if(siblNum != 1) break;
                 			else edge = sibl;
         					if(edge->depth + lpos == lelem){
-        						if(verbose) printf("(%i) (lpos: %i) Set left left %i (target: %i)\n",i,lpos,edge->ID,edge->targetJunction);
+        						if(verbose) printf("LL: (%i) (lpos: %i, lelem: %i) Set left left %i (target: %i)\n",i,lpos,lelem,edge->ID,edge->targetJunction);
+//        						if(verbose) printf("(%i) (lpos: %i) Set left left %i (target: %i)\n",i,lpos,edge->ID,edge->targetJunction);
         						left[lelem].ID = edge->ID;
         		    			if(edge->targetJunction == paths[edge->ID].leftJunction) left[lelem].sameside = 1;
         		    			else left[lelem].sameside = 0;
@@ -1599,9 +1608,43 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
         					edge = edge->next;
         				}
         				// left -> right
+        				if(verbose) printf("LR: %i\n",current);
         				if(left[lpos].sameside) edge = paths[current].rightPath;
         				else edge = paths[current].leftPath;
+        				ltemp = lpos-1;
+        				rtemp = 0;
         				while(edge){
+        					if(edge->depth < lpos + relem +2){
+        						found = 0;
+        						if(ltemp>=0){
+        							lastID = left[ltemp].ID;
+        							ltemp--;
+        						}
+        						else if(ltemp == -1){
+        							lastID = i;
+        							ltemp--;
+        						}
+        						else{
+        							lastID = right[rtemp].ID;
+        							rtemp++;
+        						}
+        						if(verbose) printf("LastId: %i\n",lastID);
+        						while(edge){
+        							if(edge->ID == lastID){
+        								if(verbose) printf("EdgeID: %i\n",edge->ID);
+        								found = 1;
+        								edge = edge->next;
+        								break;
+        							}
+        							edge = edge->sibl;
+        						}
+        						if(found) continue;
+        						else{
+        							if(verbose) printf("Correct Backpath not found\n");
+        							break;
+        							exit(1);
+        						}
+        					}
                 			siblNum = 0;
                 			if(paths[edge->ID].flag){
                 				siblNum = 1;
@@ -1618,6 +1661,7 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
                 			if(siblNum != 1) break;
                 			else edge = sibl;
         					if(edge->depth == lpos + relem +2){
+        						if(verbose) printf("LR: (%i) (rpos: %i, relem: %i) Set right %i (target: %i)\n",i,rpos,relem,edge->ID,edge->targetJunction);
         						if(verbose) printf("(%i) (lpos: %i) Set left right %i",i,lpos,edge->ID);
         						right[relem].ID = edge->ID;
         		    			if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
@@ -1648,6 +1692,7 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
         				current = right[rpos].ID;
         				paths[current].flag--;
         				// right -> right
+        				if(verbose) printf("RR\n");
         				if(right[rpos].sameside) edge = paths[current].rightPath;
         				else edge = paths[current].leftPath;
         				while(edge){
@@ -1667,6 +1712,7 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
                 			if(siblNum != 1) break;
                 			else edge = sibl;
         					if(edge->depth + rpos == relem){
+        						if(verbose) printf("RR: (%i) (rpos: %i, relem: %i) Set right %i (target: %i)\n",i,rpos,relem,edge->ID,edge->targetJunction);
         						right[relem].ID = edge->ID;
         						if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
         						else right[relem].sameside = 0;
@@ -1686,9 +1732,44 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
         					edge = edge->next;
         				}
         				// right -> left
+        				if(verbose) printf("RL: %i\n",current);
         				if(right[rpos].sameside) edge = paths[current].leftPath;
         				else edge = paths[current].rightPath;
+        				ltemp = 0;
+        				rtemp = rpos-1;
         				while(edge){
+        					if(edge->depth < rpos + lelem +2){
+        						found = 0;
+        						if(rtemp>=0){
+        							lastID = right[rtemp].ID;
+        							rtemp--;
+        						}
+        						else if(rtemp == -1){
+        							lastID = i;
+        							rtemp--;
+        						}
+        						else{
+        							lastID = left[ltemp].ID;
+        							ltemp++;
+        						}
+        						if(verbose) printf("LastId: %i\n",lastID);
+        						while(edge){
+        							if(verbose) printf("EdgeID: %i\n",edge->ID);
+        							if(edge->ID == lastID){
+        								if(verbose) printf("-> Correct\n");
+        								found = 1;
+        								edge = edge->next;
+        								break;
+        							}
+        							edge = edge->sibl;
+        						}
+        						if(found) continue;
+        						else{
+        							printf("Correct Backpath not found\n");
+        							break;
+        							exit(1);
+        						}
+        					}
                 			siblNum = 0;
                 			if(paths[edge->ID].flag){
                 				siblNum = 1;
@@ -1705,6 +1786,7 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
                 			if(siblNum != 1) break;
                 			else edge = sibl;
         					if(edge->depth == rpos + lelem +2){
+        						if(verbose) printf("RL: (%i) (lpos: %i, lelem: %i) Set left left %i (target: %i)\n",i,lpos,lelem,edge->ID,edge->targetJunction);
         						left[lelem].ID = edge->ID;
         						if(edge->targetJunction == paths[edge->ID].leftJunction) left[lelem].sameside = 1;
         						else left[lelem].sameside = 0;
