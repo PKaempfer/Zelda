@@ -551,6 +551,8 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 	return pogreads;
 }
 
+
+
 /**
  * TODO: All Fine, May have a look at the real end node!!! Seems to cause a problem at some point.
  * 1. Alignment Function
@@ -1671,7 +1673,9 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 
 //		aS = scaffold_init3(reads);
 //		scaffold_printfreqs(reads,G);
-		aS = scaffold_init4(aS);
+		// Actually best
+//		aS = scaffold_init4(aS);
+		aS = scaffold_init6(aS,1);
 //		aS = scaffold_init2(aS);
 	}
 	else{

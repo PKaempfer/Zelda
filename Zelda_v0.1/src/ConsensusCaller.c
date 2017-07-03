@@ -1681,14 +1681,16 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 		startJunction = aS->scaff[i].startJunction;
 		if(verbose2) printf("Scaffold: %i (len: %i bp) Type: %i\n",i,aS->scaff[i].len,aS->scaff[i].type);
 		scaffEdge = aS->scaff[i].first;
-		len = scaffEdge->len;
 		if(verbose2) printf(KRED"%i"KNRM,startJunction);
 		scaffID = i;
+		len = 0;
 		while(scaffEdge){
+			len += scaffEdge->len;
 			if(scaffEdge != aS->scaff[i].first && scaffEdge->bridge){
 				if(paths[scaffEdge->ID].leftJunction == scaffEdge->targetJunction) bridgeJunction = paths[scaffEdge->ID].rightJunction;
 				else bridgeJunction = paths[scaffEdge->ID].leftJunction;
 				// New ScaffEdge
+				printf("Devide Scaff ->  Org Length: %i\n",aS->scaff[i].len);
 				aS->scaff[aS->numbridge].ID = aS->num;
 				aS->scaff[aS->numbridge].startJunction = bridgeJunction;
 				aS->scaff[aS->numbridge].endJunction = scaffEdge->targetJunction;
@@ -1699,6 +1701,7 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 				aS->scaff[i].len = len - scaffEdge->len;
 //				aS->scaff[i].next = &aS->scaff[aS->numbridge];
 				aS->scaff[i].next = aS->numbridge;
+				printf("Devide Scaff ->  newLength: %i + %i = %i\n",aS->scaff[aS->numbridge].len,aS->scaff[i].len,aS->scaff[aS->numbridge].len+aS->scaff[i].len);
 				printf("Set Next Bridge: from %i to %i\n",i,aS->numbridge);
 				oldscaffEdge->next = NULL;
 				if(verbose2) printf(" ..(%i)..> "KYEL"%i"KNRM,scaffEdge->bridge->estLen,bridgeJunction);
@@ -1722,7 +1725,7 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 			if(scaffEdge->next && scaffEdge->next->bridge){
 				oldscaffEdge = scaffEdge;
 			}
-			len += scaffEdge->len;
+//			len += scaffEdge->len;
 			scaffEdge = scaffEdge->next;
 		}
 		if(verbose2) printf("\n");
@@ -2449,7 +2452,6 @@ static inline void prepPathsFlag(){
 	}
 }
 
-
 struct scaffold_set* scaffold_init4(struct scaffold_set* aS){
 	prepPathsFlag();
     int i,j;
@@ -2491,6 +2493,9 @@ struct scaffold_set* scaffold_init4(struct scaffold_set* aS){
         		rpos = 0;
         		lelem = 0;
         		relem = 0;
+        		// TODO: Try to connect to the one unique solution to left
+
+        		// TODO: Then following code, update lelem before
         		edge = paths[i].leftPath;
         		while(edge && paths[edge->ID].flag && !edge->sibl){
         			if(verbose)
@@ -2516,6 +2521,8 @@ struct scaffold_set* scaffold_init4(struct scaffold_set* aS){
         			edge = edge->next;
         		}
         		// initial right
+        		// TODO: Try to connect to the one unique solution to right
+        		// TODO: Then following code, update relem before
         		edge = paths[i].rightPath;
         		while(edge && paths[edge->ID].flag && !edge->sibl){
         			if(verbose)
