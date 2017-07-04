@@ -404,6 +404,9 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 	}
 
 	if(bread){
+
+		if(verbose) printf("Start Backboneing: stJ: %i, path: %i",startJunction,scaffEdge->ID);
+
 		breadID = bread->ID;
 		if(verbose) printf("breadID  : %i \n",breadID);
 		if(dir){
@@ -529,7 +532,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 					}
 					else{
 						if(verbose) printf("Found the wrong bread:\n");
-						if(verbose && internb->dest) printf("\t -> To Path: %i\n",internb->dest->pathID);
+						if(verbose && internb->dest) printf("\t -> To Path: %i (scaffPathID: %i)\n",internb->dest->pathID,scaffEdge->ID);
 					}
 					internb = internb->next;
 				}
