@@ -536,7 +536,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 							if(verbose2) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
 		        			if(verbose2) printf("Read: %s\n",readseq);
 							inserts++;
-							found = 2;
+							found = 1;
 							break;
 						}
 						else{
