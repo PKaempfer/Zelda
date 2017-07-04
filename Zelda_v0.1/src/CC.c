@@ -353,31 +353,41 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 				scaffEdge = scaffEdge->next;
 			}
 			printf("First PATH is a loop: Searching for the correct overlapside\n");
-			while(bread){
-				if(verbose2) printf("destPathID: %i == scaffEdgeID: %i\n",bread->dest->pathID, scaffEdge->ID);
-				if(bread->dest && bread->dest->pathID == scaffEdge->next->ID){
-					startside = bread->sideflag;
-					break;
+			if(scaffEdge->next){
+				while(bread){
+					if(verbose2) printf("destPathID: %i == scaffEdgeID: %i\n",bread->dest->pathID, scaffEdge->ID);
+					if(bread->dest && bread->dest->pathID == scaffEdge->next->ID){
+						startside = bread->sideflag;
+						break;
+					}
+					bread = bread->next;
 				}
-				bread = bread->next;
+				if(!bread){
+					printf("Next Path not found\n");
+					exit(1);
+				}
+				tempside=0;
+				// Test whether the loop path has the same sideflag on both ends
+				bread = G->read[startJunction]->first;
+				while(bread){
+					if(bread->dest && bread->dest->pathID == scaffEdge->ID) tempside += bread->sideflag;
+					bread = bread->next;
+				}
+				if(tempside != 1) startside = !startside;
+				bread = G->read[startJunction]->first;
+				while(bread){
+					if(verbose2) printf("destPathID: %i == scaffEdgeID: %i\n",bread->dest->pathID, scaffEdge->ID);
+					if(bread->dest && bread->dest->pathID == scaffEdge->ID && bread->sideflag == startside) break;
+					bread = bread->next;
+				}
 			}
-			if(!bread){
-				printf("Next Path not found\n");
-				exit(1);
-			}
-			tempside=0;
-			// Test whether the loop path has the same sideflag on both ends
-			bread = G->read[startJunction]->first;
-			while(bread){
-				if(bread->dest && bread->dest->pathID == scaffEdge->ID) tempside += bread->sideflag;
-				bread = bread->next;
-			}
-			if(tempside != 1) startside = !startside;
-			bread = G->read[startJunction]->first;
-			while(bread){
-				if(verbose2) printf("destPathID: %i == scaffEdgeID: %i\n",bread->dest->pathID, scaffEdge->ID);
-				if(bread->dest && bread->dest->pathID == scaffEdge->ID && bread->sideflag == startside) break;
-				bread = bread->next;
+			else{
+				bread = G->read[startJunction]->first;
+				while(bread){
+					if(verbose2) printf("destPathID: %i == scaffEdgeID: %i\n",bread->dest->pathID, scaffEdge->ID);
+					if(bread->dest && bread->dest->pathID == scaffEdge->ID) break;
+					bread = bread->next;
+				}
 			}
 		}
 		else{
