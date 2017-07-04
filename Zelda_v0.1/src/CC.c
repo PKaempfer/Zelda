@@ -345,7 +345,13 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 		}
 		scaffEdge = aS->scaff[scaffID].first;
 		// Test if the first path is a loop to the same junction: Find the correct bread on the correct side, to find the next path properly
+
 		if(scaffEdge->next && aS->scaff[scaffID].startJunction == scaffEdge->targetJunction){
+//			startJunction = aS->scaff[scaffID].startJunction;
+			while(scaffEdge->next && scaffEdge->next->targetJunction == scaffEdge->targetJunction){
+				startJunction = scaffEdge->targetJunction;
+				scaffEdge = scaffEdge->next;
+			}
 			printf("First PATH is a loop: Searching for the correct overlapside\n");
 			while(bread){
 				if(verbose2) printf("destPathID: %i == scaffEdgeID: %i\n",bread->dest->pathID, scaffEdge->ID);
@@ -398,7 +404,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 		bdir = bread->sideflag;
 
 		// Insert First Junction
-		decompressReadSt(reads[aS->scaff[scaffID].startJunction].seq,readseq,reads[aS->scaff[scaffID].startJunction].len);
+		decompressReadSt(reads[startJunction].seq,readseq,reads[startJunction].len);
 		if(multidir>1){
 			revReadSt(readseq,revreadseq);
 			strcpy(readseq,revreadseq);
@@ -406,11 +412,11 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 		}
 		else ori = 0;
 		POG_initbackbone(contig,readseq);
-		push_pogread(aS->scaff[scaffID].startJunction,pogreads,reads[aS->scaff[scaffID].startJunction].len,ori);
-		totalBases += reads[aS->scaff[scaffID].startJunction].len;
+		push_pogread(startJunction,pogreads,reads[startJunction].len,ori);
+		totalBases += reads[startJunction].len;
 
 		// Insert Contained reads in first Junction
-		internb = G->read[aS->scaff[scaffID].startJunction]->first;
+		internb = G->read[startJunction]->first;
 		while(internb){
 			if(G->read[internb->ID]->flag != CONTAINED && verbose) printf("Found bread: %i (FLAG: %i) dest: %i (scaffedgeID: %i)\n",internb->ID,G->read[internb->ID]->flag,internb->dest->pathID,scaffEdge->ID);
 			if(G->read[internb->ID]->flag == CONTAINED){
