@@ -27,6 +27,7 @@ static inline int max_func2(int a,int b,int c){
 }
 
 static inline void poa_resetMatrix(int line, int len){
+	char verbose = 0;
 	// free the letters and set matrix to 0
 	int i,j;
 	char nonnull = 0;
@@ -43,7 +44,7 @@ static inline void poa_resetMatrix(int line, int len){
 		alMatrix_Letter[i]->ml = NULL;
 		if(alMatrix_Letter[i]->junction!=0){
 			nonnull = 1;
-			printf("Junction WRONGGGG in line: %i (node: %li): %i\n",i,alMatrix_Letter[i]-Letters,alMatrix_Letter[i]->junction);
+			if(verbose) printf("Junction WRONGGGG in line: %i (node: %li): %i\n",i,alMatrix_Letter[i]-Letters,alMatrix_Letter[i]->junction);
 			alMatrix_Letter[i]->junction = 0;
 		}
 		memcpy(&alMatrix[i][1],nullLine,sizeof(int16_t)*len);
@@ -291,6 +292,8 @@ void POG_appendbackbone(struct POGseq* contig, char* seq, int overhang){
 //AdjacentList of [1] Head -> 180->
 //AdjacentList of [2] Head ->
 
+
+
 struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, struct myovlList* G, struct scaffold_set* aS, int scaffID){
     char verbose = 1;
     char verbose2 = 0;
@@ -497,7 +500,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 				// Insert the proper read intermediate junction along the scaffold
 				internb = G->read[breadID]->first;
 				while(internb){  // internb.sideflag == bdir???
-					if(internb->dest && internb->dest->pathID == scaffEdge->ID){
+					if(internb->dest && internb->dest->pathID == scaffEdge->ID && internb->sideflag == bdir){
 						if(verbose) printf("Found the correct bread out of the intermediate junction:\n");
 						if(verbose) printf("\t -> bread-PathID: %i, scaffedgeID: %i\n",internb->dest->pathID,scaffEdge->ID);
 		    			overhang = internb->overhang;
