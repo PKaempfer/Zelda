@@ -321,6 +321,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
     char tempside;
     int overhang;
     int inserts = 0;
+    char found;
 
     struct bread* bread;
     struct bread* internb;
@@ -470,6 +471,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 		inserts++;
 		internb = bread;
 		// Go on, insert all the rest
+
 		while(breadID != finJunction){
 			if(G->read[breadID]->flag == JUNCTION){
 				if(verbose) printf("bread (%i) is a JUNCTION (finjunction: %i)\n",breadID,finJunction);
@@ -501,40 +503,49 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 					internb = internb->next;
 				}
 				// Insert the proper read intermediate junction along the scaffold
-				internb = G->read[breadID]->first;
-				while(internb){  // internb.sideflag == bdir???
-					if(internb->dest && internb->dest->pathID == scaffEdge->ID && internb->sideflag == bdir){
-						if(verbose) printf("Found the correct bread out of the intermediate junction:\n");
-						if(verbose) printf("\t -> bread-PathID: %i, scaffedgeID: %i\n",internb->dest->pathID,scaffEdge->ID);
-		    			overhang = internb->overhang;
-		    			breadID = internb->ID;
-	        			decompressReadSt(reads[breadID].seq,readseq,reads[breadID].len);
-	        			ori = 0;
-	        			if(multidir%2==1 && G->read[breadID]->dir){
-	        				revReadSt(readseq,revreadseq);
-	        				strcpy(readseq,revreadseq);
-	        				ori = 1;
-	        			}
-	        			if(multidir%2==0 && !G->read[breadID]->dir){
-	            			revReadSt(readseq,revreadseq);
-	            			strcpy(readseq,revreadseq);
-	            			ori = 1;
-	        			}
-	        			POG_appendbackbone(contig,readseq,overhang);
-	        			push_pogread(breadID,pogreads,strlen(readseq),ori);
-	        			totalBases += strlen(readseq);
+				found = 0;
+				while(found!=2){
+					if(found == 1){
+						printf("\t\t\t ---> Change bread direction <---\n");
+						bdir = !bdir;
+					}
+					internb = G->read[breadID]->first;
+					while(internb){  // internb.sideflag == bdir???
+						if(internb->dest && internb->dest->pathID == scaffEdge->ID && internb->sideflag == bdir){
+							if(verbose) printf("Found the correct bread out of the intermediate junction:\n");
+							if(verbose) printf("\t -> bread-PathID: %i, scaffedgeID: %i\n",internb->dest->pathID,scaffEdge->ID);
+			    			overhang = internb->overhang;
+			    			breadID = internb->ID;
+		        			decompressReadSt(reads[breadID].seq,readseq,reads[breadID].len);
+		        			ori = 0;
+		        			if(multidir%2==1 && G->read[breadID]->dir){
+		        				revReadSt(readseq,revreadseq);
+		        				strcpy(readseq,revreadseq);
+		        				ori = 1;
+		        			}
+		        			if(multidir%2==0 && !G->read[breadID]->dir){
+		            			revReadSt(readseq,revreadseq);
+		            			strcpy(readseq,revreadseq);
+		            			ori = 1;
+		        			}
+		        			POG_appendbackbone(contig,readseq,overhang);
+		        			push_pogread(breadID,pogreads,strlen(readseq),ori);
+		        			totalBases += strlen(readseq);
 
-						if(verbose2) printf("ALINING PROPER READ\n");
-						if(verbose2) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
-	        			if(verbose2) printf("Read: %s\n",readseq);
-						inserts++;
-						break;
+							if(verbose2) printf("ALINING PROPER READ\n");
+							if(verbose2) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
+		        			if(verbose2) printf("Read: %s\n",readseq);
+							inserts++;
+							found = 2;
+							break;
+						}
+						else{
+							if(verbose) printf("Found the wrong bread:\n");
+							if(verbose && internb->dest) printf("\t -> To Path: %i (scaffPathID: %i)\n",internb->dest->pathID,scaffEdge->ID);
+						}
+						internb = internb->next;
 					}
-					else{
-						if(verbose) printf("Found the wrong bread:\n");
-						if(verbose && internb->dest) printf("\t -> To Path: %i (scaffPathID: %i)\n",internb->dest->pathID,scaffEdge->ID);
-					}
-					internb = internb->next;
+					found++;
 				}
 				if(!internb) printf("Did not found the correct bread to the next junction\n");
 			}
