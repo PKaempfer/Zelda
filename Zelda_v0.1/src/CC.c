@@ -481,7 +481,16 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 				}
 				if(!scaffEdge){
 					printf("Catch: no more Edge on Junction : %i , but not endJunction reached\nAbort\n",breadID);
-					exit(1);
+					aS->scaff[scaffID].true_Cov = (float)totalBases/(float)aS->scaff[scaffID].len;
+
+					printf("%i: True Coverage after the Backbone: %.2f\n",scaffID,aS->scaff[scaffID].true_Cov);
+					printf("Bases: %lu Length: %i\n",totalBases,aS->scaff[scaffID].len);
+
+					free(readseq);
+					free(revreadseq);
+
+					return pogreads;
+//					exit(1);
 				}
 				// Insert Contained reads of the intermediate Junction
 				internb = G->read[breadID]->first;
