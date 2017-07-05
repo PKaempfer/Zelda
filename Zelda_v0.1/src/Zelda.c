@@ -208,7 +208,7 @@ int main(int argc, char* argv[]) {
 
 	contig_repeatFinder();
 	balancePaths(G,reads);
-	hierholzerTourAll(G,reads);
+//	hierholzerTourAll(G,reads);
 
 	if(findotdump){
 		sprintf(tempPath,"%s/scaffGraph.dot",para->asemblyFolder);
