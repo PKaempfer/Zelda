@@ -1752,7 +1752,7 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 //		scaffold_printfreqs(reads,G);
 		// Actually best
 //		aS = scaffold_init4(aS);
-		aS = scaffold_init6(aS,1);
+		aS = scaffold_init6(aS,reads,0);
 //		aS = scaffold_init2(aS);
 	}
 	else{
@@ -1762,7 +1762,7 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 
 	aS = scaffold_stats(aS);
 
-//	exit(1);
+	exit(1);
 
 	int i,j;
     printf("MaxReadLen: %i\n",maxReadLen);

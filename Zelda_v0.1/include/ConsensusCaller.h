@@ -180,7 +180,7 @@ struct scaffold_set* scaffold_init3(struct reads* reads);
 
 struct scaffold_set* scaffold_init4(struct scaffold_set* aS);
 
-struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging);
+struct scaffold_set* scaffold_init6(struct scaffold_set* aS, struct reads* reads, char bridging);
 
 void scaffold_printfreqs(struct reads* reads, struct myovlList* G);
 

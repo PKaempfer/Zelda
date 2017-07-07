@@ -1417,8 +1417,55 @@ static inline char nextpath_isOut(int junction, struct reads* reads, int pathID)
 	return 0;
 }
 
+static int setUniqueNeighbor(struct contigScaff* side, int elem, int currentPath, int currentJ, struct reads* reads){
+	char verbose = 1;
+
+	struct j_anno* j_anno = (struct j_anno*)reads[currentJ].annotation;
+	struct jPath* jPath;
+	struct jPath* jPathcool;
+
+	jPath = j_anno->inEdge;
+	char found = 0;
+	while(jPath){
+		if(jPath->pathID == currentPath){
+			found = 1;
+			break;
+		}
+		jPath = jPath->next;
+	}
+	jPath = j_anno->outEdge;
+	while(jPath){
+		if(jPath->pathID == currentPath){
+			if(found) return elem;
+			else found = 2;
+			break;
+		}
+		jPath = jPath->next;
+	}
+	if(found == 1) jPath = j_anno->outEdge;
+	if(found == 2) jPath = j_anno->inEdge;
+	int diffnum = 0;
+	while(jPath){
+		if(jPath && paths[jPath->pathID].flag > 0){
+			diffnum++;
+			jPathcool = jPath;
+		}
+		jPath = jPath->next;
+	}
+
+	if(diffnum == 1){
+		if(verbose) printf("Set Unique Neighbor Path from %i to %i\n",currentPath,jPathcool->pathID);
+		side[elem].ID = jPathcool->pathID;
+		side[elem].sameside = 1;
+		side[elem].bridge = NULL;
+		elem++;
+	}
+
+	return elem;
+}
+
 // Combined for PE and SE data
-struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
+struct scaffold_set* scaffold_init6(struct scaffold_set* aS, struct reads* reads, char bridging){
 	printf("Checkpoint: Scaffold 6\n");
 	prepPathsFlag();
     int i,j;
@@ -1468,7 +1515,7 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
         		lelem = 0;
         		relem = 0;
         		// TODO: Try to connect to the one unique solution to left
-
+        		lelem = setUniqueNeighbor(left,lelem,i,paths[i].leftJunction,reads);
         		// TODO: Then following code, update lelem before
         		edge = paths[i].leftPath;
         		while(edge){
@@ -1490,30 +1537,36 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
         			if(siblNum != 1) break;
         			else edge = sibl;
 
-        			if(verbose)
-        				printf("(%i) Set left %i\n",i,edge->ID);
-        			left[lelem].ID = edge->ID;
-        			if(edge->targetJunction == paths[edge->ID].leftJunction) left[lelem].sameside = 1;
-        			else left[lelem].sameside = 0;
-        			if(edge->junctionCon>=0){
-        				if(verbose) printf("\t--> is bridge\n");
-        				left[lelem].bridge = edge;
-        			}
-        			else left[lelem].bridge = NULL;
-        			lelem++;
-        			if(lelem == lmaxelem){
-        				lmaxelem *= 2;
-        				left = (struct contigScaff*)realloc(left,sizeof(struct contigScaff)*lmaxelem);
-        				if(!left){
-        					printf("Error in realloc lmaxelem in scaffold_init\n");
-        					exit(1);
+        			if(edge->junctionCon<0 || bridging){
+        				if(edge->depth == lelem + 1){
+                			if(verbose)
+                				printf("(%i) Set left %i\n",i,edge->ID);
+                			left[lelem].ID = edge->ID;
+                			if(edge->targetJunction == paths[edge->ID].leftJunction) left[lelem].sameside = 1;
+                			else left[lelem].sameside = 0;
+                			if(edge->junctionCon>=0){
+                				if(verbose) printf("\t--> is bridge\n");
+                				left[lelem].bridge = edge;
+                			}
+                			else left[lelem].bridge = NULL;
+                			lelem++;
+                			if(lelem == lmaxelem){
+                				lmaxelem *= 2;
+                				left = (struct contigScaff*)realloc(left,sizeof(struct contigScaff)*lmaxelem);
+                				if(!left){
+                					printf("Error in realloc lmaxelem in scaffold_init\n");
+                					exit(1);
+                				}
+                			}
         				}
         			}
+        			else break;
 //        			paths[edge->ID].flag--;
         			edge = edge->next;
         		}
         		// initial right
         		// TODO: Try to connect to the one unique solution to right
+        		relem = setUniqueNeighbor(right,relem,i,paths[i].rightJunction,reads);
         		// TODO: Then following code, update relem before
         		edge = paths[i].rightPath;
         		while(edge){
@@ -1532,25 +1585,30 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
         			}
         			if(siblNum != 1) break;
         			else edge = sibl;
-        			if(verbose)
-        				printf("(%i) Set right %i\n",i,edge->ID);
-        			right[relem].ID = edge->ID;
-        			if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
-        			else right[relem].sameside = 0;
-        			if(edge->junctionCon>=0){
-        				if(verbose) printf("\t--> is bridge\n");
-        				right[relem].bridge = edge;
-        			}
-        			else right[relem].bridge = NULL;
-        			relem++;
-        			if(relem == rmaxelem){
-        				rmaxelem *= 2;
-        				right = (struct contigScaff*)realloc(right,sizeof(struct contigScaff)*rmaxelem);
-        				if(!right){
-        					printf("Error in realloc rmaxelem in scaffold_init\n");
-        					exit(1);
+        			if(edge->junctionCon<0 || bridging){
+        				if(edge->depth == relem + 1){
+                			if(verbose)
+                				printf("(%i) Set right %i\n",i,edge->ID);
+                			right[relem].ID = edge->ID;
+                			if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
+                			else right[relem].sameside = 0;
+                			if(edge->junctionCon>=0){
+                				if(verbose) printf("\t--> is bridge\n");
+                				right[relem].bridge = edge;
+                			}
+                			else right[relem].bridge = NULL;
+                			relem++;
+                			if(relem == rmaxelem){
+                				rmaxelem *= 2;
+                				right = (struct contigScaff*)realloc(right,sizeof(struct contigScaff)*rmaxelem);
+                				if(!right){
+                					printf("Error in realloc rmaxelem in scaffold_init\n");
+                					exit(1);
+                				}
+                			}
         				}
         			}
+        			else break;
 //        			paths[edge->ID].flag--;
         			edge = edge->next;
         		}
@@ -1586,25 +1644,30 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
                 			}
                 			if(siblNum != 1) break;
                 			else edge = sibl;
-        					if(edge->depth + lpos == lelem){
-        						if(verbose) printf("LL: (%i) (lpos: %i, lelem: %i) Set left left %i (target: %i)\n",i,lpos,lelem,edge->ID,edge->targetJunction);
-//        						if(verbose) printf("(%i) (lpos: %i) Set left left %i (target: %i)\n",i,lpos,edge->ID,edge->targetJunction);
-        						left[lelem].ID = edge->ID;
-        		    			if(edge->targetJunction == paths[edge->ID].leftJunction) left[lelem].sameside = 1;
-        		    			else left[lelem].sameside = 0;
-        		    			if(edge->junctionCon>=0) left[lelem].bridge = edge;
-        		    			else left[lelem].bridge = NULL;
-        		    			lelem++;
-        		    			if(lelem == lmaxelem){
-        		    				lmaxelem *= 2;
-        		    				left = (struct contigScaff*)realloc(left,sizeof(struct contigScaff)*lmaxelem);
-        		    				if(!left){
-        		    					printf("Error in realloc lmaxelem in scaffold_init\n");
-        		    					exit(1);
-        		    				}
-        		    			}
-//        		    			paths[edge->ID].flag--;
-        					}
+
+                			if(edge->junctionCon<0 || bridging){
+            					if(edge->depth + lpos == lelem){
+            						if(verbose) printf("LL: (%i) (lpos: %i, lelem: %i) Set left left %i (target: %i)\n",i,lpos,lelem,edge->ID,edge->targetJunction);
+    //        						if(verbose) printf("(%i) (lpos: %i) Set left left %i (target: %i)\n",i,lpos,edge->ID,edge->targetJunction);
+            						left[lelem].ID = edge->ID;
+            		    			if(edge->targetJunction == paths[edge->ID].leftJunction) left[lelem].sameside = 1;
+            		    			else left[lelem].sameside = 0;
+            		    			if(edge->junctionCon>=0) left[lelem].bridge = edge;
+            		    			else left[lelem].bridge = NULL;
+            		    			lelem++;
+            		    			if(lelem == lmaxelem){
+            		    				lmaxelem *= 2;
+            		    				left = (struct contigScaff*)realloc(left,sizeof(struct contigScaff)*lmaxelem);
+            		    				if(!left){
+            		    					printf("Error in realloc lmaxelem in scaffold_init\n");
+            		    					exit(1);
+            		    				}
+            		    			}
+    //        		    			paths[edge->ID].flag--;
+            					}
+                			}
+                			else break;
+
         					edge = edge->next;
         				}
         				// left -> right
@@ -1660,25 +1723,28 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
                 			}
                 			if(siblNum != 1) break;
                 			else edge = sibl;
-        					if(edge->depth == lpos + relem +2){
-        						if(verbose) printf("LR: (%i) (rpos: %i, relem: %i) Set right %i (target: %i)\n",i,rpos,relem,edge->ID,edge->targetJunction);
-        						if(verbose) printf("(%i) (lpos: %i) Set left right %i",i,lpos,edge->ID);
-        						right[relem].ID = edge->ID;
-        		    			if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
-        		    			else right[relem].sameside = 0;
-        		    			if(edge->junctionCon>=0) right[relem].bridge = edge;
-        		    			else right[relem].bridge = NULL;
-        		    			relem++;
-        		    			if(relem == rmaxelem){
-        		    				rmaxelem *= 2;
-        		    				right = (struct contigScaff*)realloc(right,sizeof(struct contigScaff)*rmaxelem);
-        		    				if(!right){
-        		    					printf("Error in realloc rmaxelem in scaffold_init\n");
-        		    					exit(1);
-        		    				}
-        		    			}
-//        		    			paths[edge->ID].flag--;
-        					}
+                			if(edge->junctionCon<0 || bridging){
+            					if(edge->depth == lpos + relem +2){
+            						if(verbose) printf("LR: (%i) (rpos: %i, relem: %i) Set right %i (target: %i)\n",i,rpos,relem,edge->ID,edge->targetJunction);
+            						if(verbose) printf("(%i) (lpos: %i) Set left right %i",i,lpos,edge->ID);
+            						right[relem].ID = edge->ID;
+            		    			if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
+            		    			else right[relem].sameside = 0;
+            		    			if(edge->junctionCon>=0) right[relem].bridge = edge;
+            		    			else right[relem].bridge = NULL;
+            		    			relem++;
+            		    			if(relem == rmaxelem){
+            		    				rmaxelem *= 2;
+            		    				right = (struct contigScaff*)realloc(right,sizeof(struct contigScaff)*rmaxelem);
+            		    				if(!right){
+            		    					printf("Error in realloc rmaxelem in scaffold_init\n");
+            		    					exit(1);
+            		    				}
+            		    			}
+    //        		    			paths[edge->ID].flag--;
+            					}
+                			}
+                			else break;
         					edge = edge->next;
         				}
         				lpos++;
@@ -1711,24 +1777,27 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
                 			}
                 			if(siblNum != 1) break;
                 			else edge = sibl;
-        					if(edge->depth + rpos == relem){
-        						if(verbose) printf("RR: (%i) (rpos: %i, relem: %i) Set right %i (target: %i)\n",i,rpos,relem,edge->ID,edge->targetJunction);
-        						right[relem].ID = edge->ID;
-        						if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
-        						else right[relem].sameside = 0;
-        		    			if(edge->junctionCon>=0) right[relem].bridge = edge;
-        		    			else right[relem].bridge = NULL;
-        						relem++;
-        		    			if(relem == rmaxelem){
-        		    				rmaxelem *= 2;
-        		    				right = (struct contigScaff*)realloc(right,sizeof(struct contigScaff)*rmaxelem);
-        		    				if(!right){
-        		    					printf("Error in realloc rmaxelem in scaffold_init\n");
-        		    					exit(1);
-        		    				}
-        		    			}
-//        		    			paths[edge->ID].flag--;
-        					}
+                			if(edge->junctionCon<0 || bridging){
+            					if(edge->depth + rpos == relem){
+            						if(verbose) printf("RR: (%i) (rpos: %i, relem: %i) Set right %i (target: %i)\n",i,rpos,relem,edge->ID,edge->targetJunction);
+            						right[relem].ID = edge->ID;
+            						if(edge->targetJunction == paths[edge->ID].rightJunction) right[relem].sameside = 1;
+            						else right[relem].sameside = 0;
+            		    			if(edge->junctionCon>=0) right[relem].bridge = edge;
+            		    			else right[relem].bridge = NULL;
+            						relem++;
+            		    			if(relem == rmaxelem){
+            		    				rmaxelem *= 2;
+            		    				right = (struct contigScaff*)realloc(right,sizeof(struct contigScaff)*rmaxelem);
+            		    				if(!right){
+            		    					printf("Error in realloc rmaxelem in scaffold_init\n");
+            		    					exit(1);
+            		    				}
+            		    			}
+    //        		    			paths[edge->ID].flag--;
+            					}
+                			}
+                			else break;
         					edge = edge->next;
         				}
         				// right -> left
@@ -1785,24 +1854,27 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, char bridging){
                 			}
                 			if(siblNum != 1) break;
                 			else edge = sibl;
-        					if(edge->depth == rpos + lelem +2){
-        						if(verbose) printf("RL: (%i) (lpos: %i, lelem: %i) Set left left %i (target: %i)\n",i,lpos,lelem,edge->ID,edge->targetJunction);
-        						left[lelem].ID = edge->ID;
-        						if(edge->targetJunction == paths[edge->ID].leftJunction) left[lelem].sameside = 1;
-        						else left[lelem].sameside = 0;
-        		    			if(edge->junctionCon>=0) left[lelem].bridge = edge;
-        		    			else left[lelem].bridge = NULL;
-        						lelem++;
-        		    			if(lelem == lmaxelem){
-        		    				lmaxelem *= 2;
-        		    				left = (struct contigScaff*)realloc(left,sizeof(struct contigScaff)*lmaxelem);
-        		    				if(!left){
-        		    					printf("Error in realloc lmaxelem in scaffold_init\n");
-        		    					exit(1);
-        		    				}
-        		    			}
-//        		    			paths[edge->ID].flag--;
-        					}
+                			if(edge->junctionCon<0 || bridging){
+            					if(edge->depth == rpos + lelem +2){
+            						if(verbose) printf("RL: (%i) (lpos: %i, lelem: %i) Set left left %i (target: %i)\n",i,lpos,lelem,edge->ID,edge->targetJunction);
+            						left[lelem].ID = edge->ID;
+            						if(edge->targetJunction == paths[edge->ID].leftJunction) left[lelem].sameside = 1;
+            						else left[lelem].sameside = 0;
+            		    			if(edge->junctionCon>=0) left[lelem].bridge = edge;
+            		    			else left[lelem].bridge = NULL;
+            						lelem++;
+            		    			if(lelem == lmaxelem){
+            		    				lmaxelem *= 2;
+            		    				left = (struct contigScaff*)realloc(left,sizeof(struct contigScaff)*lmaxelem);
+            		    				if(!left){
+            		    					printf("Error in realloc lmaxelem in scaffold_init\n");
+            		    					exit(1);
+            		    				}
+            		    			}
+    //        		    			paths[edge->ID].flag--;
+            					}
+                			}
+                			else break;
         					edge = edge->next;
         				}
         				rpos++;
