@@ -1762,7 +1762,7 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 
 	aS = scaffold_stats(aS);
 
-	exit(1);
+//	exit(1);
 
 	int i,j;
     printf("MaxReadLen: %i\n",maxReadLen);
