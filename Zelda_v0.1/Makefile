@@ -10,7 +10,7 @@ CFLAGS += -Wall -Wextra  -Wno-unused-result -Wno-strict-aliasing -Wno-sign-compa
 LINKFLAGS = -pthread -lm #-lrt 
 
 #CFLAGS += -O1 -fno-strict-aliasing -Wno-sign-compare -Wno-comment #-Wno-unused-but-set-variable
-CFLAGS += -g #-O3 
+CFLAGS += -g -O3 
 # Adress sanitizer seeks for memory leaeks in address room
 #CFLAGS += -g -O1
 #CFLAGS += -fsanitize=address
