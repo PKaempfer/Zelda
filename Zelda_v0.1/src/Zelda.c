@@ -32,6 +32,19 @@
 
 int main(int argc, char* argv[]) {
 
+    char *str;
+    char her;
+
+    her = 'Y';
+    str = "HelloMuraMana";
+    printf("%s, length: %i\n",str,strlen(str));
+    printf("%p\n", (void *)&str);
+    printf("%p\n", (void *)&(str[1]));
+    printf("%p\n", (void *)&(str[2]));
+    printf("%p\n", (void *)&(str[3]));
+    printf("%p\n", (void *)&(str[4]));
+    printf("%p\n", (void *)&her);
+
 	char scaffolding = 1;
 	char heuristic = 1;
 	char prefilter = 1;
