@@ -295,7 +295,7 @@ void POG_appendbackbone(struct POGseq* contig, char* seq, int overhang){
 
 
 struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, struct myovlList* G, struct scaffold_set* aS, int scaffID){
-    char verbose = 1;
+    char verbose = 0;
     char verbose2 = 0;
 
     static struct POGreadsSet* pogreads = NULL;
@@ -356,7 +356,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 				startJunction = scaffEdge->targetJunction;
 				scaffEdge = scaffEdge->next;
 			}
-			printf("First PATH is a loop: Searching for the correct overlapside\n");
+			if(verbose) printf("First PATH is a loop: Searching for the correct overlapside\n");
 			if(scaffEdge->next){
 				while(bread){
 					if(verbose2) printf("destPathID: %i == scaffEdgeID: %i\n",bread->dest->pathID, scaffEdge->ID);

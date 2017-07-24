@@ -1417,7 +1417,7 @@ static inline char nextpath_isOut(int junction, struct reads* reads, int pathID)
 	return 0;
 }
 
-static int setUniqueNeighbor(struct contigScaff* side, int elem, int currentPath, int currentJ, struct reads* reads){
+static int setUniqueNeighbor(struct contigScaff* side, int elem, int currentPath, int currentJ, struct reads* reads, char leftside){
 	char verbose = 1;
 
 	struct j_anno* j_anno = (struct j_anno*)reads[currentJ].annotation;
@@ -1456,7 +1456,16 @@ static int setUniqueNeighbor(struct contigScaff* side, int elem, int currentPath
 	if(diffnum == 1){
 		if(verbose) printf("Set Unique Neighbor Path from %i to %i\n",currentPath,jPathcool->pathID);
 		side[elem].ID = jPathcool->pathID;
+		// Todo: could cause problems, sameside could be wrong if the path is a loop to the same junction
 		side[elem].sameside = 1;
+		if(leftside){
+			if(jPathcool->eJID == paths[jPathcool->pathID].rightJunction)
+				side[elem].sameside = 0;
+		}
+		else{
+			if(jPathcool->eJID == paths[jPathcool->pathID].leftJunction)
+				side[elem].sameside = 0;
+		}
 		side[elem].bridge = NULL;
 		elem++;
 	}
@@ -1506,7 +1515,7 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, struct reads* reads
         		if(j || ((paths[i].scaffflag & 32) && (paths[i].scaffflag & 2))){
         			continue;
         		}
-        		if(verbose)
+//        		if(verbose)
         			printf("\t NEW SCAFFOLD --> Startpath: %i (Freq: %i)\n",i,paths[i].flag);
         		paths[i].flag--;
         		// initial left
@@ -1515,7 +1524,8 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, struct reads* reads
         		lelem = 0;
         		relem = 0;
         		// TODO: Try to connect to the one unique solution to left
-        		lelem = setUniqueNeighbor(left,lelem,i,paths[i].leftJunction,reads);
+        		printf("Init left\n");
+        		lelem = setUniqueNeighbor(left,lelem,i,paths[i].leftJunction,reads,1);
         		// TODO: Then following code, update lelem before
         		edge = paths[i].leftPath;
         		while(edge){
@@ -1566,7 +1576,8 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, struct reads* reads
         		}
         		// initial right
         		// TODO: Try to connect to the one unique solution to right
-        		relem = setUniqueNeighbor(right,relem,i,paths[i].rightJunction,reads);
+        		printf("Init right\n");
+        		relem = setUniqueNeighbor(right,relem,i,paths[i].rightJunction,reads,0);
         		// TODO: Then following code, update relem before
         		edge = paths[i].rightPath;
         		while(edge){
@@ -1625,6 +1636,10 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, struct reads* reads
         				current = left[lpos].ID;
         				paths[current].flag--;
         				// left -> left
+        				if(lpos+1==lelem){
+        					printf("Left -> Left\n");
+        					lelem = setUniqueNeighbor(left,lelem,current,left[lpos].sameside ? paths[current].leftJunction : paths[current].rightJunction,reads,1);
+        				}
         				if(verbose) printf("LL\n");
         				if(left[lpos].sameside) edge = paths[current].leftPath;
         				else edge = paths[current].rightPath;
@@ -1759,6 +1774,11 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, struct reads* reads
         				paths[current].flag--;
         				// right -> right
         				if(verbose) printf("RR\n");
+        				if(rpos + 1 == relem){
+        					printf("right -> Right\n");
+        					relem = setUniqueNeighbor(right,relem,current,right[rpos].sameside ? paths[current].rightJunction : paths[current].leftJunction, reads,0);
+        				}
+
         				if(right[rpos].sameside) edge = paths[current].rightPath;
         				else edge = paths[current].leftPath;
         				while(edge){
