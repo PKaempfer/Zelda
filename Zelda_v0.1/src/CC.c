@@ -847,7 +847,7 @@ static inline int POG_alignFillMatrix(int* new_numG, struct Letter_T** new_lette
 					else{
 						printf("This case should not happen (Junction Number == 0: %i -> (oldnum: %i / j: %i))\n",Letters[edge->dest].junction,old_num,j);
 						(*new_numG) = new_num;
-						if(depth%2==0){
+						if((depth+1)%2==0){
 							memcpy(old_letters,new_letters,sizeof(struct Letter_T)*new_num);
 							temp_letters = old_letters;
 							old_letters = new_letters;
