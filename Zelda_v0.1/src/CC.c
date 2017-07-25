@@ -846,6 +846,13 @@ static inline int POG_alignFillMatrix(int* new_numG, struct Letter_T** new_lette
 					}
 					else{
 						printf("This case should not happen (Junction Number == 0: %i -> (oldnum: %i / j: %i))\n",Letters[edge->dest].junction,old_num,j);
+						(*new_numG) = new_num;
+						if(depth%2==0){
+							memcpy(old_letters,new_letters,sizeof(struct Letter_T)*new_num);
+							temp_letters = old_letters;
+							old_letters = new_letters;
+							new_letters = temp_letters;
+						}
 						return -1;
 	//					exit(1);
 					}
@@ -1562,7 +1569,7 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 		end_node = &Letters[end_pos];
 		end_num = POG_alignFillMatrix(&new_num, new_letters, seq, end_node, end_letters, fullMatrix, seqlen);
 		if(end_num <= 0){
-			printf("EndNum<=0 . RETURN\n");
+			printf("EndNum<=0 (%i). RETURN\n",end_num);
 			if(!fullMatrix){
 				fullMatrix = 1;
 				numFull++;
