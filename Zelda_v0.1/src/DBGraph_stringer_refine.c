@@ -66,10 +66,7 @@ void countRemainingNodes(){
 		}
 	}
 
-	printf("\nGraph stats:\n");
-	printf("Number of contigs: %i\n",nodeNum);
-	printf("Number of contigs > 100bp: %i\n",nodeNum100);
-	printf("Avg contig length: %2.f\n",(float)nodeLen/nodeNum100);
+
 
 	int *nStat = (int*)malloc(sizeof(int)*(nodeNum+1));
 	int k=0;
@@ -80,33 +77,36 @@ void countRemainingNodes(){
 	}
 
 	radixSort(nodeNum,nStat);
-
-	printf("Contig Length: %i\n",nodeLen);
-	printf("Contig Length (>100): %i\n",nodeLen100);
-	printf("Largest Contig: %i\n\n", nStat[0]);
+//	printf("\tGraph stats:\n");
+	printf("\tNumber of contigs: \t\t%i\n",nodeNum);
+	printf("\tNumber of contigs > 100bp: \t%i\n",nodeNum100);
+	printf("\tAvg contig length: \t\t%2.f\n",(float)nodeLen/nodeNum100);
+	printf("\tLargest Contig: \t\t%i\n", nStat[0]);
+	printf("\tContig Length: \t\t\t%i\n",nodeLen);
+	printf("\tContig Length (>100): \t\t%i\n",nodeLen100);
 
 	int sum=0;
 	int ns=0;
 	for(i=0;i<nodeNum;i++){
 		sum += nStat[i];
 		if(sum > (nodeLen/10) && ns == 0){
-			printf("N10: %i\n",nStat[i]);
+			printf("\tN10: %i\n",nStat[i]);
 			ns++;
 		}
 		if(sum > (nodeLen/4) && ns == 1){
-			printf("N25: %i\n",nStat[i]);
+			printf("\tN25: %i\n",nStat[i]);
 			ns++;
 		}
 		if(sum > (nodeLen/2) && ns == 2){
-			printf("N50: %i\n",nStat[i]);
+			printf("\tN50: %i\n",nStat[i]);
 			ns++;
 		}
 		if(sum > (nodeLen/4)*3 && ns == 3){
-			printf("N75: %i\n",nStat[i]);
+			printf("\tN75: %i\n",nStat[i]);
 			ns++;
 		}
 		if(sum > (nodeLen/10)*9 && ns == 4){
-			printf("N90: %i\n\n",nStat[i]);
+			printf("\tN90: %i\n\n",nStat[i]);
 			ns++;
 		}
 	}
@@ -241,7 +241,7 @@ struct myovlList* initOVLgraph(int numreads){
 	struct myovlList* ovlgraph = (struct myovlList*)malloc(sizeof(struct myovlList));
 	ovlgraph->V = numreads;
 	ovlgraph->read = (struct aread**)malloc(sizeof(struct aread*)*(numreads+2)); // 0 ist NULL, last is \0->pointer
-	printf("Number of all reads: %i\n",ovlgraph->V);
+//	printf("Number of all reads: %i\n",ovlgraph->V);
 	int i;
 	for(i=0;i<=numreads;i++){
 		ovlgraph->read[i] = NULL;
@@ -251,9 +251,9 @@ struct myovlList* initOVLgraph(int numreads){
 
 struct string_graph* initStringGraph(struct myovlList* ovlgraph,char* pathAssembly, char dotdump){
 //	stringer2(ovlgraph);
-	printf("FIND INITIAL CONTAINMENTS\n");
+	printf("CHECKPOINT: Find initial Containments\n");
 	tag_A_Contained(ovlgraph);
-	printf("CALCULATE OVERLAPS\n");
+	printf("CHECKPOINT: Calculate Overlaps\n");
 	stringer3(ovlgraph);
 //	printf("CATEGORIZE OVERLAPS\n");
 	struct string_graph* S = catOVLgraph(ovlgraph, pathAssembly);
@@ -371,7 +371,8 @@ void printReducedOVLgraph(struct myovlList *ovlGraph,int dir, char *ovlPath){
 }
 
 void checkTransitivity(struct myovlList *ovlGraph){
-	printf("CHECK OVERLAP-TRANSITIVETY\n");
+	printf("CHECKPOINT: Check Overlap transitivity\n");
+	char verbose = 0;
 	int i;
 	int in;
 	int target;
@@ -393,23 +394,23 @@ void checkTransitivity(struct myovlList *ovlGraph){
 					bread = bread->next;
 				}
 				if(!in){
-					printf("Leak of transitivity at %i -> %i\n",i,target);
+					printf("\tLeak of transitivity at %i -> %i\n",i,target);
 					printf("\n");
-					printf("Read: %i (%i)\n",i,ovlGraph->read[i]->flag);
+					if(verbose) printf("Read: %i (%i)\n",i,ovlGraph->read[i]->flag);
 					bread = ovlGraph->read[i]->first;
 					while(bread){
-						printf("\t-> %i\t%i\t%i  -> dir: %i  -> flag: %i\n",bread->ID,ovlGraph->read[i]->dir != ovlGraph->read[bread->ID]->dir,bread->overhang,(int)bread->sideflag,ovlGraph->read[bread->ID]->flag);
+						if(verbose) printf("\t-> %i\t%i\t%i  -> dir: %i  -> flag: %i\n",bread->ID,ovlGraph->read[i]->dir != ovlGraph->read[bread->ID]->dir,bread->overhang,(int)bread->sideflag,ovlGraph->read[bread->ID]->flag);
 						bread = bread->next;
 					}
-					printf("\n");
+					if(verbose) printf("\n");
 					i=target;
-					printf("Read: %i (%i)\n",i,ovlGraph->read[i]->flag);
+					if(verbose) printf("Read: %i (%i)\n",i,ovlGraph->read[i]->flag);
 					bread = ovlGraph->read[i]->first;
 					while(bread){
-						printf("\t-> %i\t%i\t%i  -> dir: %i  -> flag: %i\n",bread->ID,ovlGraph->read[i]->dir != ovlGraph->read[bread->ID]->dir,bread->overhang,(int)bread->sideflag,ovlGraph->read[bread->ID]->flag);
+						if(verbose) printf("\t-> %i\t%i\t%i  -> dir: %i  -> flag: %i\n",bread->ID,ovlGraph->read[i]->dir != ovlGraph->read[bread->ID]->dir,bread->overhang,(int)bread->sideflag,ovlGraph->read[bread->ID]->flag);
 						bread = bread->next;
 					}
-					printf("\n");
+					if(verbose) printf("\n");
 					return;
 				}
 				aread = aread->next;
@@ -418,7 +419,7 @@ void checkTransitivity(struct myovlList *ovlGraph){
 
 		}
 	}
-	printf("String graph is transitively closed\n");
+	printf("\tString graph is transitively closed\n");
 }
 
 struct string_graph* catOVLgraph(struct myovlList *ovlGraph, char* pathAssembly){
@@ -472,7 +473,7 @@ struct string_graph* catOVLgraph(struct myovlList *ovlGraph, char* pathAssembly)
 
 	checkTransitivity(ovlGraph);
 
-	printf("CHECKPOINT: Read categorizer\n");
+	printf("CHECKPOINT: Read Categorizer\n");
 	int wid = 0;
 	int cont = 0;
 	int str = 0;
@@ -543,15 +544,15 @@ struct string_graph* catOVLgraph(struct myovlList *ovlGraph, char* pathAssembly)
 	}
 
 
-	printf("StringGraph Stats: \n");
-	printf("Widowed:\t\t\t%i\n",wid);
-	printf("Contained:\t\t\t%i\n",cont);
-	printf("Stray:\t\t\t\t%i\n",str);
-	printf("Proper:\t\t\t\t%i\n",prop);
-	printf("Junction:\t\t\t%i\n",junc);
-	printf("\t-> Incomming edges:\t%i\n",totin);
-	printf("\t-> Outgoing edges: \t%i\n",totout);
-	printf("All:\t\t\t\t%i\n",all);
+	printf("\tStringGraph Stats: \n");
+	printf("\tAll:\t\t\t\t%i\n",all);
+	printf("\tProper:\t\t\t\t%i\n",prop);
+	printf("\tContained:\t\t\t%i\n",cont);
+	printf("\tJunction:\t\t\t%i\n",junc);
+	printf("\tWidowed:\t\t\t%i\n",wid);
+	printf("\tStray:\t\t\t\t%i\n",str);
+	printf("\t\t-> Incomming edges:\t%i\n",totin);
+	printf("\t\t-> Outgoing edges: \t%i\n",totout);
 
 	// Init Stringgraph
 	struct string_graph *S = (struct string_graph*)malloc(sizeof(struct string_graph));
@@ -797,7 +798,7 @@ void ovlToString(struct myovlList *G, struct string_graph *S, char* pathAssembly
     if(verbose) printf("CHECKPOINT: StringGraphList\n");
 	if(verbose) print_string_graph_list(S,"Test_label");
 	char* tempPath = (char*) malloc(200);
-	printf("Write DotFile\n");
+	printf("CHECKPOINT: Write StringGraph DotFile\n");
 	sprintf(tempPath,"%s/stringGraph.dot",pathAssembly);
 //	print_overlap_graph_dot(S,tempPath,"StringGraph");
 	free(tempPath);

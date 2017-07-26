@@ -963,8 +963,8 @@ void initAllReads(){
  * 		   					(3) One Parent with more than one Child
  */
 void travToRedOVL_v2(){
-	printf("travToRedOVL_v2\n");
-	char verbose = 1;
+//	printf("travToRedOVL_v2\n");
+	char verbose = 0;
 	int i;
 //	int j,outdegree;
 	cNodeId = 1;

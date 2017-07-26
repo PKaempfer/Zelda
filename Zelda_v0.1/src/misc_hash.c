@@ -25,7 +25,7 @@
 #define INITHASHSIZE(a) pow(2,a)
 
 struct hashTable32* hashTable32_create(int size){
-	printf("Create HashTable of size: %.0f (in bits: %i)\n",INITHASHSIZE(size),size);
+//	printf("Create HashTable of size: %.0f (in bits: %i)\n",INITHASHSIZE(size),size);
 	uint32_t i;
 	struct hashTable32* ht = (struct hashTable32*)malloc(sizeof(struct hashTable32));
 	ht->elements = 0;
@@ -52,7 +52,7 @@ struct hashTable32* hashTable32_create(int size){
 }
 
 void hashTable32_resize(struct hashTable32* ht){
-	printf("Resize HashTable\n");
+//	printf("Resize HashTable\n");
 	if(ht->size>=32){
 		printf("HashTable reached its MaxSize already\n");
 		printf("No Reallocation. Resize maximum bucket size instead\n");
@@ -69,7 +69,7 @@ void hashTable32_resize(struct hashTable32* ht){
 		exit(1);
 	}
 
-	printf("New hashSize: %i (in bits: %i)",(int)INITHASHSIZE(ht->size),(int)ht->size);
+//	printf("New hashSize: %i (in bits: %i)\n",(int)INITHASHSIZE(ht->size),(int)ht->size);
 	uint32_t i;
 	for(i=INITHASHSIZE((ht->size-1));i<INITHASHSIZE(ht->size);i++){
 		ht->bucket[i] = NULL;

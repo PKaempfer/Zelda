@@ -1418,7 +1418,7 @@ static inline char nextpath_isOut(int junction, struct reads* reads, int pathID)
 }
 
 static int setUniqueNeighbor(struct contigScaff* side, int elem, int currentPath, int currentJ, struct reads* reads, char leftside){
-	char verbose = 1;
+	char verbose = 0;
 
 	struct j_anno* j_anno = (struct j_anno*)reads[currentJ].annotation;
 	struct jPath* jPath;
@@ -1515,7 +1515,7 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, struct reads* reads
         		if(j || ((paths[i].scaffflag & 32) && (paths[i].scaffflag & 2))){
         			continue;
         		}
-//        		if(verbose)
+        		if(verbose)
         			printf("\t NEW SCAFFOLD --> Startpath: %i (Freq: %i)\n",i,paths[i].flag);
         		paths[i].flag--;
         		// initial left

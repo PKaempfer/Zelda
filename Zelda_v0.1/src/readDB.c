@@ -52,18 +52,18 @@ int makeDB(char* outDB, int blocks, struct readFiles* files){
 	for(i=0;i<files->libNum;i++){
 		// PE or MP
 		if(files[i].rightReads){
-			printf("Read Paired-End Library (%i)\n",i);
-			printf("MinInsertSize: %i\n",files[i].minInsert);
-			printf("MaxInsertSize: %i\n",files[i].maxInsert);
+			printf("\tRead Paired-End Library (%i)\n",i);
+			printf("\tMinInsertSize: %i\n",files[i].minInsert);
+			printf("\tMaxInsertSize: %i\n",files[i].maxInsert);
 			files[i].avgInsert = (files[i].maxInsert + files[i].minInsert) / 2;
-			printf("PairedEnd Orientation: %s \n",peOri[files[i].oriPE]);
+			printf("\tPairedEnd Orientation: %s \n",peOri[files[i].oriPE]);
 
 			files[i].startId = readNum;
 			// read left reads
 			readl = readNum;
 			readr = readNum+1;
 			format = strrchr(files[i].leftReads,'.')+1;
-			printf("Left Reads: %s\nFile format: %s\n",files[i].leftReads,format);
+			printf("\tLeft Reads: %s\n\tFile format: %s\n",files[i].leftReads,format);
 			if(strcmp(format,"fasta") == 0 || strcmp(format,"fa") == 0){
 				readFastA_DB(files[i].leftReads,readl,2);
 			}
@@ -71,12 +71,12 @@ int makeDB(char* outDB, int blocks, struct readFiles* files){
 				readFastQ_DB(files[i].leftReads,readl,2);
 			}
 			else{
-				printf("Neither fasta nor fastq. EXIT\n");
+				printf("\tNeither fasta nor fastq. EXIT\n");
 				return 0;
 			}
 			// read right reads
 			format = strrchr(files[i].rightReads,'.')+1;
-			printf("Right Reads: %s\nFile format: %s\n",files[i].rightReads,format);
+			printf("\tRight Reads: %s\n\tFile format: %s\n",files[i].rightReads,format);
 			if(strcmp(format,"fasta") == 0 || strcmp(format,"fa") == 0){
 				readNum = readFastA_DB(files[i].rightReads,readr,2) + 1;
 			}
@@ -84,16 +84,16 @@ int makeDB(char* outDB, int blocks, struct readFiles* files){
 				readNum = readFastQ_DB(files[i].rightReads,readr,2) + 1;
 			}
 			else{
-				printf("Neither fasta nor fastq. EXIT\n");
+				printf("\tNeither fasta nor fastq. EXIT\n");
 				return 0;
 			}
 			files[i].endId = readNum-1;
 		}
 		// SE
 		else{
-			printf("Read Single-End Library\n");
+			printf("\tRead Single-End Library\n");
 			format = strrchr(files[i].leftReads,'.')+1;
-			printf("InFile: %s\nFile format: %s\n",files[i].leftReads,format);
+			printf("\tInFile: %s\n\tFile format: %s\n",files[i].leftReads,format);
 			files[i].startId = readNum;
 			if(strcmp(format,"fasta") == 0 || strcmp(format,"fa") == 0){
 				readNum = readFastA_DB(files[i].leftReads,readNum,1) + 1;
@@ -102,14 +102,14 @@ int makeDB(char* outDB, int blocks, struct readFiles* files){
 				readNum = readFastQ_DB(files[i].leftReads,readNum,1) + 1;
 			}
 			else{
-				printf("Neither fasta nor fastq. Exit !!!\n");
+				printf("\tNeither fasta nor fastq. Exit !!!\n");
 				return 0;
 			}
 			files[i].endId = readNum-1;
 		}
 	}
 
-	printf("Write database to: %s\n",outDB);
+	printf("\tWrite database to: %s\n",outDB);
 	writeDB(outDB,blocks,files);
 
 	return 1;
@@ -141,8 +141,8 @@ void writeDB(char* outDB, int blocks, struct readFiles* files){
 
 	blocksPos[0][0] = wPos;
 
-	printf("CHECKPOINT write read DB\n");
-	printf("Number of all reads: %i\n",readTotNum);
+	printf("CHECKPOINT: Write read DB\n");
+	printf("\tNumber of all reads: %i\n",readTotNum);
 
 	for(i=0;i<readTotNum;i++){
 		if(i==blsize && j < blocks-1){
@@ -169,7 +169,7 @@ void writeDB(char* outDB, int blocks, struct readFiles* files){
 
 	fclose(db);
 
-	printf("CHECKPOINT write metaData to %s\n",outDB);
+	printf("CHECKPOINT: Write metaData to %s\n",outDB);
 
 	db = fopen(outDB,"wb");
 
@@ -234,8 +234,8 @@ void write_filteredDB(char* outDB, int blocks, struct readFiles* files, struct r
 
 	blocksPos[0][0] = wPos;
 
-	printf("CHECKPOINT write read DB\n");
-	printf("Number of all reads: %i\n",numreads);
+	printf("CHECKPOINT: Write read DB\n");
+//	printf("Number of all reads: %i\n",numreads);
 
 	for(i=0;i<numreads;i++){
 		if(i==blsize && j < blocks-1){
@@ -258,7 +258,7 @@ void write_filteredDB(char* outDB, int blocks, struct readFiles* files, struct r
 
 	fclose(db);
 
-	printf("CHECKPOINT write metaData to %s\n",outDB);
+	printf("CHECKPOINT: Write metaData to %s\n",outDB);
 
 	db = fopen(outDB,"wb");
 
@@ -291,7 +291,7 @@ void write_filteredDB(char* outDB, int blocks, struct readFiles* files, struct r
 	fwrite(&temp,sizeof(int),1,db);
 	fwrite(readDB,sizeof(char),temp,db);
 	fwrite(&numreads,sizeof(int),1,db);
-	printf("readTotNum: %i\n",readTotNum);
+//	printf("readTotNum: %i\n",readTotNum);
 //	fwrite(&readTotNum,sizeof(int),1,db);
 	fwrite(&blocks,sizeof(int),1,db);
 	fwrite(blocksPos[0],sizeof(uint64_t),blocks,db);
@@ -306,21 +306,22 @@ void write_filteredDB(char* outDB, int blocks, struct readFiles* files, struct r
 }
 
 struct reads* readDB(char* outDB){
+	char verbose = 0;
 	FILE* metaDB = fopen(outDB,"rb");
-	printf("Read Reads from: %s\n",outDB);
+	if(verbose) printf("Read Reads from: %s\n",outDB);
 	struct reads* reads = NULL;
 
 	int i;
 	int temp;
 	// Read MetaINFO
 	fread(&maxReadLen,sizeof(int),1,metaDB);
-	printf("MaxRead: %i\n",maxReadLen);
+	if(verbose) printf("MaxRead: %i\n",maxReadLen);
 	fread(&temp,sizeof(int),1,metaDB);
-	printf("Number of Libs: %i\n",temp);
+	if(verbose) printf("Number of Libs: %i\n",temp);
 	struct readFiles* files = (struct readFiles*)malloc(sizeof(struct readFiles)*temp);
 	fread(files,sizeof(struct readFiles),temp,metaDB);
 	for(i=0; i<files->libNum;i++){
-		printf("EndId: %i\n",files[i].endId);
+		if(verbose) printf("EndId: %i\n",files[i].endId);
 		numreads = files[i].endId;
 		fread(&temp,sizeof(int),1,metaDB);
 		files[i].leftReads = (char*)malloc(temp+1);
@@ -337,12 +338,12 @@ struct reads* readDB(char* outDB){
 			fread(&files[i].maxInsert,sizeof(int),1,metaDB);
 			fread(&files[i].avgInsert,sizeof(int),1,metaDB);
 			fread(&files[i].oriPE,sizeof(int),1,metaDB);
-			printf("MatePair Library -> Insert: %i\n",files[i].avgInsert);
-			printf("\tLeftReads:  %s\n",files[i].leftReads);
-			printf("\tRightReads: %s\n",files[i].rightReads);
-			printf("\tMinInsertSize: %i\n",files[i].minInsert);
-			printf("\tMaxInsertSize: %i\n",files[i].maxInsert);
-			printf("\tPE-read Orientation: %s\n",peOri[files[i].oriPE]);
+			printf("\tMatePair Library -> InsertSize: %i\n",files[i].avgInsert);
+			printf("\t\tLeftReads: \t\t%s\n",files[i].leftReads);
+			printf("\t\tRightReads: \t\t%s\n",files[i].rightReads);
+			printf("\t\tMinInsertSize: \t\t%i\n",files[i].minInsert);
+			printf("\t\tMaxInsertSize: \t\t%i\n",files[i].maxInsert);
+			printf("\t\tPE-read Orientation: \t%s\n",peOri[files[i].oriPE]);
 		}
 		else{
 			printf("SingleEnd Library\n");
@@ -360,15 +361,11 @@ struct reads* readDB(char* outDB){
 	char* readDBFile = (char*)malloc(temp+1);
 	fread(readDBFile,sizeof(char),temp,metaDB);
 	readDBFile[temp]='\0';
-	printf("Path to readDB: %s\n",readDBFile);
+	if(verbose) printf("Path to readDB: %s\n",readDBFile);
 	int readNumber;
 	fread(&readNumber,sizeof(int),1,metaDB);
-	printf("numreads: %i\n",numreads);
 	numreads = readNumber;
-	//TODo: Why wrong in MetaDB
-//	readNumber = numreads;
-	printf("readNumber: %i\n",readNumber);
-
+	if(verbose) printf("readNumber: %i\n",readNumber);
 
 	fclose(metaDB);
 
@@ -394,7 +391,6 @@ struct reads* readDB(char* outDB){
 		if(len>=31){
 			if(len > maxReadLen) maxReadLen = len;
 			fread(&ID,sizeof(int),1,readDB);
-			if(ID == 1) printf("read with ID: 1 was found\n");
 			reads[ID].seq = (char*)malloc((len+3)/4);
 			fread(reads[ID].seq,sizeof(char),(len+3)/4,readDB);
 			reads[ID].ID = ID;
@@ -404,13 +400,12 @@ struct reads* readDB(char* outDB){
 
 	fclose(readDB);
 
-	printf("Length of read 1: %i \n",reads[1].len);
-
 	return reads;
 }
 
 void freeDB(struct reads* reads){
-	printf("Numreads to free: %i\n",numreads);
+	char verbose = 0;
+	if(verbose) printf("Numreads to free: %i\n",numreads);
 	for(int i=0;i<=numreads;i++){
 		if(reads[i].len){
 			free(reads[i].seq);
@@ -515,7 +510,7 @@ int readFastA_DB(char* inFile, int readNum, int jump){
 	fseek (fasta , 0 , SEEK_END);
 	filesize = ftell(fasta);
 	rewind(fasta);
-	printf("Filesize: %li\n",filesize);
+	printf("\tFilesize: %li\n",filesize);
 
 	char* buffer2;
 	char* read = (char*)malloc(150000);
@@ -589,7 +584,7 @@ int readFastA_DB(char* inFile, int readNum, int jump){
 }
 
 int readFastQ_DB(char* inFile, int readNum, int jump){
-	printf("CHECKPOINT : ReadFastQ_DB\n");
+	printf("CHECKPOINT: ReadFastQ_DB\n");
 	char filebuffer[BUFFER_SIZE]; // 4 MB buffer
 	long filesize;
 	long cursize=0;
@@ -605,7 +600,7 @@ int readFastQ_DB(char* inFile, int readNum, int jump){
 	fseek (fasta , 0 , SEEK_END);
 	filesize = ftell(fasta);
 	rewind(fasta);
-	printf("Filesize: %li\n",filesize);
+	printf("\tFilesize: %li\n",filesize);
 
 	char* buffer1, *buffer2;
 	char* read = (char*)malloc(150000);

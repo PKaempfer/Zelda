@@ -19,7 +19,8 @@
  * Is not used in next hash table construction.
  */
 void* mt_filter_reads_correction(void* filter_block){
-	printf("Checkpoint: Create Mapping Thread\n");
+	char verbose = 0;
+	if(verbose) printf("Checkpoint: Create Mapping Thread\n");
 	KmerBitBuffer kmercp;
 	KmerBitBuffer tempCor;
 	KmerBitBuffer tempCor2;
@@ -28,8 +29,6 @@ void* mt_filter_reads_correction(void* filter_block){
 	KmerBitBuffer precurser = 0;
 	uint32_t bucket;
 
-	char verbose = 0;
-
 	FILE* correctedR;
 	if(verbose) correctedR = fopen("correctedReads","w");
 
@@ -37,8 +36,6 @@ void* mt_filter_reads_correction(void* filter_block){
 	struct reads* reads = block.reads;
 	long i = block.start;
 	long end = block.end;
-
-//	if(block.pthr_id == 6) verbose = 1;
 
 	int cov_tot;
 	int cov_one;
@@ -62,20 +59,18 @@ void* mt_filter_reads_correction(void* filter_block){
 	int cpByte;
 	char* decomRead = NULL;
 	char* comRead = NULL;
-//	char* decomRead = (char*)malloc(sizeof(char)*(len+1));
 	char* readSeq;
 	char* readSeqC=(char*)malloc(150000);
 	char* cutSeq=(char*)malloc(150000);
 	int max_one;
 	char* readSeqOrg = (char*)malloc((maxReadLen+3)/4);
-//	char* readSeqInter = (char*)malloc((maxReadLen+3)/4);
 	unsigned char* cArray = (unsigned char*)malloc(sizeof(unsigned char)*((maxReadLen-nK)+1));
 	char redo = 0;
 
 	if(verbose) printf("MaxReadLen: %i\n",maxReadLen);
 
 	for(;i<=end;i++){
-		if((i-block.start)%100000==0) printf("Thread: %i: %li reads corrected\n",block.pthr_id,i-block.start);
+		if(verbose && (i-block.start)%100000==0) printf("Thread: %i: %li reads corrected\n",block.pthr_id,i-block.start);
 		len = reads[i].len;
 		if(len >= nK){
 //			decomRead = decompressRead(reads[i].seq,len);
@@ -347,7 +342,7 @@ void* mt_filter_reads_correction(void* filter_block){
 			redo = 0;
 		}
 	}
-	printf("Thread %i finished correction\n",block.pthr_id);
+	if(verbose) printf("Thread %i finished correction\n",block.pthr_id);
 	free(readSeqC);
 	free(cArray);
 	if(verbose) fclose(correctedR);
@@ -476,20 +471,15 @@ void* mt_filter_reads(void* filter_block){
 }
 
 void filter_reads(struct reads* reads, const int pthr_num, pthread_t* threads){
-	printf("TEst\n");
 	printf("CHECKPOINT: Filter Reads\n");
-	printf("TreadNumber: %i\n",pthr_num);
 	struct filter_block* filter_block = (struct filter_block*)malloc(sizeof(struct filter_block)*pthr_num);
-	printf("NumReads: %i\n",numreads);
-	printf("TreadNumber: %i\n",pthr_num);
 
 	int i;
 	int part = numreads / pthr_num;
 
 	long start = 0;
-	printf("TreadNumber: %i\n",pthr_num);
 	for(i=0;i<pthr_num;i++){
-		printf("Start with thread: %i\n",i);
+//		printf("Start with thread: %i\n",i);
 		filter_block[i].start = start;
 		filter_block[i].end = (i+1)*part;
 		start = filter_block[i].end + 1;

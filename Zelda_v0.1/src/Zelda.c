@@ -42,16 +42,20 @@ int main(int argc, char* argv[]) {
 	struct para* para = readCMDline(argc, argv);
 
 	if(para->run == 1 || para->run == 3){
-		printf("CHECKPOINT: 0. craete DB\n");
+		printf("\nStep 0: Craete DB\n");
+		printf("###################################################\n");
 		time(&start);
 		makeDB(para->readDB, para->blocks, para->files);
 		time(&stop);
 		printf("Time: %0.2f\n",difftime (stop,start));
-		sleep(sleeptime);
-		printf("Continue\n");
+		if(sleeptime){
+			sleep(sleeptime);
+			printf("Continue\n");
+		}
 		freeFiles(para);
 		if(para->run == 1) finished(para);
 	}
+	printf("\n");
 
 
 
@@ -65,7 +69,8 @@ int main(int argc, char* argv[]) {
 
     if(prefilter == 1){
 		// preliminary filter
-	    printf("CHECKPOINT: 1. create Graph\n");
+	    printf("Step 1: Create Graph\n");
+	    printf("###################################################\n");
 		time(&stop);
 		para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
 		struct reads* reads1 = readDB(para->readDB);
@@ -74,13 +79,13 @@ int main(int argc, char* argv[]) {
 		write_filteredDB(para->readDB,para->blocks,para->files,reads1);
 		freeEnds_oa();
 		freeHashTable_oa();
-		printf("CHECKPOINT: 1. Free Reads\n");
+		printf("CHECKPOINT: Free Reads\n");
 		freeDB(reads1);
 		freeFiles(para);
     }
     else if(prefilter == 2){
     	// Hashing
-    	printf("CHECKPOINT: 1. Start New Hashing\n");
+    	printf("CHECKPOINT: Start New Hashing\n");
     	time(&stop);
     	strcat(para->readDB,"filter");
     }
@@ -92,34 +97,51 @@ int main(int argc, char* argv[]) {
 	createGraph(graphSize);
 	time(&start);
 	printf("Time: %0.2f\n",difftime (start,stop));
-	sleep(sleeptime);
-	printf("Continue\n");
+	if(sleeptime){
+		sleep(sleeptime);
+		printf("Continue\n");
+	}
+	printf("\n");
 
-	printf("CHECKPOINT: 2. Fill Adjacency List\n");
+
+	printf("Step 2: Fill Adjacency List\n");
+	printf("###################################################\n");
 	hashToTabDFS_oa();
 	time(&stop);
 	printf("Time: %0.2f\n",difftime (stop,start));
-	printf("Wait after Hashing\n");
-	sleep(sleeptime);
-	printf("Continue\n");
+	if(sleeptime){
+		printf("Wait after Hashing\n");
+		sleep(sleeptime);
+		printf("Continue\n");
+	}
+	printf("\n");
 
-	printf("CHECKPOINT: 3. HashTable Destructor\n");
+//	printf("Step 3: Free HashTable\n");
 	freeHashTable_oa();
-	printf("Wait after Freeing HashTbale\n");
-	sleep(sleeptime);
-	printf("Continue\n");
+//	if(sleeptime){
+//		printf("Wait after Freeing HashTbale\n");
+//		sleep(sleeptime);
+//		printf("Continue\n");
+//	}
+//	printf("\n");
 
-	printf("CHECKPOINT: 4 Error Correction\n");
+	printf("Step 3: Error Correction\n");
+	printf("###################################################\n");
 	time(&start);
 	perfectErrorCorrection();// errorCorrection();
 //	writeDot("./output/test_aftererror.dot");
 	time(&stop);
-	printf("Error Correction Time: %0.2f\n",difftime (stop,start));
-	printf("Wait after Error correction\n");
-	sleep(sleeptime);
-	printf("continue\n");
+	printf("Time: %0.2f\n",difftime (stop,start));
+	if(sleeptime){
+		printf("Wait after Error correction\n");
+		sleep(sleeptime);
+		printf("continue\n");
+	}
+	printf("\n");
 
-	printf("CHECKPOINT: 5. Graph Reduction\n");
+
+	printf("Step 4: Graph Reduction\n");
+	printf("###################################################\n");
 	time(&start);
 	prepareGraph();
 	printf("CHECKPOINT: Reduce Graph (light)\n");
@@ -139,12 +161,10 @@ int main(int argc, char* argv[]) {
 //	printRedGraph();
 //	printRedDot("output/redRedredGraph.dot");
 	do{
-//		printf("Horizontal reduction\n");
 		reduceRedGraph();
-//		printf("Vertical reduction\n");
 	}while(verticalReduction());
-	printf("Write dot-File: Reduced_DBG.dot");
 	if(findotdump){
+		printf("CHECKPOINT: Write dot-File: Reduced_DBG.dot\n");
 		sprintf(tempPath,"%s/Reduced_DBG.dot",para->asemblyFolder);
 		printRedDot(tempPath);
 	}
@@ -157,7 +177,7 @@ int main(int argc, char* argv[]) {
 		printRedGraphToFile(tempPath);
 	}
 	do{
-		printf("Graph reduction\n");
+//		printf("Graph reduction\n");
 		reduceRedGraph_strong();
 	}while(verticalReduction());
 	if(findotdump){
@@ -166,9 +186,12 @@ int main(int argc, char* argv[]) {
 	}
 	time(&stop);
 	printf("Reducer Time: %0.2f\n",difftime (stop,start));
-	printf("Wait after Reduction\n");
-	sleep(sleeptime);
-	printf("continue\n");
+	if(sleeptime){
+		printf("Wait after Reduction\n");
+		sleep(sleeptime);
+		printf("continue\n");
+	}
+
 	countRemainingNodes();
 	redGraphConnector();
 	if(dotdump){
@@ -176,33 +199,35 @@ int main(int argc, char* argv[]) {
 		printRedGraphToFile(tempPath);
 	}
 
-	printf("CHECKPOINT: 6. Stringer (Overlaps to String Graph):\n");
+	printf("Step 5: Stringer (Overlaps to String Graph):\n");
+	printf("###################################################\n");
 	time(&start);
 	struct myovlList* G = initOVLgraph(numreads);
 	struct string_graph* S = initStringGraph(G,para->asemblyFolder,findotdump);
-//	exit(1);
 	time(&stop);
 	printf("Stringer: %0.2f\n",difftime (stop,start));
-	printf("Wait after Stringer\n");
-	sleep(sleeptime);
-	printf("CHECKPOINT: ContigWriter\n");
-
+	if(sleeptime){
+		printf("Wait after Stringer\n");
+		sleep(sleeptime);
+	}
+	printf("\n");
 
 	// Scaffolding
-	printf("CHECKPOINT: 7. Scaffolding\n");
-	printf("Re-read the input Database\n");
+	printf("Step 6: Scaffolding\n");
+	printf("###################################################\n");
+	printf("CHECKPOINT: Re-read the input Database\n");
 	struct reads* reads = readDB(para->readDB);
 	time(&start);
 	initScaff(G,reads);
-//	struct pc_anno* pc_anno = (struct pc_anno*)reads[22673596].annotation;
-//	printf("pc_anno of 22673596 pathID: %i\n",pc_anno->pathID);
 	readTouring(G,para->files,reads);
 	time(&stop);
 	printf("Scaffolding: %0.2f\n",difftime (stop,start));
-	printf("Wait after Scaffolding\n");
-	sleep(sleeptime);
-	printf("continue\n");
-//		exit(1);
+	if(sleeptime){
+		printf("Wait after Scaffolding\n");
+		sleep(sleeptime);
+		printf("continue\n");
+	}
+
 	findotdump = 1;
 
 	contig_repeatFinder();
@@ -214,47 +239,17 @@ int main(int argc, char* argv[]) {
 		scaffGraphDot(G,reads,tempPath);
 	}
 
-
-//	exit(1);
-//		No Scaffolding
-	time(&start);
-
 	printf("CHECKPOINT: 8. POA (Layout-Consensus)\n");
+	time(&start);
 	struct POG* contigs_pog;
-	// 3. Argument, scaffolding 1 - yes, 0 - no
-	// boolean heuristic parameter decides whether heuristic alignments methods are used or not
-	// Contigs
-//	struct POG* contigs_pog = make_poaScaff(G,reads,0,para,heuristic);
-//	time(&stop);
-//	printf("POA: %0.2f\n",difftime (stop,start));
-//	printf("Wait after POA\n");
-//	sleep(sleeptime);
-//	printf("continue\n");
-//	char* contigPath = (char*)malloc(100);
-//	sprintf(contigPath,"%s/contigs.fasta",para->asemblyFolder);
-//	printf("CHECKPOINT: FastaOut\n");
-//	time(&start);
-//	poa_printContigs(contigs_pog,contigPath);
-//	sprintf(tempPath,"%s/contigs.vcf",para->asemblyFolder);
-//	printf("CHECKPOINT: Variation Calling\n");
-//	poa_reportVariant(contigs_pog,tempPath,contigPath);
-//	time(&stop);
-//	printf("FASTA Out: %0.2f\n",difftime (stop,start));
-//	printf("Wait after FastaOut\n");
-//	sleep(sleeptime);
-//	printf("continue\n");
-//	poa_deleteVariant(contigs_pog);
-//	if(contigs_pog) free_POG(contigs_pog);
-
-//	exit(1);
-	// Scaffolds
-
 	contigs_pog = OLC(G,reads,scaffolding,heuristic, para);
 	time(&stop);
 	printf("POA: %0.2f\n",difftime (stop,start));
-	printf("Wait after POA\n");
-	sleep(sleeptime);
-	printf("continue\n");
+	if(sleeptime){
+		printf("Wait after POA\n");
+		sleep(sleeptime);
+		printf("continue\n");
+	}
 	if(scaffolding){
 //		exit(1);
 //		contigs_pog = make_poaScaff(G,reads,1,para,heuristic);
@@ -281,9 +276,11 @@ int main(int argc, char* argv[]) {
 	}
 	time(&stop);
 	printf("FASTA Out: %0.2f\n",difftime (stop,start));
-	printf("Wait after FastaOut\n");
-	sleep(sleeptime);
-	printf("continue\n");
+	if(sleeptime){
+		printf("Wait after FastaOut\n");
+		sleep(sleeptime);
+		printf("continue\n");
+	}
 	poa_deleteVariant(contigs_pog);
 	if(contigs_pog) free_POG(contigs_pog);
 	freeDB(reads);

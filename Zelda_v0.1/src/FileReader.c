@@ -256,7 +256,7 @@ struct readFiles* readCMDmakeDB(int argc, char *argv[],int libnumTot){
 					return NULL;
 				}
 			}
-			printf("Found Paired-End libraries\n");
+//			printf("Found Paired-End libraries\n");
 			files[libnum].leftReads = (char*)malloc(sizeof(char)*100);
 			files[libnum].rightReads = (char*)malloc(sizeof(char)*100);
 			strcpy(files[libnum].leftReads,argv[i+1]);
@@ -470,6 +470,7 @@ void fileScheduler(char* inFile, int pthr_num, pthread_t* threads){
  * @return			The library meta information (SE-,PE-,MP-lib, insert size, read number, ...)
  */
 struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* threads){
+	char verbose = 0;
 	printf("CHECKPOINT: FileScheduler\n");
 	FILE* metaDB = fopen(dbFile,"rb");
 
@@ -485,12 +486,12 @@ struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* thread
 	// Read MetaINFO
 	fread(&maxReadLen,sizeof(int),1,metaDB);
 	fread(&temp,sizeof(int),1,metaDB);
-	printf("Number of Libs: %i\n",temp);
-	printf("Max Read Len: %i\n",maxReadLen);
+	if(verbose) printf("Number of Libs: %i\n",temp);
+	if(verbose) printf("Max Read Len: %i\n",maxReadLen);
 	struct readFiles* files = (struct readFiles*)malloc(sizeof(struct readFiles)*temp);
 	fread(files,sizeof(struct readFiles),temp,metaDB);
 	for(i=0; i<files->libNum;i++){
-		printf("EndId: %i\n",files[i].endId);
+		if(verbose) printf("EndId: %i\n",files[i].endId);
 		numreads = files[i].endId;
 		fread(&temp,sizeof(int),1,metaDB);
 		files[i].leftReads = (char*)malloc(temp+1);
@@ -507,17 +508,17 @@ struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* thread
 			fread(&files[i].maxInsert,sizeof(int),1,metaDB);
 			fread(&files[i].avgInsert,sizeof(int),1,metaDB);
 			fread(&files[i].oriPE,sizeof(int),1,metaDB);
-			printf("MP/PE Library -> Insert: %i - %i\n",files[i].minInsert,files[i].maxInsert);
-			printf("\tLeftReads:  %s\n",files[i].leftReads);
-			printf("\tRightReads: %s\n",files[i].rightReads);
+			printf("\tMP/PE Library -> Insert: %i - %i\n",files[i].minInsert,files[i].maxInsert);
+			printf("\t\tLeftReads:  %s\n",files[i].leftReads);
+			printf("\t\tRightReads: %s\n",files[i].rightReads);
 		}
 		else{
-			printf("SingleEnd Library\n");
-			printf("\tLeftReads:  %s\n",files[i].leftReads);
+			printf("\tSingleEnd Library\n");
+			printf("\t\tLeftReads:  %s\n",files[i].leftReads);
 		}
 	}
 
-	printf("numreads: %i\n",numreads);
+	if(verbose) printf("numreads: %i\n",numreads);
 	readLenList = (int16_t*)malloc(sizeof(int16_t)*(numreads+1));
 //	readStartList = (int*)malloc(sizeof(int)*(numreads+1));
 
@@ -528,13 +529,13 @@ struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* thread
 	char* readDBFile = (char*)malloc(temp+1);
 	fread(readDBFile,sizeof(char),temp,metaDB);
 	readDBFile[temp]='\0';
-	printf("Path to readDB: %s\n",readDBFile);
+	printf("\tPath to readDB: %s\n",readDBFile);
 	int readNumber;
 	fread(&readNumber,sizeof(int),1,metaDB);
 //	printf("readNumber(???): %i\n",readNumber);
 
 	fread(&blocks,sizeof(int),1,metaDB);
-	printf("Number of Block in this DB: %i\n",blocks);
+	printf("\tNumber of Block in this DB: %i\n",blocks);
 	uint64_t** blocksPos = (uint64_t**)malloc(sizeof(uint64_t*)*2);
 	blocksPos[0] = (uint64_t*)malloc(sizeof(uint64_t)*blocks);
 	blocksPos[1] = (uint64_t*)malloc(sizeof(uint64_t)*blocks);
@@ -545,7 +546,7 @@ struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* thread
 
 	createHashTable_oa();
 	if(blocks < pthr_num){
-		printf("#Threads > #Blocks: Set pthr_num to %i\n",blocks);
+		printf("\t#Threads > #Blocks: Set pthr_num to %i\n",blocks);
 		pthr_num = blocks;
 	}
 	struct hash_block* hash_block = (struct hash_block*)malloc(sizeof(struct hash_block)*pthr_num);
@@ -564,8 +565,8 @@ struct readFiles* fileScheduler_DB(char* dbFile, int pthr_num, pthread_t* thread
 	blocks_per_thread = blocks/pthr_num;
 	pthr_runN = pthr_num;
 
-	printf("Init Number of Threads: %i in %i blocks\n",pthr_num,blocks);
-	printf("Number of blocks per Thread: %i (rest: %i)\n",blocks_per_thread,rest_blocks);
+	printf("\tInit Number of Threads: %i in %i blocks\n",pthr_num,blocks);
+	printf("\tNumber of blocks per Thread: %i (rest: %i)\n",blocks_per_thread,rest_blocks);
 	for(i=0;i<pthr_num;i++){
 		hash_block[i].pthr_id = i;
 		hash_block[i].pthr_num = pthr_num;

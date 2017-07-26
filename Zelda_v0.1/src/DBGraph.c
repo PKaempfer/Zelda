@@ -141,7 +141,7 @@ void createGraph(int V)
 }
 
 void freeGraph(){
-	printf("CHECKPOINT: Free AdjList\n");
+//	printf("CHECKPOINT: Free AdjList\n");
 	uint32_t i;
 	struct AdjListNode* listNode;
 	struct LinkListNode* linkNode;
@@ -233,7 +233,7 @@ void countKmers(){
 	for(i=1;i<graph->V;i++){
 		if(graph->array[i].head || graph->array[i].tail) count++;
 	}
-	printf("Number of left Kmers: %i\n",count);
+	printf("\tNumber of left Kmers: %i\n",count);
 }
 
 void deleteComp(int start){

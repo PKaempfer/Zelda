@@ -676,16 +676,11 @@ void perfectErrorCorrection(){
 	char *dotFile = (char*)malloc(sizeof(char)*100);
 	do{
 		pro = 0;
-		printf("ErrorCorrection Round %i\n",round);
-		countKmers();
+//		printf("ErrorCorrection Round %i\n",round);
 		change = 0;
 		for(i=1;i<=graph->V;i++){
 			if(i%(graph->V/10)==0){
 				pro++;
-				printf("%.1f %% (%i) nodes Corrected\n",(float)pro*10,i);
-				printf("Number of collapsed Kmers: up: %li / down: %li\n",collapseCountUp,collapseCountDown);
-	    		printf("Iter time:      %.3f s\n",(float)sumcollapse/1000000000);
-	    		printf("Collapse time:  %.3f s\n",(float)sumIter/1000000000);
 			}
 			oldchange = change;
 #ifdef IterError
@@ -714,12 +709,19 @@ void perfectErrorCorrection(){
 			sprintf(dotFile,"test_%i.dot",round);
 			writeDot(dotFile);
 		}
-		printf("Deleted k-mers: %li\n",deletedKmer);
+
 	} while(change);
 	// Delete self pointing circles ?!?
 //	for(i=1;i<=graph->V;i++){
 //		indelHandle(i);
 //	}
+//	printf("%.1f %% (%i) nodes Corrected\n",(float)pro*10,i);
+	printf("\tDeleted k-mers: %li\n",deletedKmer);
+	printf("\tNumber of collapsed Kmers: %li\n",collapseCountUp+collapseCountDown);
+	countKmers();
+//	printf("Iter time:      %.3f s\n",(float)sumcollapse/1000000000);
+//	printf("Collapse time:  %.3f s\n",(float)sumIter/1000000000);
+
 
 
 }

@@ -83,9 +83,9 @@ void hashToTabDFS_oa(){
 	}
 	travDFS_oa(EMPTYBUCKET);
 
-    printf("%i Nodes in %i Components\n",tabindex-1,comp);
-    printf("%i Ends deleted\n",delEnd);
-    printf("%i Nodes in %i Components deleted\n",delNode,delcomp);
+    printf("\t%i Nodes in %i Component(s)\n",tabindex-1,comp);
+//    printf("\t%i Ends deleted\n",delEnd);
+    printf("\t%i Nodes in %i Component(s) deleted\n",delNode,delcomp);
 }
 
 void travDFS_oa(uint32_t i){
@@ -99,7 +99,7 @@ void travDFS_oa(uint32_t i){
 	if(!upStack) upStack = (uint32_t*)malloc(sizeof(uint32_t)*upStacksize);
 
 	if(i == EMPTYBUCKET){
-		printf("Free all intermediate stacks\n");
+//		printf("Free all intermediate stacks\n");
 		free(upStack);
 		free(downStack);
 	}

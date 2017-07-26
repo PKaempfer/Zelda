@@ -484,7 +484,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 					aS->scaff[scaffID].true_Cov = (float)totalBases/(float)aS->scaff[scaffID].len;
 
 					printf("%i: True Coverage after the Backbone: %.2f\n",scaffID,aS->scaff[scaffID].true_Cov);
-					printf("Bases: %lu Length: %i\n",totalBases,aS->scaff[scaffID].len);
+					if(verbose) printf("Bases: %lu Length: %i\n",totalBases,aS->scaff[scaffID].len);
 
 					free(readseq);
 					free(revreadseq);
@@ -1613,7 +1613,7 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 				continue;
 			}
 			else{
-				printf("\tEND MATRIX BREAK\n");
+				if(verbose) printf("\tEND MATRIX BREAK\n");
 				unalignedReads++;
 				return 0;
 			}
@@ -1687,7 +1687,7 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuristic, uint32_t contigLen){
 	printf("CHECKPOINT: Start Alignments\n");
 	char verbose = 0;
-	char verbose2 = 1;
+	char verbose2 = 0;
 	int offset = 10;
 	char fin;
 	int i,j;
@@ -1817,10 +1817,10 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 
     for(i=0;i<aS->numbridge;i++){
     	if(aS->scaff[i].len > MIN_SCAFF_LEN || i >= aS->num){
-    		printf("i: %i\n",i);
-    		if(i>=aS->num) printf("\t\tGebridgetes Scaffold (%i)\n",i);
+//    		printf("i: %i\n",i);
+    		if(i>=aS->num && verbose) printf("\t\tGebridgetes Scaffold (%i)\n",i);
     		pogreadsset = OLC_backbone(&pog->contig[pog->contigNum],reads,G,aS,i);
-    		printf("Contig_%i:%i_%i_len:%i -> Coverage: %.2f (!! %i x!!)\n",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID,pog->contig[pog->contigNum].length,aS->scaff[i].true_Cov,aS->scaff[i].testVar_delete);
+    		if(verbose) printf("Contig_%i:%i_%i_len:%i -> Coverage: %.2f (!! %i x!!)\n",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID,pog->contig[pog->contigNum].length,aS->scaff[i].true_Cov,aS->scaff[i].testVar_delete);
 			if(scaffolding) sprintf(name,"Scaff_%i:%i_%i_len:",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID);
 			else sprintf(name,"Contig_%i:%i_%i_len:",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID);
 			pog->contig[pog->contigNum].name = (char*)malloc(strlen(name)+100);
@@ -1836,6 +1836,7 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 
 //    		POG_doubletest(&pog->contig[pog->contigNum]);
 			if((float)numNodes/(float)aS->scaff[i].len < 2){
+				pog->contig[pog->contigNum].avgCov = aS->scaff[i].true_Cov;
 #ifdef TIMEM
 				clock_gettime(CLOCK_MONOTONIC, &consenusSt);
 #endif
@@ -1852,14 +1853,14 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 	    		aS->scaff[i].scaffoldID = pog->contigNum;
 	    		if(verbose) printf("i: %i , scaffID: %i\n",i,aS->scaff[i].scaffoldID);
 	    		if(aS->scaff[i].next>=0){
-	    			printf("Scaffold %i has a connection\n",pog->contigNum);
+	    			if(verbose) printf("Scaffold %i has a connection\n",pog->contigNum);
 	    			pog->contig[pog->contigNum].seqEdge = (struct sequenceEdge*)malloc(sizeof(struct sequenceEdge));
 	//    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[i].next->first->bridge->estLen;
 	    			pog->contig[pog->contigNum].seqEdge->insertLen = aS->scaff[aS->scaff[i].next].first->bridge->estLen;
 	    			pog->contig[pog->contigNum].seqEdge->ori = 0;
 	    		}
 	    		else{
-	    			printf("No Bridging Connection: from %i %i\n",i,aS->scaff[i].next);
+	    			if(verbose) printf("No Bridging Connection: from %i %i\n",i,aS->scaff[i].next);
 	    			pog->contig[pog->contigNum].seqEdge = NULL;
 	    		}
 	    		if(i >= aS->num) pog->contig[pog->contigNum].vflag = 1;

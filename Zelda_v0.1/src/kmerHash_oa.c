@@ -66,11 +66,10 @@ void createHashTable_oa(){
 		bitmask |= 1;
 	}
 	expansionThreshold = INITHASHSIZE(bitnum);
-	printf("Create HashTable of size: %i (expTreshold: %i)\n",j,expansionThreshold);
+	printf("\tCreate HashTable of size: %i (expTreshold: %i)\n",j,expansionThreshold);
 }
 
 void freeHashTable_oa(){
-	printf("CHECKPOINT: Free HashTable\n");
 	free((void*)dbHash_oa);
 	dbHash_oa=NULL;
 	bitnum -= 2;
@@ -91,7 +90,8 @@ void freeEnds_oa(){
 }
 
 volatile struct hashkmer_oa* resizeHashTable(){
-	char verbose = 1;
+	char verbose = 0;
+	if(verbose) printf("Hash table full: RESIZE!\n");
 	uint32_t i,j;
 	volatile struct hashkmer_oa* tempHash_oa;
 	if(verbose) hashStats_oa();
@@ -202,8 +202,6 @@ char addKmer128_oa(KmerBitBuffer current_new){
 //					printf("Already locked by other thread: Return and start new\n");
 					return 0;
 				}
-				printf("Hash table full: RESIZE!\n");
-
 				// Wait till all other threads report a stopped- or finished-state
 				while(pthr_runN != resize_mutex + fin_mutex){
 //					printf("pth: %i != %i + %i\n",pthr_runN, resize_mutex, fin_mutex);
@@ -334,7 +332,7 @@ void hashStats_oa(){
 	j = INITHASHSIZE(bitnum);
 	KmerBitBuffer old = empty;
 
-	printf("Max readID: %i\n",numreads);
+	printf("\tNumber of Reads: %i\n",numreads);
 
 	int unique = 0;
 	int full = 0;
@@ -381,14 +379,14 @@ void hashStats_oa(){
 	float coverage = (float)totdist/(float)distinct;
 	float part = (float)maxReadLen/((float)(maxReadLen-nK)+1);
 	float part2 = unique / (float)tot_num;
-	printf("hashTable contains %i (%.2f%%) different k-mers with a total number of %lu\n",dif_kmer,(((float)dif_kmer/j))*100,tot_num);
-	printf("Unique k-mer: (c=1)    %i\n",unique);
-	printf("Estimated genome size: %i\n",distinct);
-	printf("Estimated Coverage:    %.2f\n",(coverage * part) + (coverage * part * part2));
-	printf("Conunt >=255:          %i\n",full);
-	printf("MaxCoverage:           %i\n",maxcount);
-	printf("AL GraphSize:          %i\n",graphSize);
-	printf("SetChains:             %i (avglen: %.2f)\n",setchains,(float)setchainlen/setchains);
+	printf("\tHashTable contains %i (%.2f%%) different k-mers with a total number of %lu\n",dif_kmer,(((float)dif_kmer/j))*100,tot_num);
+	printf("\tUnique k-mer: (c=1)    %i\n",unique);
+	printf("\tEstimated genome size: %i\n",distinct);
+	printf("\tEstimated Coverage:    %.2f\n",(coverage * part) + (coverage * part * part2));
+	printf("\tConunt >=255:          %i\n",full);
+	printf("\tMaxCoverage:           %i\n",maxcount);
+	printf("\tAL GraphSize:          %i\n",graphSize);
+	printf("\tSetChains:             %i (avglen: %.2f)\n",setchains,(float)setchainlen/setchains);
 }
 
 void mt_createKmers(char* read, int readNum){

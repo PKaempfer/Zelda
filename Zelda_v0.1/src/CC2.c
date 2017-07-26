@@ -478,7 +478,7 @@ void POG_alignConsensus(struct POGseq* contig){
 //	getrusage(RUSAGE_SELF,&r_usage);
 //	printf("Memory usage: %ld bytes\n",r_usage.ru_maxrss);
 	POG_variantCalling(contig);
-	POG_avgCov(contig);
+//	POG_avgCov(contig);
 	sprintf(contig->name,"%s_avgCov:%.2f",contig->name,contig->avgCov);
 //	if(verbose) exit(1);
 }

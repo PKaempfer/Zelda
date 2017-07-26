@@ -1098,7 +1098,7 @@ int startEndCon2(int *stp, int *endp, int *stk, int *endk, struct ReadNode *rnod
 						return 2;
 					}
 					else falsedir++;
-					if(rnode->read->ID == 1144414) printf("ID: %i -> relen: %i = mylen: %i (depth: %i) rnodepos: %i kanntepos: %i (found: %i, notfound: %i)\n",rnode->read->ID,relen,mylen,childReadIds->array[j].depth,rnode->pos,kannte->pos,truedir,falsedir);
+//					if(rnode->read->ID == 1144414) printf("ID: %i -> relen: %i = mylen: %i (depth: %i) rnodepos: %i kanntepos: %i (found: %i, notfound: %i)\n",rnode->read->ID,relen,mylen,childReadIds->array[j].depth,rnode->pos,kannte->pos,truedir,falsedir);
 //					return 1;
 				}
 			}
