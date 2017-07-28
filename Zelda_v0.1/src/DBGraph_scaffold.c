@@ -296,8 +296,8 @@ void initScaff(struct myovlList* G, struct reads* reads){
     	}
     }
 
-    printf("Number of components: %i\n",componentNum-1);
-    printf("Initial Read-Annotation finished\n");
+    printf("\tNumber of components: %i\n",componentNum-1);
+//    printf("Initial Read-Annotation finished\n");
 }
 
 /**
@@ -1938,7 +1938,7 @@ char isBridge(struct myovlList* G, int r1pathID, int r2pathID){
  * @param reads		The Read database, including meta information of the reads: The contig and component the belongs to. The function in the graph (JUNCTION, PROPER, WIDOWED, CONTAINED)
  */
 void readTouring(struct myovlList* G, struct readFiles* files, struct reads* reads){
-	printf("Start ReadTouring\n");
+	printf("CHECKPOINT: Read-Touring\n");
 	char verbose = 0;
 	char verbose2 = 0;
 	char verbose3 = 0;
@@ -1997,13 +1997,13 @@ void readTouring(struct myovlList* G, struct readFiles* files, struct reads* rea
 	for(i=0;i<files->libNum;i++){
 		startID = files[i].startId;
 		endID = files[i].endId;
-		printf("Reads: %i -> %i\n",startID,endID);
 		if(files[i].rightReads) pe = 1;
 		if(pe){
 			minIns = files[i].minInsert;
 			maxIns = files[i].maxInsert;
 			insert_array = (int*)malloc(sizeof(int)*((endID-startID)+1));
-			printf("\n##### MP/PE LIB #####\n");
+			printf("\n\t##### MP/PE LIB #####\n");
+			printf("\tReads: %i -> %i\n",startID,endID);
 			insert_num = 0;
 			insert_sum = 0;
 			insert_stddev_sum = 0;
@@ -2278,23 +2278,23 @@ void readTouring(struct myovlList* G, struct readFiles* files, struct reads* rea
 			}
 			insert_var = (float)insert_var_sum/insert_num;
 			insert_stddev = insert_stddev_sum/insert_num;
-			printf("Library Stats:\n");
-			printf("Concordant Reads pairs: %i\n",insert_num);
-			printf("Avg insert size:        %i\n",insert_avg);
-			printf("Stddev of insert size:  %i\n",insert_stddev);
-			printf("Var of insert size:     %.2f\n",insert_var);
+			printf("\tLibrary Stats:\n");
+			printf("\t\tConcordant Reads pairs: %i\n",insert_num);
+			printf("\t\tAvg insert size: \t%i\n",insert_avg);
+			printf("\t\tStddev of insert size: \t%i\n",insert_stddev);
+			printf("\t\tVar of insert size: \t%.2f\n",insert_var);
 			printf("\n");
-			printf("CONCORDANT READS : %i\n",co_num);
-			printf("BRIDGING   READS : %i\n",br_num);
-			printf("REPRESOLVE READS : %i\n",re_num);
-			printf("DISCORDANT READS : %i\n",di_num);
-			printf("DIFFCOMP   READS : %i\n",dicomp_num);
-			printf("MULTIPLE P READS : %i\n",mu_num);
-			printf("REJECTED   READS : %i\n",de_num);
-			printf("WIDOWED    READS : %i\n",wi_num);
-			printf("UNKNOWN    READS : %i\n",un_num);
-			printf("FOUND      READS : %i\n",foundsum);
-			printf("NOT FOUND  READS : %i\n",nfoundsum);
+			printf("\t\tCONCORDANT READS: \t%i\n",co_num);
+			printf("\t\tBRIDGING   READS: \t%i\n",br_num);
+			printf("\t\tREPRESOLVE READS: \t%i\n",re_num);
+			printf("\t\tDISCORDANT READS: \t%i\n",di_num);
+			printf("\t\tDIFFCOMP   READS: \t%i\n",dicomp_num);
+			printf("\t\tMULTIPLE P READS: \t%i\n",mu_num);
+			printf("\t\tREJECTED   READS: \t%i\n",de_num);
+			printf("\t\tWIDOWED    READS: \t%i\n",wi_num);
+			printf("\t\tUNKNOWN    READS: \t%i\n",un_num);
+//			printf("\tFOUND      READS : %i\n",foundsum);
+//			printf("\tNOT FOUND  READS : %i\n",nfoundsum);
 			co_num_tot += co_num;
 			co_num_tot += br_num;
 			co_num_tot += re_num;
@@ -2306,8 +2306,8 @@ void readTouring(struct myovlList* G, struct readFiles* files, struct reads* rea
 			free(insert_array);
 		}
 		else{
-			printf("\n##### SE LIB #####\n");
-			printf("From ID: %i to %i\n",startID,endID);
+			printf("\n\t##### SE LIB #####\n");
+			printf("\tFrom ID: %i to %i\n",startID,endID);
 			int si_num = 0;
 			int de_num = 0 ;
 			for(i=startID;i<=endID;i++){
@@ -2320,8 +2320,8 @@ void readTouring(struct myovlList* G, struct readFiles* files, struct reads* rea
 					de_num++;
 				}
 			}
-			printf("REJECTED   READS : %i\n",de_num);
-			printf("SINGLE     READS : %i\n",si_num);
+			printf("\t\tREJECTED   READS: \t%i\n",de_num);
+			printf("\t\tSINGLE     READS: \t%i\n",si_num);
 			de_num_tot += de_num;
 			si_num_tot += si_num;
 		}
@@ -2329,15 +2329,14 @@ void readTouring(struct myovlList* G, struct readFiles* files, struct reads* rea
 	}
 
 	printf("\n");
-	printf("Collective Statistica:\n");
-	printf("CONCORDANT READS : %i\n",co_num_tot);
-	printf("DISCORDANT READS : %i\n",di_num_tot);
-	printf("DIFFCOMP   READS : %i\n",dicomp_num_tot);
-	printf("REJECTED   READS : %i\n",de_num_tot);
-	printf("WIDOWED    READS : %i\n",wi_num_tot);
-	printf("UNKNOWN    READS : %i\n",un_num_tot);
-	printf("SINGLE     READS : %i\n",si_num_tot);
-	printf("\n");
+	printf("\tOverall Statistics:\n");
+	printf("\t\tCONCORDANT READS: \t%i\n",co_num_tot);
+	printf("\t\tDISCORDANT READS: \t%i\n",di_num_tot);
+	printf("\t\tDIFFCOMP   READS: \t%i\n",dicomp_num_tot);
+	printf("\t\tREJECTED   READS: \t%i\n",de_num_tot);
+	printf("\t\tWIDOWED    READS: \t%i\n",wi_num_tot);
+	printf("\t\tUNKNOWN    READS: \t%i\n",un_num_tot);
+	printf("\t\tSINGLE     READS: \t%i\n",si_num_tot);
 
 	annotatePaths();
 	if(verbose) connectPathStats();

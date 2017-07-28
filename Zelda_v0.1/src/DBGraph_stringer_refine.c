@@ -83,30 +83,30 @@ void countRemainingNodes(){
 	printf("\tAvg contig length: \t\t%2.f\n",(float)nodeLen/nodeNum100);
 	printf("\tLargest Contig: \t\t%i\n", nStat[0]);
 	printf("\tContig Length: \t\t\t%i\n",nodeLen);
-	printf("\tContig Length (>100): \t\t%i\n",nodeLen100);
+	printf("\tContig Length (>100): \t\t%i\n\n",nodeLen100);
 
 	int sum=0;
 	int ns=0;
 	for(i=0;i<nodeNum;i++){
 		sum += nStat[i];
 		if(sum > (nodeLen/10) && ns == 0){
-			printf("\tN10: %i\n",nStat[i]);
+			printf("\tN10: \t\t\t\t%i (L10: %i)\n",nStat[i],i);
 			ns++;
 		}
 		if(sum > (nodeLen/4) && ns == 1){
-			printf("\tN25: %i\n",nStat[i]);
+			printf("\tN25: \t\t\t\t%i (L25: %i)\n",nStat[i],i);
 			ns++;
 		}
 		if(sum > (nodeLen/2) && ns == 2){
-			printf("\tN50: %i\n",nStat[i]);
+			printf("\tN50: \t\t\t\t%i (L50: %i)\n",nStat[i],i);
 			ns++;
 		}
 		if(sum > (nodeLen/4)*3 && ns == 3){
-			printf("\tN75: %i\n",nStat[i]);
+			printf("\tN75: \t\t\t\t%i (L75: %i)\n",nStat[i],i);
 			ns++;
 		}
 		if(sum > (nodeLen/10)*9 && ns == 4){
-			printf("\tN90: %i\n\n",nStat[i]);
+			printf("\tN90: \t\t\t\t%i (L90: %i)\n\n",nStat[i],i);
 			ns++;
 		}
 	}

@@ -215,18 +215,12 @@ int main(int argc, char* argv[]) {
 	// Scaffolding
 	printf("Step 6: Scaffolding\n");
 	printf("###################################################\n");
+	time(&start);
 	printf("CHECKPOINT: Re-read the input Database\n");
 	struct reads* reads = readDB(para->readDB);
-	time(&start);
+
 	initScaff(G,reads);
 	readTouring(G,para->files,reads);
-	time(&stop);
-	printf("Scaffolding: %0.2f\n",difftime (stop,start));
-	if(sleeptime){
-		printf("Wait after Scaffolding\n");
-		sleep(sleeptime);
-		printf("continue\n");
-	}
 
 	findotdump = 1;
 
@@ -238,8 +232,17 @@ int main(int argc, char* argv[]) {
 		sprintf(tempPath,"%s/scaffGraph.dot",para->asemblyFolder);
 		scaffGraphDot(G,reads,tempPath);
 	}
+	time(&stop);
+	printf("Scaffolding: %0.2f\n",difftime (stop,start));
+	if(sleeptime){
+		printf("Wait after Scaffolding\n");
+		sleep(sleeptime);
+		printf("continue\n");
+	}
+	printf("\n");
 
-	printf("CHECKPOINT: 8. POA (Layout-Consensus)\n");
+	printf("Step 7: POA (Layout-Consensus)\n");
+	printf("###################################################\n");
 	time(&start);
 	struct POG* contigs_pog;
 	contigs_pog = OLC(G,reads,scaffolding,heuristic, para);
@@ -250,23 +253,27 @@ int main(int argc, char* argv[]) {
 		sleep(sleeptime);
 		printf("continue\n");
 	}
+	printf("\n");
+
+	printf("Step 8: Write GenomeAssembly Files\n");
+	printf("###################################################\n");
 	if(scaffolding){
 //		exit(1);
 //		contigs_pog = make_poaScaff(G,reads,1,para,heuristic);
 		char* contigPath = (char*)malloc(100);
 		sprintf(contigPath,"%s/scaff.fasta",para->asemblyFolder);
-		printf("CHECKPOINT: FastaOut\n");
+		printf("CHECKPOINT: Write Fasta File\n");
 		time(&start);
 		poa_printContigs(contigs_pog,contigPath);
 		sprintf(tempPath,"%s/scaff.vcf",para->asemblyFolder);
-		printf("CHECKPOINT: Variation Calling\n");
+		printf("CHECKPOINT: Write VCF File\n");
 		poa_reportVariant(contigs_pog,tempPath,contigPath);
 		free(contigPath);
 	}
 	else{
 		char* contigPath = (char*)malloc(100);
 		sprintf(contigPath,"%s/contigs.fasta",para->asemblyFolder);
-		printf("CHECKPOINT: FastaOut\n");
+		printf("CHECKPOINT: Write Fasta File\n");
 		time(&start);
 		poa_printContigs(contigs_pog,contigPath);
 		sprintf(tempPath,"%s/contigs.vcf",para->asemblyFolder);
@@ -281,6 +288,8 @@ int main(int argc, char* argv[]) {
 		sleep(sleeptime);
 		printf("continue\n");
 	}
+	printf("\n");
+
 	poa_deleteVariant(contigs_pog);
 	if(contigs_pog) free_POG(contigs_pog);
 	freeDB(reads);

@@ -1329,8 +1329,8 @@ void poa_consensus(struct Sequence* contig){
 }
 
 void poa_printContigs(struct POG* pog, char* contigFile){
-	char verbose = 1;
-	printf("CHECKPOINT: Write CorrectContigs in fasta\n");
+	char verbose = 0;
+//	printf("CHECKPOINT: Write CorrectContigs in fasta\n");
 	FILE* correctContigs = fopen(contigFile,"w");
 	char hideEnds = 0;
 
@@ -1340,10 +1340,10 @@ void poa_printContigs(struct POG* pog, char* contigFile){
 
 	int nextID;
 	int insert;
-	printf("Number of Contigs to Write: %i\n",pog->contigNum);
+//	printf("Number of Contigs to Write: %i\n",pog->contigNum);
 	for(i=0;i<pog->contigNum;i++){
 		if(!pog->contig[i].vflag){
-			printf("Write %s\n",pog->contig[i].name);
+			if(verbose) printf("Write %s\n",pog->contig[i].name);
 			len = strlen(pog->contig[i].sequence);
 			fprintf(correctContigs,">%s\n",pog->contig[i].name);
 			j=0;
@@ -1615,8 +1615,8 @@ int findLeftMostJunction(int i){
 //}
 
 struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
-	char verbose = 1;
-	char verbose2 = 1;
+	char verbose = 0;
+	char verbose2 = 0;
     int gesLen = 0;													// Sum over all scaffold length
 	int *nStat = (int*)malloc(sizeof(int)*aS->num);				// List of Scaffold length
 
@@ -1640,8 +1640,10 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 	struct scaffEdge* scaffEdge;
 	int startJunction;
 
+	printf("\tScaffolds: %i\n",anzlen);
+	aS->numMinLen = anzlen;
+	aS->numbridge = aS->num;
 	if(verbose){
-		printf("Scaffold Paths -> num: %i\n",anzlen);
 		printf("ScaffStat:\n");
 		aS->numbridge = aS->num;
 		int bridgeJunction;
@@ -1731,36 +1733,37 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 		if(verbose2) printf("\n");
 	}
 
-	printf("Backtest\n");
+	if(verbose) printf("Backtest\n");
 	for(i=0;i<aS->numbridge;i++){
 		if(aS->scaff[i].next>=0) printf("Set Next Bridge: from %i to %i\n",i,aS->scaff[i].next);
 	}
 
 
 	printf("\n");
-	printf("Largest Scaffold: %i bp\n",nStat[0]);
-	printf("Number of Scaffolds (>=200bp): %i\n",anzlen);
-	printf("Total Length over all Scaffolds: %i\n",gesLen);
+	printf("\tLargest Scaffold: \t\t%i bp\n",nStat[0]);
+	printf("\tNumber of Scaffolds (>=200bp): \t%i\n",anzlen);
+	printf("\tLength over all Scaffolds: \t%i\n",gesLen);
+	printf("\n");
 	for(i=0;i<anzlen;i++){
 		sum += nStat[i];
 		if(sum > (gesLen/10) && ns == 0){
-			printf("N10: %i (L10: %i)\n",nStat[i],i+1);
+			printf("\tN10: \t\t\t\t%i \t(L10: %i)\n",nStat[i],i+1);
 			ns++;
 		}
 		if(sum > (gesLen/4) && ns == 1){
-			printf("N25: %i (L25: %i)\n",nStat[i],i+1);
+			printf("\tN25: \t\t\t\t%i \t(L25: %i)\n",nStat[i],i+1);
 			ns++;
 		}
 		if(sum > (gesLen/2) && ns == 2){
-			printf("N50: %i (L50: %i)\n",nStat[i],i+1);
+			printf("\tN50: \t\t\t\t%i \t(L50: %i)\n",nStat[i],i+1);
 			ns++;
 		}
 		if(sum > (gesLen/4)*3 && ns == 3){
-			printf("N75: %i (L75: %i)\n",nStat[i],i+1);
+			printf("\tN75: \t\t\t\t%i \t(L75: %i)\n",nStat[i],i+1);
 			ns++;
 		}
 		if(sum > (gesLen/10)*9 && ns == 4){
-			printf("N90: %i (L90: %i)\n\n",nStat[i],i+1);
+			printf("\tN90: \t\t\t\t%i \t(L90: %i)\n\n",nStat[i],i+1);
 			ns++;
 		}
 	}

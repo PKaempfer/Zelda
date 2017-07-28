@@ -234,7 +234,7 @@ void POG_recMainPath(struct Letter_T* currentLetter, struct Letter_T* endLetter,
 	struct Letter_T* startLetter = currentLetter;
 	while(currentLetter != endLetter){
 		if(refLen == maxAltLen){
-			printf("No Proper Ref Path Found (Length Error)\n");
+			if(verbose) printf("No Proper Ref Path Found (Length Error)\n");
 			return;
 		}
 		refSeq[refLen++] = currentLetter->letter;
@@ -321,8 +321,8 @@ void POG_recVariantPath(struct Letter_T* startLetter, int startPos, int len, cha
 }
 
 void POG_variantCalling(struct POGseq* contig){
-	int varNum = 0;
-	printf("CHECKPOINT: Variation Calling!\n");
+	static int varNum = 0;
+//	printf("CHECKPOINT: Variation Calling!\n");
 	int i=0;
 	struct Letter_T* current = &Letters[contig->startLetter.dest];
 	struct LetterEdge* edge;
@@ -337,9 +337,9 @@ void POG_variantCalling(struct POGseq* contig){
 				if(!edge->vFlag && edge->counter > 2){
 					altPath[0] = current->letter;
 					varNum++;
-					if(varNum%100==0){
-						printf("Number of Variants on this path: %i\n",varNum);
-					}
+//					if(varNum%100==0){
+//						printf("Number of Variants on this path: %i\n",varNum);
+//					}
 					POG_recVariantPath(current,i,1,altPath,edge,edge->counter,contig);
 				}
 				edge = edge->next;
@@ -376,9 +376,10 @@ static inline void resetLetterSt(struct LetterEdge** letters){
 	letters[3] = NULL;
 }
 
-void POG_alignConsensus(struct POGseq* contig){
-	printf("CHECKPOINT: PO-MSA to Contig\n");
-	int verbose = 0;
+void POG_alignConsensus(struct POGseq* contig, char minverbose){
+//	printf("CHECKPOINT: PO-MSA to Contig\n");
+	char verboseImp = 0;
+	char verbose = 0;
 //	if(strcmp(contig->name,"Scaffold_19_90086_186097_len:")==0) verbose = 1;
 	char* seq = (char*)malloc(contig->length + 10000);
 	int i=0;
@@ -389,7 +390,7 @@ void POG_alignConsensus(struct POGseq* contig){
 	struct Letter_T* ring;
 	struct Letter_T* bestRing = NULL;
 
-	printf("Contig: %s%i\n",contig->name,contig->length);
+	if(minverbose) printf("Contig: %s%i\n",contig->name,contig->length);
 
 	struct LetterEdge* lettersSt[4];
 
@@ -447,8 +448,9 @@ void POG_alignConsensus(struct POGseq* contig){
 			if(!edge){
 				backb_pos++;
 				if(backb_pos < (contig->length/4)*3){
-					printf("No edge found, break CC\n");
-					printf("Jump to back to Backbone (%i)\n",backb_pos);
+					// Todo: Important to deal better with this case: Insert N's could be a proper solution.
+					if(verboseImp) printf("No edge found, break CC\n");
+					if(verboseImp) printf("Jump to back to Backbone (%i)\n",backb_pos);
 					current = &Letters[backb_pos];
 					bestRing = NULL;
 					continue;

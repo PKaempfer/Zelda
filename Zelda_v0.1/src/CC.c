@@ -294,7 +294,7 @@ void POG_appendbackbone(struct POGseq* contig, char* seq, int overhang){
 
 
 
-struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, struct myovlList* G, struct scaffold_set* aS, int scaffID){
+struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, struct myovlList* G, struct scaffold_set* aS, int scaffID, char minverbose){
     char verbose = 0;
     char verbose2 = 0;
 
@@ -619,8 +619,8 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 
 	aS->scaff[scaffID].true_Cov = (float)totalBases/(float)aS->scaff[scaffID].len;
 
-	printf("%i: True Coverage after the Backbone: %.2f\n",scaffID,aS->scaff[scaffID].true_Cov);
-	printf("Bases: %lu Length: %i\n",totalBases,aS->scaff[scaffID].len);
+	if(minverbose) printf("%i: True Coverage after the Backbone: %.2f\n",scaffID,aS->scaff[scaffID].true_Cov);
+	if(minverbose) printf("Bases: %lu Length: %i\n",totalBases,aS->scaff[scaffID].len);
 
 	free(readseq);
 	free(revreadseq);
@@ -1685,7 +1685,7 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 
 
 char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuristic, uint32_t contigLen){
-	printf("CHECKPOINT: Start Alignments\n");
+//	printf("CHECKPOINT: Start Alignments\n");
 	char verbose = 0;
 	char verbose2 = 0;
 	int offset = 10;
@@ -1739,6 +1739,7 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 
 struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char heuristic, struct para* para){
 	char verbose = 0;
+	char minverbose = 0;
 
 #ifdef TIMEM
 	struct timespec consenusSt;
@@ -1769,10 +1770,8 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 
 	aS = scaffold_stats(aS);
 
-//	exit(1);
-
 	int i,j;
-    printf("MaxReadLen: %i\n",maxReadLen);
+    printf("\tMaxReadLen: %i\n",maxReadLen);
     char* name = (char*)malloc(1000);
     char* dotPath = (char*)malloc(1000);
 
@@ -1782,7 +1781,6 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
     pog->maxNum = 1000;
     pog->contig = (struct POGseq*)malloc(sizeof(struct POGseq)*pog->maxNum);
     if(!Letters){
-    	printf("Malloc new Letters\n");
     	Letters = (struct Letter_T*)malloc(sizeof(struct Letter_T)*maxNumNodes);
         for(i=0;i<maxNumNodes;i++){
         	Letters[i].left = NULL;
@@ -1794,7 +1792,6 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
     }
 
     if(!alMatrix_Letter){
-    	printf("Init MatrixLetter\n");
     	int16_t data[maxReadLen*MATRIX_MAX_BR+1][maxReadLen+1];
     	alMatrix = (int16_t**)malloc(sizeof(int16_t*)*(maxReadLen*MATRIX_MAX_BR+1)); // Convention that the aligning part of the graph do not contain more than 5*maxReadLen nodes
     	alMatrix_Letter = (struct Letter_T**)malloc(sizeof(struct Letter_T*)*(maxReadLen*MATRIX_MAX_BR+1));
@@ -1810,16 +1807,21 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
     struct POGreadsSet* pogreadsset;
     char dotverbose;
 
-	printf("Backtest2\n");
 	for(i=0;i<aS->numbridge;i++){
 		if(aS->scaff[i].next>=0) printf("Set Next Bridge: from %i to %i\n",i,aS->scaff[i].next);
 	}
 
+	int contigsnum = 0;
+	printf("CHECKPOINT: Start Alignments\n");
+	printf("\n");
     for(i=0;i<aS->numbridge;i++){
     	if(aS->scaff[i].len > MIN_SCAFF_LEN || i >= aS->num){
+    		contigsnum++;
+    		fflush(stdout);
+    		printf("\rConsensus Calling: %i / %i",contigsnum,aS->numMinLen);
 //    		printf("i: %i\n",i);
     		if(i>=aS->num && verbose) printf("\t\tGebridgetes Scaffold (%i)\n",i);
-    		pogreadsset = OLC_backbone(&pog->contig[pog->contigNum],reads,G,aS,i);
+    		pogreadsset = OLC_backbone(&pog->contig[pog->contigNum],reads,G,aS,i,minverbose);
     		if(verbose) printf("Contig_%i:%i_%i_len:%i -> Coverage: %.2f (!! %i x!!)\n",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID,pog->contig[pog->contigNum].length,aS->scaff[i].true_Cov,aS->scaff[i].testVar_delete);
 			if(scaffolding) sprintf(name,"Scaff_%i:%i_%i_len:",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID);
 			else sprintf(name,"Contig_%i:%i_%i_len:",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID);
@@ -1840,7 +1842,7 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 #ifdef TIMEM
 				clock_gettime(CLOCK_MONOTONIC, &consenusSt);
 #endif
-				POG_alignConsensus(&pog->contig[pog->contigNum]);
+				POG_alignConsensus(&pog->contig[pog->contigNum],minverbose);
 #ifdef TIMEM
 	    		clock_gettime(CLOCK_MONOTONIC, &consenusEnd);
 	    		consensusTime += (((consenusEnd.tv_sec * 1000000000) + consenusEnd.tv_nsec) - ((consenusSt.tv_sec * 1000000000) + consenusSt.tv_nsec));
@@ -1872,8 +1874,8 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 			}
     		resetLetters(Letters);
     		numNodes = 0;
-    		printf("Aligned Reads:  %i\n",alignedReads);
-    		printf("Unligned Reads: %i\n",unalignedReads);
+    		if(minverbose) printf("Aligned Reads:  %i\n",alignedReads);
+    		if(minverbose) printf("Unligned Reads: %i\n",unalignedReads);
 #ifdef TIMEM
     		printf("Init time:      %.3f s\n",(float)alignmentTime/1000000000);
     		printf("Alignment time: %.3f s\n",(float)sumMatrix/1000000000);
@@ -1902,7 +1904,7 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 			pog->maxNum *= 2;
 		}
     }
-    printf("POG Finisched\n");
+    printf("\nCHECKPOINT: POG Finisched\n");
     verbose = 0;
 
     for(i=0;i<aS->numbridge;i++){
@@ -1921,6 +1923,9 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
     		}
     	}
     }
+
+    printf("\tAligned Reads:  %i\n",alignedReads);
+    printf("\tUnligned Reads: %i\n",unalignedReads);
 
     // _________ Scaffold Consensus Calling
     if(verbose)printf("Free ScaffoldsSet\n");

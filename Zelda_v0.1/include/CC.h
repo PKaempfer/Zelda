@@ -50,9 +50,7 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 
 char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuristic, uint32_t contigLen);
 
-void POG_alignConsensus(struct POGseq* contig);
-
-void POG_alignConsensus(struct POGseq* contig);
+void POG_alignConsensus(struct POGseq* contig, char minverbose);
 
 void POG_showMatrix(int row, int column, char* seq);
 

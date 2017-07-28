@@ -1475,7 +1475,7 @@ static int setUniqueNeighbor(struct contigScaff* side, int elem, int currentPath
 
 // Combined for PE and SE data
 struct scaffold_set* scaffold_init6(struct scaffold_set* aS, struct reads* reads, char bridging){
-	printf("Checkpoint: Scaffold 6\n");
+	printf("Checkpoint: Scaffolding\n");
 	prepPathsFlag();
     int i,j;
     if(!aS){
@@ -1486,6 +1486,7 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, struct reads* reads
     }
 
     char verbose = 0;
+    char verboseNeighbor = 0;
     char stopit;
 
     int depth = 0;
@@ -1524,7 +1525,7 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, struct reads* reads
         		lelem = 0;
         		relem = 0;
         		// TODO: Try to connect to the one unique solution to left
-        		printf("Init left\n");
+        		if(verboseNeighbor) printf("Init left\n");
         		lelem = setUniqueNeighbor(left,lelem,i,paths[i].leftJunction,reads,1);
         		// TODO: Then following code, update lelem before
         		edge = paths[i].leftPath;
@@ -1576,7 +1577,7 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, struct reads* reads
         		}
         		// initial right
         		// TODO: Try to connect to the one unique solution to right
-        		printf("Init right\n");
+        		if(verboseNeighbor) printf("Init right\n");
         		relem = setUniqueNeighbor(right,relem,i,paths[i].rightJunction,reads,0);
         		// TODO: Then following code, update relem before
         		edge = paths[i].rightPath;
@@ -1637,7 +1638,7 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, struct reads* reads
         				paths[current].flag--;
         				// left -> left
         				if(lpos+1==lelem){
-        					printf("Left -> Left\n");
+        					if(verboseNeighbor) printf("Left -> Left\n");
         					lelem = setUniqueNeighbor(left,lelem,current,left[lpos].sameside ? paths[current].leftJunction : paths[current].rightJunction,reads,1);
         				}
         				if(verbose) printf("LL\n");
@@ -1775,7 +1776,7 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, struct reads* reads
         				// right -> right
         				if(verbose) printf("RR\n");
         				if(rpos + 1 == relem){
-        					printf("right -> Right\n");
+        					if(verboseNeighbor) printf("right -> Right\n");
         					relem = setUniqueNeighbor(right,relem,current,right[rpos].sameside ? paths[current].rightJunction : paths[current].leftJunction, reads,0);
         				}
 
@@ -1854,7 +1855,7 @@ struct scaffold_set* scaffold_init6(struct scaffold_set* aS, struct reads* reads
         						}
         						if(found) continue;
         						else{
-        							printf("Correct Backpath not found\n");
+        							if(verbose) printf("Correct Backpath not found\n");
         							break;
         							exit(1);
         						}

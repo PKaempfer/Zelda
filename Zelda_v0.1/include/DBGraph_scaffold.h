@@ -112,6 +112,7 @@ struct contigScaff{
 
 struct scaffold_set{
 	struct scaffold* scaff;
+	int numMinLen;
 	int num;
 	int numbridge;
 	int nummax;
