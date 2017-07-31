@@ -556,7 +556,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 					}
 					found++;
 				}
-				if(!internb) printf("Did not found the correct bread to the next junction\n");
+				if(!internb && verbose2) printf("Did not found the correct bread to the next junction\n");
 			}
 			else{
 				// Insert the Contained reads of the proper bread
@@ -845,7 +845,7 @@ static inline int POG_alignFillMatrix(int* new_numG, struct Letter_T** new_lette
 						rightbool = 2;
 					}
 					else{
-						printf("This case should not happen (Junction Number == 0: %i -> (oldnum: %i / j: %i))\n",Letters[edge->dest].junction,old_num,j);
+						if(strictverbose) printf("This case should not happen (Junction Number == 0: %i -> (oldnum: %i / j: %i))\n",Letters[edge->dest].junction,old_num,j);
 						(*new_numG) = new_num;
 						if((depth+1)%2==0){
 							memcpy(old_letters,new_letters,sizeof(struct Letter_T)*new_num);
