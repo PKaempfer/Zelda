@@ -480,10 +480,10 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 
 				}
 				if(!scaffEdge){
-					printf("Catch: no more Edge on Junction : %i , but not endJunction reached\nAbort\n",breadID);
+					if(verbose) printf("Catch: no more Edge on Junction : %i , but not endJunction reached\nAbort\n",breadID);
 					aS->scaff[scaffID].true_Cov = (float)totalBases/(float)aS->scaff[scaffID].len;
 
-					printf("%i: True Coverage after the Backbone: %.2f\n",scaffID,aS->scaff[scaffID].true_Cov);
+					if(verbose) printf("%i: True Coverage after the Backbone: %.2f\n",scaffID,aS->scaff[scaffID].true_Cov);
 					if(verbose) printf("Bases: %lu Length: %i\n",totalBases,aS->scaff[scaffID].len);
 
 					free(readseq);
@@ -1899,7 +1899,7 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
     		}
     	}
 		if(pog->contigNum == pog->maxNum){
-			printf("ContigList full, Realloc memory\n");
+//			printf("ContigList full, Realloc memory\n");
 			pog->contig = (struct POGseq*)realloc(pog->contig,sizeof(struct POGseq)*(pog->maxNum*2));
 			pog->maxNum *= 2;
 		}
