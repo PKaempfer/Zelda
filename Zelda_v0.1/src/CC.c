@@ -515,7 +515,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 				found = 0;
 				while(found!=2){
 					if(found == 1){
-						printf("\t\t\t ---> Change bread direction <---\n");
+					 	if(verbose) printf("\t\t\t ---> Change bread direction <---\n");
 						bdir = !bdir;
 					}
 					internb = G->read[breadID]->first;
@@ -958,7 +958,7 @@ static inline struct pairAlign* POG_alignBacktrack(unsigned char* seq, struct Le
 
 
 	if(print_Message) printf("Start back tracing (j:%i)\n",j);
-	char suspectVerbose = 1;
+	char suspectVerbose = 0;
 	int k;
 //	int seqlen = j;
 	struct LetterEdge* edge;
@@ -1569,7 +1569,7 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 		end_node = &Letters[end_pos];
 		end_num = POG_alignFillMatrix(&new_num, new_letters, seq, end_node, end_letters, fullMatrix, seqlen);
 		if(end_num <= 0){
-			printf("EndNum<=0 (%i). RETURN\n",end_num);
+			if(verbose) printf("EndNum<=0 (%i). RETURN\n",end_num);
 			if(!fullMatrix){
 				fullMatrix = 1;
 				numFull++;
@@ -1586,7 +1586,7 @@ char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_p
 //				printf("seq: %s\n",(char*)seq);
 //				printf("\n");
 //				printf("Error in Alignment Matrix -> Abort Contig\n");
-//				if(verbose)
+				if(verbose)
 					printf("\tFILL MATRIX BREAK by read: %i (numNode: %i)\n",readID,numNodes);
 				unalignedReads++;
 				return 0;
