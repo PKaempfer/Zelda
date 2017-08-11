@@ -18,7 +18,7 @@
 #include "math.h"
 
 void **dbHashg = NULL;
-int bitnum = 29; // Initial hash size
+int bitnum = 24; // Initial hash size (2^bitnum) -> max 32
 uint32_t itemNum = 0;
 uint32_t expansionThreshold = 0;
 uint32_t bitmask = 0x0;
@@ -39,6 +39,10 @@ void createHashTable(){
 	printf("Create HashTable of size: %i (expTreshold: %i, BitMask: %i)\n",j,expansionThreshold,bitmask);
 }
 
+
+/// Bla Blub
+/// @param kmer is a special thing
+///
 char insertKmer(KmerBitBuffer *kmer){
 	static uint32_t bucket;
 	static struct hashkmer* oldkmer;

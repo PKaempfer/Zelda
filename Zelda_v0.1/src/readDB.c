@@ -40,6 +40,7 @@ static const char* peOri[3]={"FR","RF","FF"};
  * @return bool Value is 1 if database creation terminated without throwing any exception. 0 Otherwise
  */
 int makeDB(char* outDB, int blocks, struct readFiles* files){
+	printf("CHECKPOINT: Read raw libraries\n");
 	// read fasta, fastq or list of files!!!
 	if(files->libNum == 0) return 0;
 	int i;
