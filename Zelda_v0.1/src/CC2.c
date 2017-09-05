@@ -14,7 +14,7 @@
 #include "DBGraph_scaffold.h"
 
 #define maxAltLen 10
-#define mask_N
+//#define mask_N
 
 long double POG_variant_qualaty(int n,int k){
 	long double right = 0.995;
