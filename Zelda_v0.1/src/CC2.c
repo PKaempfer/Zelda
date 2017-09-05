@@ -13,6 +13,9 @@
 #include "kmer.h"
 #include "DBGraph_scaffold.h"
 
+#define maxAltLen 10
+#define mask_N
+
 long double POG_variant_qualaty(int n,int k){
 	long double right = 0.995;
 	long double wrong = 0.005;
@@ -36,7 +39,6 @@ long double POG_variant_qualaty(int n,int k){
     return (-10 * log10((ans*(pow(wrong,k)*pow(right,n-k)))));
 }
 
-#define maxAltLen 10
 
 static inline unsigned char POG_makeCigar(char* cigar, char* ref, char* alt){
 	unsigned char numM = 0;
@@ -398,8 +400,16 @@ void POG_alignConsensus(struct POGseq* contig, char minverbose){
 
 	while(1){
 //		printf("Seqpos: %i",i);
-		if(current->counter < 5) seq[i++] = current->letter+32;
-		else seq[i++] = current->letter;
+#ifdef mask_N
+		if(current->counter > contig->avgCov*1.3) seq[i++] = 'N';
+		else{
+#endif
+			if(current->counter < 5) seq[i++] = current->letter+32;
+			else seq[i++] = current->letter;
+#ifdef mask_N
+		}
+#endif
+
 //		if(current->vFlag) printf("Flag was set\n");
 		current->vFlag = 1;
 		edge = current->right;

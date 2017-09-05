@@ -15,7 +15,7 @@
 
 #define MIN_CONTIG_LEN 100
 #define MIN_SCAFF_LEN 	200
-#define H_RANGE 		6
+#define H_RANGE 		10
 #define MAXBR			300
 
 static inline int max_func(int a,int b,int c,int d){
