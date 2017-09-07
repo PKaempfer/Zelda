@@ -1626,7 +1626,7 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 //    int k=0;
     int anzlen = 0;
     for (v = 0; v < aS->num; v++){
-    	if(aS->scaff[v].len >= 200) nStat[anzlen++] = aS->scaff[v].len;
+    	if(aS->scaff[v].len >= 100) nStat[anzlen++] = aS->scaff[v].len;
     }
 
     // Sort Scaffolds by length
@@ -1648,7 +1648,7 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 		aS->numbridge = aS->num;
 		int bridgeJunction;
 		for(i=0;i<aS->numbridge;i++){
-			if(aS->scaff[i].len < 200) continue;
+			if(aS->scaff[i].len < 100) continue;
 			startJunction = aS->scaff[i].startJunction;
 			printf("Scaffold: %i (len: %i bp) Type: %i\n",i,aS->scaff[i].len,aS->scaff[i].type);
 			scaffEdge = aS->scaff[i].first;
@@ -1679,7 +1679,7 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 	for(i=0;i<aS->numbridge;i++){
 //		aS->scaff[i].next = NULL;
 		aS->scaff[i].next = -1;
-		if(aS->scaff[i].len < 200 && i<aS->num) continue;
+		if(aS->scaff[i].len < 100 && i<aS->num) continue;
 		startJunction = aS->scaff[i].startJunction;
 		if(verbose2) printf("Scaffold: %i (len: %i bp) Type: %i\n",i,aS->scaff[i].len,aS->scaff[i].type);
 		scaffEdge = aS->scaff[i].first;
@@ -1741,7 +1741,7 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 
 	printf("\n");
 	printf("\tLargest Scaffold: \t\t%i bp\n",nStat[0]);
-	printf("\tNumber of Scaffolds (>=200bp): \t%i\n",anzlen);
+	printf("\tNumber of Scaffolds (>=100bp): \t%i\n",anzlen);
 	printf("\tLength over all Scaffolds: \t%i\n",gesLen);
 	printf("\n");
 	for(i=0;i<anzlen;i++){

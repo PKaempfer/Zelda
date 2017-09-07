@@ -14,7 +14,7 @@
 #include "DBGraph_scaffold.h"
 
 #define MIN_CONTIG_LEN 100
-#define MIN_SCAFF_LEN 	200
+#define MIN_SCAFF_LEN 	100
 #define H_RANGE 		10
 #define MAXBR			300
 
