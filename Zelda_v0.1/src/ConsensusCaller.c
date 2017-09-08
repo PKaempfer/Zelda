@@ -31,7 +31,7 @@
 #define KWHT  "\x1B[37m"
 
 #define MIN_CONTIG_LEN 100
-#define MIN_SCAFF_LEN 200
+#define MIN_SCAFF_LEN 100
 
 static char status_char[] = { 'W', 'C', 'S', 'P', 'J' };
 struct timespec ts_start;

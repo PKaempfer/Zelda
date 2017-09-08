@@ -404,12 +404,14 @@ void POG_alignConsensus(struct POGseq* contig, char minverbose){
 		if(current->counter > contig->avgCov*1.3) seq[i++] = 'N';
 		else{
 #endif
+			if(current->letter != 'A' && current->letter != 'C' && current->letter != 'T' && current->letter != 'G' && current->letter != 'N'){
+				printf("Set NON-ACGT Letter : (%c)\n",current->letter);
+			}
 			if(current->counter < 5) seq[i++] = current->letter+32;
 			else seq[i++] = current->letter;
 #ifdef mask_N
 		}
 #endif
-
 //		if(current->vFlag) printf("Flag was set\n");
 		current->vFlag = 1;
 		edge = current->right;
