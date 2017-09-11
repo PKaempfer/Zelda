@@ -249,6 +249,9 @@ void POG_appendbackbone(struct POGseq* contig, char* seq, int overhang){
 	for(i=len-overhang;i<len;i++){
 		current = &Letters[numNodes];
 		current->letter = seq[i];
+		if(current->letter != 'A' && current->letter != 'C' && current->letter != 'T' && current->letter != 'G' && current->letter != 'N'){
+			printf("Set NON-ACGT Letter in Backbone: (%c: count: %i)\n",current->letter,current->counter);
+		}
 		current->align_ring = NULL;
 		current->ml = NULL;
 		current->counter = 0;
