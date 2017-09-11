@@ -405,7 +405,7 @@ void POG_alignConsensus(struct POGseq* contig, char minverbose){
 		else{
 #endif
 			if(current->letter != 'A' && current->letter != 'C' && current->letter != 'T' && current->letter != 'G' && current->letter != 'N'){
-				printf("Set NON-ACGT Letter : (%c)\n",current->letter);
+				printf("Set NON-ACGT Letter : (%c: count: %i)\n",current->letter,current->counter);
 			}
 			if(current->counter < 5) seq[i++] = current->letter+32;
 			else seq[i++] = current->letter;
