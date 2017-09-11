@@ -246,11 +246,15 @@ void POG_appendbackbone(struct POGseq* contig, char* seq, int overhang){
 	struct Letter_T* left;
 	struct Letter_T* current;
 
+	if(len-overhang < 0) printf("Negative Index in Append Backbone\n");
+
 	for(i=len-overhang;i<len;i++){
 		current = &Letters[numNodes];
 		current->letter = seq[i];
 		if(current->letter != 'A' && current->letter != 'C' && current->letter != 'T' && current->letter != 'G' && current->letter != 'N'){
-			printf("Set NON-ACGT Letter in Backbone: (%c: count: %i)\n",current->letter,current->counter);
+			printf("Set NON-ACGT Letter in Backbone: (%c: count: %i) -> (len: %i/ Overhang: %i)\n",current->letter,current->counter,len,overhang);
+			printf("Full ReadSeq: \n");
+			printf("\t%s\n",seq);
 		}
 		current->align_ring = NULL;
 		current->ml = NULL;
