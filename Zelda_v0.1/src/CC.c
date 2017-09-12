@@ -236,7 +236,7 @@ void POG_initbackbone(struct POGseq* contig, char* seq){ //struct reads* read
 	}
 }
 
-void POG_appendbackbone(struct POGseq* contig, char* seq, int overhang){
+char POG_appendbackbone(struct POGseq* contig, char* seq, int overhang){
 	int i;
 	int len = strlen(seq);
 	uint32_t leftID = numNodes-1;
@@ -248,8 +248,7 @@ void POG_appendbackbone(struct POGseq* contig, char* seq, int overhang){
 
 //	if(len-overhang < 0) printf("Negative Index in Append Backbone\n");
 	// ToDo: Chanche this: more complex bug
-	if(overhang > len-nK) overhang = len-nK;
-	if(overhang < 0) overhang = 5;
+	if(overhang > len-nK) return 0;
 
 	for(i=len-overhang;i<len;i++){
 		current = &Letters[numNodes];
@@ -277,6 +276,8 @@ void POG_appendbackbone(struct POGseq* contig, char* seq, int overhang){
 		numNodes++;
 		poa_LetterSizeCheck();
 	}
+
+	return 1;
 }
 
 
@@ -474,7 +475,12 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 			strcpy(readseq,revreadseq);
 			ori = 1;
 		}
-		POG_appendbackbone(contig,readseq,overhang);
+		if(!POG_appendbackbone(contig,readseq,overhang)){
+			pogreads->number = 0;
+			free(readseq);
+			free(revreadseq);
+			return pogreads;
+		}
 		push_pogread(breadID,pogreads,strlen(readseq),ori);
 		totalBases += strlen(readseq);
 
@@ -547,8 +553,12 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 		            			strcpy(readseq,revreadseq);
 		            			ori = 1;
 		        			}
-		        			POG_appendbackbone(contig,readseq,overhang);
-		        			push_pogread(breadID,pogreads,strlen(readseq),ori);
+		        			if(!POG_appendbackbone(contig,readseq,overhang)){
+		        				pogreads->number = 0;
+		        				free(readseq);
+		        				free(revreadseq);
+		        				return pogreads;
+		        			}		        			push_pogread(breadID,pogreads,strlen(readseq),ori);
 		        			totalBases += strlen(readseq);
 
 							if(verbose2) printf("ALINING PROPER READ\n");
@@ -612,8 +622,12 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 	            			strcpy(readseq,revreadseq);
 	            			ori = 1;
 	        			}
-	        			POG_appendbackbone(contig,readseq,overhang);
-	        			push_pogread(breadID,pogreads,strlen(readseq),ori);
+	        			if(!POG_appendbackbone(contig,readseq,overhang)){
+	        				pogreads->number = 0;
+	        				free(readseq);
+	        				free(revreadseq);
+	        				return pogreads;
+	        			}	        			push_pogread(breadID,pogreads,strlen(readseq),ori);
 	        			totalBases += strlen(readseq);
 						if(verbose2) printf("ALIGING PROPER READ\n");
 						if(verbose2) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
@@ -1832,6 +1846,10 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
 //    		printf("i: %i\n",i);
     		if(i>=aS->num && verbose) printf("\t\tGebridgetes Scaffold (%i)\n",i);
     		pogreadsset = OLC_backbone(&pog->contig[pog->contigNum],reads,G,aS,i,minverbose);
+    		if(!pogreadsset->number){
+    			aS->scaff[i].len = 0;
+    			continue;
+    		}
     		if(verbose) printf("Contig_%i:%i_%i_len:%i -> Coverage: %.2f (!! %i x!!)\n",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID,pog->contig[pog->contigNum].length,aS->scaff[i].true_Cov,aS->scaff[i].testVar_delete);
 			if(scaffolding) sprintf(name,"Scaff_%i:%i_%i_len:",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID);
 			else sprintf(name,"Contig_%i:%i_%i_len:",pog->contigNum,pogreadsset->pogreads[0].ID,pogreadsset->pogreads[pogreadsset->number-1].ID);
