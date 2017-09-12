@@ -249,6 +249,7 @@ void POG_appendbackbone(struct POGseq* contig, char* seq, int overhang){
 //	if(len-overhang < 0) printf("Negative Index in Append Backbone\n");
 	// ToDo: Chanche this: more complex bug
 	if(overhang > len-nK) overhang = len-nK;
+	if(overhang < 0) overhang = 5;
 
 	for(i=len-overhang;i<len;i++){
 		current = &Letters[numNodes];

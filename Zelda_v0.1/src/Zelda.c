@@ -31,6 +31,11 @@
 #include "read_filter.h"
 
 int main(int argc, char* argv[]) {
+
+	  const char *s = NULL;
+	  printf( "%c\n", s[0] );
+	  return 0;
+
 	char scaffolding = 0;
 	char heuristic = 1;
 	char prefilter = 1;
