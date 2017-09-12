@@ -248,7 +248,10 @@ char POG_appendbackbone(struct POGseq* contig, char* seq, int overhang){
 
 //	if(len-overhang < 0) printf("Negative Index in Append Backbone\n");
 	// ToDo: Chanche this: more complex bug
-	if(overhang > len-nK) return 0;
+	if(overhang > len){
+		printf("Abort Backbone: Over/len-nK: %i/%i\n",overhang,len-nK);
+		return 0;
+	}
 
 	for(i=len-overhang;i<len;i++){
 		current = &Letters[numNodes];
@@ -476,6 +479,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 			ori = 1;
 		}
 		if(!POG_appendbackbone(contig,readseq,overhang)){
+			printf("Contig_length at break: %i\n",contig->length);
 			pogreads->number = 0;
 			free(readseq);
 			free(revreadseq);
@@ -1847,6 +1851,7 @@ struct POG* OLC(struct myovlList* G, struct reads* reads, char scaffolding, char
     		if(i>=aS->num && verbose) printf("\t\tGebridgetes Scaffold (%i)\n",i);
     		pogreadsset = OLC_backbone(&pog->contig[pog->contigNum],reads,G,aS,i,minverbose);
     		if(!pogreadsset->number){
+    			printf("Break, Org Length: %i\n",aS->scaff[i].len);
     			aS->scaff[i].len = 0;
     			continue;
     		}
