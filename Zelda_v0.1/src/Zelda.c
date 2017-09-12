@@ -32,9 +32,9 @@
 
 int main(int argc, char* argv[]) {
 
-	char *s = NULL;
-	printf( "%c\n", s[15] );
-	s[9] = 'v';
+//	char *s = NULL;
+//	printf( "%c\n", s[15] );
+//	s[9] = 'v';
 
 	char scaffolding = 0;
 	char heuristic = 1;
