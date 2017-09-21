@@ -77,8 +77,6 @@ int main(int argc, char* argv[]) {
 	    printf("Step 1: Create Graph\n");
 	    printf("###################################################\n");
 		time(&stop);
-		fileScheduler(para->files[0].leftReads,NUM_THREADS,threads);
-		exit(1);
 		para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
 		struct reads* reads1 = readDB(para->readDB);
 		filter_reads(reads1,NUM_THREADS,threads);
