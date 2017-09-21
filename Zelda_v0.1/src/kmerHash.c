@@ -18,7 +18,7 @@
 #include "math.h"
 
 void **dbHashg = NULL;
-int bitnum = 24; // Initial hash size (2^bitnum) -> max 32
+int bitnum = 29; // Initial hash size (2^bitnum) -> max 32 (default is 24)
 uint32_t itemNum = 0;
 uint32_t expansionThreshold = 0;
 uint32_t bitmask = 0x0;
