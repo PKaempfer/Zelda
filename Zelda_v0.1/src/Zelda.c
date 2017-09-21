@@ -97,7 +97,7 @@ int main(int argc, char* argv[]) {
 
     printf("CHECKPOINT: Build DeBruijn Graph\n");
 	para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
-
+	exit(1);
 
 	createGraph(graphSize);
 	time(&start);

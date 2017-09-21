@@ -110,7 +110,6 @@ int makeDB(char* outDB, int blocks, struct readFiles* files){
 		}
 	}
 
-	exit(1);
 	printf("\tWrite database to: %s\n",outDB);
 	writeDB(outDB,blocks,files);
 
