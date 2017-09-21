@@ -78,6 +78,7 @@ int main(int argc, char* argv[]) {
 	    printf("###################################################\n");
 		time(&stop);
 		para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
+		exit(1);
 		struct reads* reads1 = readDB(para->readDB);
 		filter_reads(reads1,NUM_THREADS,threads);
 		strcat(para->readDB,"filter");
