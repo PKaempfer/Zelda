@@ -45,8 +45,6 @@ int main(int argc, char* argv[]) {
 	time_t start,stop;
 
 	struct para* para = readCMDline(argc, argv);
-	struct reads* reads1 = readDB(para->readDB);
-	exit(1);
 
 	if(para->run == 1 || para->run == 3){
 		printf("\nStep 0: Craete DB\n");
@@ -79,6 +77,8 @@ int main(int argc, char* argv[]) {
 	    printf("Step 1: Create Graph\n");
 	    printf("###################################################\n");
 		time(&stop);
+		fileScheduler(para->files[0],NUM_THREADS,threads);
+		exit(1);
 		para->files = fileScheduler_DB(para->readDB,NUM_THREADS,threads);
 		struct reads* reads1 = readDB(para->readDB);
 		filter_reads(reads1,NUM_THREADS,threads);
