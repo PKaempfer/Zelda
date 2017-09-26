@@ -215,6 +215,102 @@ void writeDB(char* outDB, int blocks, struct readFiles* files){
 	fclose(db);
 }
 
+
+void write_filteredFasta(struct readFiles* files, struct reads* reads){
+	int i;
+	int j;
+	int lastD;
+	int paired;
+	int temp;
+
+	FILE* fastaL;
+	FILE* fastaR;
+	FILE* fastaU;
+
+	printf("MaxRreadLen: %i\n",maxReadLen);
+	char* readseq = (char*)malloc(maxReadLen+1);
+	char* fastanameL = (char*)malloc(1000);
+	char* fastanameR = (char*)malloc(1000);
+	char* fastanameU = (char*)malloc(1000);
+
+
+	for(i=0; i<files->libNum;i++){
+		if(files[i].rightReads) paired = 1;
+		else paired = 0;
+		temp = strlen(files[i].leftReads);
+		strcpy(fastanameL,files[i].leftReads);
+		lastD = 0;
+		for(j=0;j<temp;j++){
+			if(fastanameL[j]=='.') lastD = j;
+		}
+		if(lastD) fastanameL[lastD] = '\0';
+		strcat(fastanameL,"_filter.fasta");
+		fastaL = fopen(fastanameL,"w");
+		if(paired){
+			temp = strlen(files[i].rightReads);
+			strcpy(fastanameR,files[i].rightReads);
+			lastD = 0;
+			for(j=0;j<temp;j++){
+				if(fastanameR[j]=='.') lastD = j;
+			}
+			if(lastD) fastanameR[lastD] = '\0';
+			strcat(fastanameR,"_filter.fasta");
+			fastaR = fopen(fastanameR,"w");
+			temp = strlen(files[i].leftReads);
+			strcpy(fastanameU,files[i].leftReads);
+			lastD = 0;
+			for(j=0;j<temp;j++){
+				if(fastanameU[j]=='.') lastD = j;
+			}
+			if(lastD) fastanameU[lastD] = '\0';
+			strcat(fastanameU,"_U_filter.fasta");
+			fastaU = fopen(fastanameU,"w");
+		}
+		for(j=files->startId;j<files->endId;){
+			if(paired){
+				if(reads[j].len && reads[j+1].len){
+					decompressReadSt(reads[j].seq,readseq,reads[j].len);
+					fprintf(fastaL,">%i\n",j);
+					fprintf(fastaL,"%s\n",readseq);
+					decompressReadSt(reads[j+1].seq,readseq,reads[j+1].len);
+					fprintf(fastaR,">%i\n",j+1);
+					fprintf(fastaR,"%s\n",readseq);
+				}
+				else{
+					if(reads[j].len){
+						decompressReadSt(reads[j].seq,readseq,reads[j].len);
+						fprintf(fastaU,">%i\n",j);
+						fprintf(fastaU,"%s\n",readseq);
+					}
+					if(reads[j+1].len){
+						decompressReadSt(reads[j+1].seq,readseq,reads[j+1].len);
+						fprintf(fastaU,">%i\n",j+1);
+						fprintf(fastaU,"%s\n",readseq);
+					}
+				}
+				j+=2;
+			}
+			else{
+				if(reads[j].len){
+					decompressReadSt(reads[j].seq,readseq,reads[j].len);
+					fprintf(fastaL,">%i\n",j);
+					fprintf(fastaL,"%s\n",readseq);
+				}
+				j++;
+			}
+		}
+		fclose(fastaL);
+		if(paired){
+			fclose(fastaR);
+			fclose(fastaU);
+		}
+	}
+	free(readseq);
+	free(fastanameL);
+	free(fastanameR);
+	free(fastanameU);
+}
+
 void write_filteredDB(char* outDB, int blocks, struct readFiles* files, struct reads* reads){
 
 	int i = 0;

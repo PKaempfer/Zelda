@@ -82,6 +82,8 @@ int main(int argc, char* argv[]) {
 		filter_reads(reads1,NUM_THREADS,threads);
 		strcat(para->readDB,"filter");
 		write_filteredDB(para->readDB,para->blocks,para->files,reads1);
+		write_filteredFasta(para->files,reads1);
+		exit(1);
 		freeEnds_oa();
 		freeHashTable_oa();
 		printf("CHECKPOINT: Free Reads\n");
