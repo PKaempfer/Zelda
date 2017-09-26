@@ -10,11 +10,11 @@ CFLAGS += -Wall -Wextra  -Wno-unused-result -Wno-strict-aliasing -Wno-sign-compa
 LINKFLAGS = -pthread -lm #-lrt 
 
 #CFLAGS += -O1 -fno-strict-aliasing -Wno-sign-compare -Wno-comment #-Wno-unused-but-set-variable
-#CFLAGS += -g -O3 
+CFLAGS += -g -O3 
 # Adress sanitizer seeks for memory leaeks in address room
-CFLAGS += -g -O1
-CFLAGS += -fsanitize=address
-CFLAGS += -fsanitize=leak
+#CFLAGS += -g -O1
+#CFLAGS += -fsanitize=address
+#CFLAGS += -fsanitize=leak
 
 SOURCES =  src/DBGraph.c src/DBGraph_oa.c
 SOURCES += src/FileReader.c  src/kmer.c src/kmerHash.c src/kmerHash_oa.c src/readDB.c
