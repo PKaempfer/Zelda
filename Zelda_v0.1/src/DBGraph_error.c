@@ -20,7 +20,8 @@
 #define IterError
 #define counterCorrection
 
-int counterTrash = 45;
+int counterTrashUp = 30;
+int counterTrashDown = 5;
 int maxDir;
 
 void rekDot(int a, int layer, FILE *part){
@@ -289,7 +290,11 @@ void rekCorrection(int a, int b, int up){
 							b = temp;
 						}
 #endif
-						if(graph->array[a].counter > counterTrash && graph->array[b].counter > counterTrash){
+						if(graph->array[a].counter > counterTrashUp && graph->array[b].counter > counterTrashUp){
+							nextnode = nextnode->next;
+							continue;
+						}
+						else if(graph->array[b].counter > counterTrashDown){
 							nextnode = nextnode->next;
 							continue;
 						}
@@ -329,7 +334,11 @@ void rekCorrection(int a, int b, int up){
 							b = temp;
 						}
 #endif
-						if(graph->array[a].counter > counterTrash && graph->array[b].counter > counterTrash){
+						if(graph->array[a].counter > counterTrashUp && graph->array[b].counter > counterTrashUp){
+							nextnode = nextnode->next;
+							continue;
+						}
+						else if(graph->array[b].counter > counterTrashDown){
 							nextnode = nextnode->next;
 							continue;
 						}
@@ -477,7 +486,7 @@ static inline int iter_collapse(int ori, int dir){
 			if(node && node->next){
 				while(node){
 					numNeighbor++;
-					if(graph->array[node->dest].counter <= counterTrash){
+					if(graph->array[node->dest].counter <= counterTrashDown){
 						found = 1;
 //						break;
 					}
@@ -491,7 +500,7 @@ static inline int iter_collapse(int ori, int dir){
 				while(node){
 					nextnode = node->next;
 					while(nextnode){
-						if(graph->array[node->dest].counter > counterTrash && graph->array[nextnode->dest].counter > counterTrash){
+						if(graph->array[node->dest].counter > counterTrashUp && graph->array[nextnode->dest].counter > counterTrashUp){
 							nextnode = nextnode->next;
 							continue;
 						}
@@ -501,13 +510,17 @@ static inline int iter_collapse(int ori, int dir){
 							a = _min(node->dest,nextnode->dest);
 							b = _max(node->dest,nextnode->dest);
 #ifdef counterCorrection
-							if(graph->array[a].counter > graph->array[b].counter){
+							if(graph->array[a].counter < graph->array[b].counter){
 								temp = a;
 								a = b;
 								b = temp;
 							}
 #endif
 							if(ori == a || ori == b){
+								nextnode = nextnode->next;
+								continue;
+							}
+							else if(graph->array[b].counter > counterTrashDown){
 								nextnode = nextnode->next;
 								continue;
 							}
@@ -547,7 +560,7 @@ static inline int iter_collapse(int ori, int dir){
 			if(node && node->next){
 				while(node){
 					numNeighbor++;
-					if(graph->array[node->dest].counter <= counterTrash){
+					if(graph->array[node->dest].counter <= counterTrashDown){
 						found = 1;
 //						break;
 					}
@@ -562,7 +575,7 @@ static inline int iter_collapse(int ori, int dir){
 				while(node){
 					nextnode = node->next;
 					while(nextnode){
-						if(graph->array[node->dest].counter > counterTrash && graph->array[nextnode->dest].counter > counterTrash){
+						if(graph->array[node->dest].counter > counterTrashUp && graph->array[nextnode->dest].counter > counterTrashUp){
 							nextnode = nextnode->next;
 							continue;
 						}
@@ -572,7 +585,7 @@ static inline int iter_collapse(int ori, int dir){
 							a = _min(node->dest,nextnode->dest);
 							b = _max(node->dest,nextnode->dest);
 #ifdef counterCorrection
-							if(graph->array[a].counter > graph->array[b].counter){
+							if(graph->array[a].counter < graph->array[b].counter){
 								temp = a;
 								a = b;
 								b = temp;
@@ -583,6 +596,10 @@ static inline int iter_collapse(int ori, int dir){
 								nextnode = nextnode->next;
 								continue;
 	//							return 0;
+							}
+							else if(graph->array[b].counter > counterTrashDown){
+								nextnode = nextnode->next;
+								continue;
 							}
 							else if(isParent(ori,a) || isParent(ori,b)){
 								nextnode = nextnode->next;

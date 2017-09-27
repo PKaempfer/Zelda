@@ -40,9 +40,6 @@ void createHashTable(){
 }
 
 
-/// Bla Blub
-/// @param kmer is a special thing
-///
 char insertKmer(KmerBitBuffer *kmer){
 	static uint32_t bucket;
 	static struct hashkmer* oldkmer;

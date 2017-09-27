@@ -42,6 +42,7 @@ int main(int argc, char* argv[]) {
 	char findotdump = 0;
 	char dotdump = 0;
 	char sleeptime = 0;
+	char prefilteronly = 0;
 	time_t start,stop;
 
 	struct para* para = readCMDline(argc, argv);
@@ -82,8 +83,10 @@ int main(int argc, char* argv[]) {
 		filter_reads(reads1,NUM_THREADS,threads);
 		strcat(para->readDB,"filter");
 		write_filteredDB(para->readDB,para->blocks,para->files,reads1);
-		write_filteredFasta(para->files,reads1);
-		exit(1);
+		if(prefilteronly){
+			write_filteredFasta(para->files,reads1);
+			exit(1);
+		}
 		freeEnds_oa();
 		freeHashTable_oa();
 		printf("CHECKPOINT: Free Reads\n");
