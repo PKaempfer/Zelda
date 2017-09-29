@@ -19,7 +19,7 @@
 #define TESTNODE 1051
 #define TESTNODE2 1957
 #define TESTREAD 403606
-#define MINOVL 31
+#define MINOVL nK
 
 //#define UPSTREAMTEST
 
@@ -45,6 +45,9 @@ static char setaRead2(int rNid, int dir, struct myovlList *ovlGraph){
 }
 
 static void setOVL(int Nid, int overhang,int ID, int ovlflag,struct myovlList *ovlGraph,char side){
+	if(overhang > 100 - nK) {
+		printf("\t Overhang: %i (% - %i)\n",overhang,Nid,ID);
+	}
 	struct bread *newovl;
 	newovl = (struct bread*)malloc(sizeof(struct bread));
 	newovl->next = ovlGraph->read[Nid]->first;
