@@ -185,14 +185,14 @@ int main(int argc, char* argv[]) {
 		sprintf(tempPath,"%s/redGraphBefore.list",para->asemblyFolder);
 		printRedGraphToFile(tempPath);
 	}
-	do{
-//		printf("Graph reduction\n");
-		reduceRedGraph_strong();
-	}while(verticalReduction());
-	if(findotdump){
-		sprintf(tempPath,"%s/Reduced_DBG_strong.dot",para->asemblyFolder);
-		printRedDot(tempPath);
-	}
+//	do{
+////		printf("Graph reduction\n");
+//		reduceRedGraph_strong();
+//	}while(verticalReduction());
+//	if(findotdump){
+//		sprintf(tempPath,"%s/Reduced_DBG_strong.dot",para->asemblyFolder);
+//		printRedDot(tempPath);
+//	}
 	time(&stop);
 	printf("Reducer Time: %0.2f\n",difftime (stop,start));
 	if(sleeptime){
