@@ -184,6 +184,7 @@ static inline void push_pogread(int readID, struct POGreadsSet* pogreadset, int 
 	uint32_t preadID = pogreadset->number;
 	struct POGreads* pogreads = pogreadset->pogreads;
 	if(preadID == pogreadset->size){
+		printf("Resize pogreads\n");
 		pogreadset->size *= 2;
 		pogreadset->pogreads = (struct POGreads*)realloc(pogreadset->pogreads,(sizeof(struct POGreads))*pogreadset->size);
 		if(!pogreadset->pogreads){
@@ -631,7 +632,8 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
 	        				free(readseq);
 	        				free(revreadseq);
 	        				return pogreads;
-	        			}	        			push_pogread(breadID,pogreads,strlen(readseq),ori);
+	        			}
+	        			push_pogread(breadID,pogreads,strlen(readseq),ori);
 	        			totalBases += strlen(readseq);
 						if(verbose2) printf("ALIGING PROPER READ\n");
 						if(verbose2) printf("c %i (%i)\n",G->read[internb->ID]->dir,internb->ID);
@@ -1729,6 +1731,8 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 	char* revreadseq = (char*)malloc(sizeof(char)*maxReadLen+1);
 
 	for(i=0;i<pogreadsSet->number;i++){
+		if(pogreads[i].start >= maxNumNodes) printf("pogreads[%i].start = %i\n",i,pogreads[i].start);
+		if(pogreads[i].start < 0) printf("pogreads[%i].start = %i\n",i,pogreads[i].start);
 		if(Letters[pogreads[i].start].counter==255){
 			j=i;
 			i++;
@@ -1736,7 +1740,7 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 				i++;
 			}
 			if(verbose) printf("Countershift, jump by %i reads\n",i-j);
-			if(i==pogreadsSet->number && Letters[pogreads[i].start].counter==255) break;
+//			if(i==pogreadsSet->number && Letters[pogreads[i].start].counter==255) break;
 		}
 		readID = pogreads[i].ID;
 		readLen = reads[readID].len;
