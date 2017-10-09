@@ -1734,7 +1734,10 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 
 	for(i=0;i<pogreadsSet->number;i++){
 		if(pogreads[i].start >= maxNumNodes) printf("pogreads[%i].start = %i\n",i,pogreads[i].start);
-		if(pogreads[i].start < 0) printf("pogreads[%i].start = %i\n",i,pogreads[i].start);
+		if(pogreads[i].start < 0){
+			printf("pogreads[%i].start = %i\n",i,pogreads[i].start);
+			pogreads[i].start = 0;
+		}
 		if(Letters[pogreads[i].start].counter==255){
 			j=i;
 			i++;
