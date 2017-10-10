@@ -1292,8 +1292,10 @@ void tag_A_Contained(struct myovlList *ovlGraph){
 									if(startEndCon2(&bstp,&bendp,&bstk,&bendk,nextrNode,childReadIds, &nodepos) == 2){
 										abover = bendp - endp;
 										baover = bstp - stp;
-										if(abover || baover) printf("C 1 -> ab: %i (%i - %i) -> ba: %i)\n",abover,bendp,endp,baover);
-										setbRead2(rNid,nextrNode->read->ID,nextrNode->dir,ovlGraph,abover,baover,1);
+										if(abover <=0 || baover <= 0){
+											if(abover || baover) printf("C 1 -> ab: %i (%i - %i) -> ba: %i)\n",abover,bendp,endp,baover);
+											setbRead2(rNid,nextrNode->read->ID,nextrNode->dir,ovlGraph,abover,baover,1);
+										}
 //										printf("CONTAINMENT: %i is in %i (ab: %i (%i - %i) -> ba: %i)\n",nextrNode->read->ID,rNode->read->ID,abover,bendp,endp,baover);
 //										ovlGraph->read[nextrNode->read->ID]->dir = !nextrNode->dir;
 //										ovlGraph->read[nextrNode->read->ID]->flag = CONTAINED;
@@ -1334,8 +1336,10 @@ void tag_A_Contained(struct myovlList *ovlGraph){
 												if(startEndCon2(&bstp,&bendp,&bstk,&bendk,nextrNode,childReadIds, &nodepos) == 2){
 													abover = bendp - endp;
 													baover = bstp - stp;
-													if(abover || baover) printf("C 2 -> ab: %i (%i - %i) -> ba: %i)\n",abover,bendp,endp,baover);
-													setbRead2(rNid,nextrNode->read->ID,nextrNode->dir,ovlGraph,abover,baover,1);
+													if(abover <=0 || baover <= 0){
+														if(abover || baover) printf("C 2 -> ab: %i (%i - %i) -> ba: %i)\n",abover,bendp,endp,baover);
+														setbRead2(rNid,nextrNode->read->ID,nextrNode->dir,ovlGraph,abover,baover,1);
+													}
 #ifdef CONTAIN_MASSAGE
 													if(verbose) printf("\t -> Further contained read: %i (node: %i) in %i (node: %i)\n", nextrNode->read->ID,rnNid,rNode->read->ID,i);
 #endif
