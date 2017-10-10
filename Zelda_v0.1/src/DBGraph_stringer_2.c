@@ -569,6 +569,7 @@ int stringer3(struct myovlList *ovlGraph){
 	char verbose = 0;
 	char verbose2 = 0;
 	char verboseJOvl = 0;
+	char verboseC = 0;
 
 	int i,m,k;
 	int rNid = 0, rnNid = 0;
@@ -719,7 +720,7 @@ int stringer3(struct myovlList *ovlGraph){
 									}
 									if(k == 1){
 //										if(astk == TESTNODE || astk == TESTNODE2)
-										if(verbose) printf("Overlap (b is CONTAINED): %i -> %i --->>> k: %i (abover: %i baover: %i)\n",rNid,rnNid,k,abover,baover);
+										if(verboseC) printf("Overlap (b is CONTAINED 1): %i -> %i --->>> k: %i (abover: %i baover: %i)\n",rNid,rnNid,k,abover,baover);
 										nextrNode = nextrNode->next;
 										continue;
 									}
@@ -825,8 +826,8 @@ int stringer3(struct myovlList *ovlGraph){
 														break;
 													}
 													if(k == 1){
-														if(verboseJOvl)
-															printf("-> Next Overlap (b is CONTAINED): %i -> %i --->>> k: %i (abover: %i baover: %i)\n",rNid,rnNid,k,abover,baover);
+														if(verboseJOvl || verboseC)
+															printf("-> Next Overlap (b is CONTAINED 2): %i -> %i --->>> k: %i (abover: %i baover: %i)\n",rNid,rnNid,k,abover,baover);
 														nextrNode = nextrNode->next;
 														continue;
 													}
@@ -1291,6 +1292,7 @@ void tag_A_Contained(struct myovlList *ovlGraph){
 									if(startEndCon2(&bstp,&bendp,&bstk,&bendk,nextrNode,childReadIds, &nodepos) == 2){
 										abover = bendp - endp;
 										baover = bstp - stp;
+										if(abover || baover) printf("C 1 -> ab: %i (%i - %i) -> ba: %i)\n",abover,bendp,endp,baover);
 										setbRead2(rNid,nextrNode->read->ID,nextrNode->dir,ovlGraph,abover,baover,1);
 //										printf("CONTAINMENT: %i is in %i (ab: %i (%i - %i) -> ba: %i)\n",nextrNode->read->ID,rNode->read->ID,abover,bendp,endp,baover);
 //										ovlGraph->read[nextrNode->read->ID]->dir = !nextrNode->dir;
@@ -1332,6 +1334,7 @@ void tag_A_Contained(struct myovlList *ovlGraph){
 												if(startEndCon2(&bstp,&bendp,&bstk,&bendk,nextrNode,childReadIds, &nodepos) == 2){
 													abover = bendp - endp;
 													baover = bstp - stp;
+													if(abover || baover) printf("C 2 -> ab: %i (%i - %i) -> ba: %i)\n",abover,bendp,endp,baover);
 													setbRead2(rNid,nextrNode->read->ID,nextrNode->dir,ovlGraph,abover,baover,1);
 #ifdef CONTAIN_MASSAGE
 													if(verbose) printf("\t -> Further contained read: %i (node: %i) in %i (node: %i)\n", nextrNode->read->ID,rnNid,rNode->read->ID,i);
