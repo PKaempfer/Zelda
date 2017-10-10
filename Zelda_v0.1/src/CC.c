@@ -1733,9 +1733,14 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 	char* revreadseq = (char*)malloc(sizeof(char)*maxReadLen+1);
 
 	for(i=0;i<pogreadsSet->number;i++){
-		if(pogreads[i].start >= maxNumNodes) printf("pogreads[%i].start = %i\n",i,pogreads[i].start);
+		if(pogreads[i].start >= maxNumNodes){
+			printf("3 -> pogreads[%i].start = %i\n",i,pogreads[i].start);
+			printf("Continue");
+			continue;
+		}
 		if(pogreads[i].start < 0){
 			printf("1 -> pogreads[%i].start = %i\n",i,pogreads[i].start);
+			printf("Continue");
 			continue;
 			pogreads[i].start = 0;
 		}
@@ -1748,8 +1753,14 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 			if(verbose) printf("Countershift, jump by %i reads\n",i-j);
 //			if(i==pogreadsSet->number && Letters[pogreads[i].start].counter==255) break;
 		}
+		if(pogreads[i].start > maxNumNodes){
+			printf("3 -> pogreads[%i].start = %i\n",i,pogreads[i].start);
+			printf("Continue");
+			continue;
+		}
 		if(pogreads[i].start < 0){
 			printf("2 -> pogreads[%i].start = %i\n",i,pogreads[i].start);
+			printf("Continue");
 			continue;
 			pogreads[i].start = 0;
 		}
