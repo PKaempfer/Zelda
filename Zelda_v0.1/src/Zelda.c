@@ -30,57 +30,7 @@
 #include "CC.h"
 #include "read_filter.h"
 
-struct nodewe{
-	    int data;
-	    struct nodewe *link;
-}*head;
-
-void add( int num, struct nodewe **prevNode )
-{
-    // assigning memory for a new node
-    struct nodewe *newNode = malloc( sizeof( struct nodewe ) );
-    (*prevNode)->link = newNode;
-    newNode->data = num;
-    newNode->link = NULL;
-    prevNode = &newNode;
-}// END add(
-
 int main(int argc, char* argv[]) {
-    struct nodewe *head;
-    struct nodewe **startPtr;
-    startPtr = head;
-    struct nodewe *nodePtr;
-    int userInput;
-    int inputData;
-
-
-    do{
-    printf( "\n\n1: enter new node\n" );
-    printf( "2: Print Nodes\n" );
-    printf( "\n\nEnter: " );
-    scanf( "%d", &userInput );
-        if ( userInput == 1 )
-        {
-            printf( "\n\nEnter data:");
-            scanf("%d", &inputData );
-            add( inputData, startPtr );
-        }
-
-    }while( userInput == 1 );
-
-    // printing linked list
-    nodePtr = head->link;
-    while( nodePtr->link != NULL )
-    {
-        printf( "%d\n", nodePtr->data);
-        nodePtr = nodePtr->link;
-    }
-    printf( "%d\n", nodePtr->data);
-    return 0;
-
-    exit(1);
-
-
 	char scaffolding = 0;
 	char heuristic = 1;
 	char prefilter = 1;
