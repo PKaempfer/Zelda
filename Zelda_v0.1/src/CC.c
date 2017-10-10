@@ -318,7 +318,7 @@ struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, str
     static struct POGreadsSet* pogreads = NULL;
     if(!pogreads){
     	pogreads = (struct POGreadsSet*)malloc(sizeof(struct POGreadsSet));
-    	pogreads->size = pow(2,16);
+    	pogreads->size = pow(2,17);
     	pogreads->pogreads = (struct POGreads*)malloc(sizeof(struct POGreads)*pogreads->size);
     }
 	pogreads->number = 0;
@@ -1746,6 +1746,10 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 			}
 			if(verbose) printf("Countershift, jump by %i reads\n",i-j);
 //			if(i==pogreadsSet->number && Letters[pogreads[i].start].counter==255) break;
+		}
+		if(pogreads[i].start < 0){
+			printf("pogreads[%i].start = %i\n",i,pogreads[i].start);
+			pogreads[i].start = 0;
 		}
 		readID = pogreads[i].ID;
 		readLen = reads[readID].len;
