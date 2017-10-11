@@ -40,7 +40,7 @@ void collapseEdges_strong(int i, int dest, int up,int* nodeList, int nodenum){
 	bnode = redGraph->array[i].headread;
 	anode = redGraph->array[nodeList[j]].headread;
 
-	print("WhileloopST\n");
+	printf("WhileloopST\n");
 	while(bnode){
 //		printf("bnode: -> %i (ID: %i) flag: %i \n",bnode->pos,bnode->read->ID,bnode->flag);
 		if(bnode->pos >= nodeList[j+1]){
@@ -99,9 +99,9 @@ void collapseEdges_strong(int i, int dest, int up,int* nodeList, int nodenum){
 			else j -= 2;
 			anode = redGraph->array[nodeList[j]].headread;
 		}
-		print("Whileloop\n");
+		printf("Whileloop\n");
 	}
-	print("WhileloopFin\n");
+	printf("WhileloopFin\n");
 	redGraph->array[i].headread = NULL;
 }
 
