@@ -91,6 +91,8 @@ int main(int argc, char* argv[]) {
     }
     else if(prefilter == 2){
     	// Hashing
+	    printf("Step 1: Create Graph\n");
+	    printf("###################################################\n");
     	printf("CHECKPOINT: Start New Hashing\n");
     	time(&stop);
     	strcat(para->readDB,"filter");

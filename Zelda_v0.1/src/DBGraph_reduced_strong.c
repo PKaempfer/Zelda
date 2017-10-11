@@ -40,7 +40,6 @@ void collapseEdges_strong(int i, int dest, int up,int* nodeList, int nodenum){
 	bnode = redGraph->array[i].headread;
 	anode = redGraph->array[nodeList[j]].headread;
 
-	printf("WhileloopST\n");
 	while(bnode){
 //		printf("bnode: -> %i (ID: %i) flag: %i \n",bnode->pos,bnode->read->ID,bnode->flag);
 		if(bnode->pos >= nodeList[j+1]){
@@ -99,9 +98,7 @@ void collapseEdges_strong(int i, int dest, int up,int* nodeList, int nodenum){
 			else j -= 2;
 			anode = redGraph->array[nodeList[j]].headread;
 		}
-		printf("Whileloop\n");
 	}
-	printf("WhileloopFin\n");
 	redGraph->array[i].headread = NULL;
 }
 
@@ -125,6 +122,7 @@ static inline int* setDestList(int i, int dest, int ilen, int destlen, struct ed
 	else list[num++] = ilen - destlen;
 
 
+	printf("SetDist St\n");
 	while(tempedge && templena>0 && !tempedge->next){
 		tempdest = tempedge->dest;
 		list[num++] = tempdest;
@@ -136,7 +134,9 @@ static inline int* setDestList(int i, int dest, int ilen, int destlen, struct ed
 		if(verbose) printf(" --> %i",tempdest);
 		if(up)	tempedge = redGraph->array[tempdest].head;
 		else tempedge = redGraph->array[tempdest].tail;
+		printf("WhileLoop\n");
 	}
+	printf("SetDist End\n");
 	if(templena<=0){
 		if(verbose) printf("\n");
 		(*listlen) = num/2;
@@ -286,8 +286,9 @@ void reduceRedGraph_strong(){
 				if(num == 2 && dest != -1){
 					if(lenb >= lena){
 						// collapse dest and i in, than delete i
-//						printf("Collapse upSpur: %i --> %i\n",i,dest);
+						printf("Collapse upSpur: %i --> %i\n",i,dest);
 						collapseEdges(i,dest,downedge->dest,0);
+						printf("Collaps Finishes\n");
 					}
 					else{
 						destNodeNum = 0;
