@@ -197,7 +197,8 @@ static inline void push_pogread(int readID, struct POGreadsSet* pogreadset, int 
 	pogreads[preadID].end = numNodes-1;
 	pogreads[preadID].start = numNodes - seqlen;
 	// TODO: The origign of this problem seems to be based inside the overlapper. Otherwise start < 0 impossible.
-	if(numNodes - seqlen < 0) pogreads[preadID].start = 0;
+//	if(numNodes - seqlen < 0) pogreads[preadID].start = 0;
+	if((int)numNodes - seqlen < 0) return;
 	pogreads[preadID].ori = ori;
 	pogreadset->number++;
 }
