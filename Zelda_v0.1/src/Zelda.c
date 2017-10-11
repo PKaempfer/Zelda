@@ -33,7 +33,7 @@
 int main(int argc, char* argv[]) {
 	char scaffolding = 0;
 	char heuristic = 1;
-	char prefilter = 1;
+	char prefilter;
 	char findotdump = 0;
 	char dotdump = 0;
 	char sleeptime = 0;
@@ -41,6 +41,7 @@ int main(int argc, char* argv[]) {
 	time_t start,stop;
 
 	struct para* para = readCMDline(argc, argv);
+	prefilter = para->prefilter;
 
 	if(para->run == 1 || para->run == 3){
 		printf("\nStep 0: Craete DB\n");

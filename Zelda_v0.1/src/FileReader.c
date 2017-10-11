@@ -62,6 +62,7 @@ void printUsageDB(){
 	printf("\t-t       <int>\t\t\t: Number of threads\n");
 	printf("\t-k       <1..63>\t\t: k-mer size [default 47]\n");
 	printf("\t-m       <int>\t\t\t: Min overlap length in DeBruijn graph >=k [default: k-mer size, k]\n");
+	printf("\t-pf		\t\t\t\t: Use already existing DB with corrected reads\n");
 	printf("\n");
 }
 
@@ -132,6 +133,7 @@ struct para* readCMDline(int argc, char *argv[]){
 	para->minOvlLen = 0;
 	para->threads = 1;
 	para->run = 0;
+	para->prefilter = 1;
 	dtSize = sizeof(KmerBitBuffer)*8;
 
 	int i;
@@ -211,6 +213,9 @@ struct para* readCMDline(int argc, char *argv[]){
 		}
 		if(strcmp(argv[i],"-m")==0 && i+1 < argc && argv[i+1][0] != '-'){
 			para->minOvlLen = atoi(argv[i+1]);
+		}
+		if(para->run == 2 && strcmp(argv[i],"-pf")==0){
+			para->prefilter = 2;
 		}
 	}
 	if(para->minOvlLen < para->kSize) para->minOvlLen = para->kSize;

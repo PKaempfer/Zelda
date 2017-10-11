@@ -60,6 +60,7 @@ struct para{
 	unsigned int kSize;
 	unsigned int minOvlLen;
 	char run;
+	char prefilter;
 };
 
 struct hash_block{
