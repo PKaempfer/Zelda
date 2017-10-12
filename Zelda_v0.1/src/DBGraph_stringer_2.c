@@ -1351,7 +1351,7 @@ void tag_A_Contained(struct myovlList *ovlGraph, struct reads* reads){
 															}
 															else printf("ReadB: %s\n",readSeq);
 														}
-														setbRead2(rNid,nextrNode->read->ID,nextrNode->dir,ovlGraph,abover,baover,1);
+//														setbRead2(rNid,nextrNode->read->ID,nextrNode->dir,ovlGraph,abover,baover,1);
 													}
 #ifdef CONTAIN_MASSAGE
 													if(verbose) printf("\t -> Further contained read: %i (node: %i) in %i (node: %i)\n", nextrNode->read->ID,rnNid,rNode->read->ID,i);
