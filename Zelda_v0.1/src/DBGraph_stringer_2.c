@@ -1221,8 +1221,11 @@ inline static void catchNonSetReads(struct myovlList *ovlGraph){
 	}
 }
 
-void tag_A_Contained(struct myovlList *ovlGraph){
+void tag_A_Contained(struct myovlList *ovlGraph, struct reads* reads){
 	char verbose = 0;
+
+	char* readSeq = (char*)malloc(maxReadLen+1);
+	char* revSeq = (char*)malloc(maxReadLen+1);
 
 	int i,j;
 	int rNid,rnNid;
@@ -1337,7 +1340,17 @@ void tag_A_Contained(struct myovlList *ovlGraph){
 													abover = bendp - endp;
 													baover = bstp - stp;
 													if(abover <=0 || baover <= 0){
-														if(abover || baover) printf("C 2 -> ab: %i (%i - %i) -> ba: %i)\n",abover,bendp,endp,baover);
+														if(abover || baover){
+															printf("C 2 -> ab: %i (%i - %i) -> ba: %i)\n",abover,bendp,endp,baover);
+															decompressReadSt(reads[rNid].seq,readSeq,reads[rNid].len);
+															printf("ReadA: %s\n",readSeq);
+															decompressReadSt(reads[nextrNode->read->ID].seq,readSeq,reads[nextrNode->read->ID].len);
+															if(nextrNode->dir){
+																revReadSt(readSeq,revSeq);
+																printf("ReadB: %s\n",revSeq);
+															}
+															else printf("ReadB: %s\n",readSeq);
+														}
 														setbRead2(rNid,nextrNode->read->ID,nextrNode->dir,ovlGraph,abover,baover,1);
 													}
 #ifdef CONTAIN_MASSAGE
@@ -1378,6 +1391,9 @@ void tag_A_Contained(struct myovlList *ovlGraph){
 			}
 		}
 	}
+
+	free(readSeq);
+	free(revSeq);
 
 	free_UpstreamTree(childReadIds);
 	catchNonSetReads(ovlGraph);

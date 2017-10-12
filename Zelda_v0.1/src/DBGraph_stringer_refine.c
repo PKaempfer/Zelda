@@ -249,10 +249,10 @@ struct myovlList* initOVLgraph(int numreads){
 	return ovlgraph;
 }
 
-struct string_graph* initStringGraph(struct myovlList* ovlgraph,char* pathAssembly, char dotdump){
+struct string_graph* initStringGraph(struct myovlList* ovlgraph,char* pathAssembly, char dotdump, struct reads* reads){
 //	stringer2(ovlgraph);
 	printf("CHECKPOINT: Find initial Containments\n");
-	tag_A_Contained(ovlgraph);
+	tag_A_Contained(ovlgraph, reads);
 	printf("CHECKPOINT: Calculate Overlaps\n");
 	stringer3(ovlgraph);
 //	printf("CATEGORIZE OVERLAPS\n");

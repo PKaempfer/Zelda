@@ -210,8 +210,10 @@ int main(int argc, char* argv[]) {
 	printf("Step 5: Stringer (Overlaps to String Graph):\n");
 	printf("###################################################\n");
 	time(&start);
+	printf("CHECKPOINT: Re-read the input Database\n");
+	struct reads* reads = readDB(para->readDB);
 	struct myovlList* G = initOVLgraph(numreads);
-	struct string_graph* S = initStringGraph(G,para->asemblyFolder,findotdump);
+	struct string_graph* S = initStringGraph(G,para->asemblyFolder,findotdump,reads);
 	time(&stop);
 	printf("Stringer: %0.2f\n",difftime (stop,start));
 	if(sleeptime){
@@ -224,9 +226,6 @@ int main(int argc, char* argv[]) {
 	printf("Step 6: Scaffolding\n");
 	printf("###################################################\n");
 	time(&start);
-	printf("CHECKPOINT: Re-read the input Database\n");
-	struct reads* reads = readDB(para->readDB);
-
 	initScaff(G,reads);
 	readTouring(G,para->files,reads);
 

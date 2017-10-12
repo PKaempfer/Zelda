@@ -12,6 +12,7 @@
 #define DBGRAPH_H_
 
 #include "kmer.h"
+#include "readDB.h"
 
 #define MINCOMP 100
 #define MAX_DEPTH 200
