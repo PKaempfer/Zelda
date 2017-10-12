@@ -122,7 +122,6 @@ static inline int* setDestList(int i, int dest, int ilen, int destlen, struct ed
 	else list[num++] = ilen - destlen;
 
 
-	printf("SetDist St\n");
 	while(tempedge && templena>0 && !tempedge->next){
 		tempdest = tempedge->dest;
 		list[num++] = tempdest;
@@ -134,9 +133,7 @@ static inline int* setDestList(int i, int dest, int ilen, int destlen, struct ed
 		if(verbose) printf(" --> %i",tempdest);
 		if(up)	tempedge = redGraph->array[tempdest].head;
 		else tempedge = redGraph->array[tempdest].tail;
-		printf("WhileLoop\n");
 	}
-	printf("SetDist End\n");
 	if(templena<=0){
 		if(verbose) printf("\n");
 		(*listlen) = num/2;
@@ -285,10 +282,10 @@ void reduceRedGraph_strong(){
 				}
 				if(num == 2 && dest != -1){
 					if(lenb >= lena){
-						// collapse dest and i in, than delete i
-						printf("Collapse upSpur: %i --> %i\n",i,dest);
-						collapseEdges(i,dest,downedge->dest,0);
-						printf("Collaps Finishes\n");
+//						// collapse dest and i in, than delete i
+//						printf("Collapse upSpur: %i --> %i\n",i,dest);
+//						collapseEdges(i,dest,downedge->dest,0);
+//						printf("Collaps Finishes\n");
 					}
 					else{
 						destNodeNum = 0;
