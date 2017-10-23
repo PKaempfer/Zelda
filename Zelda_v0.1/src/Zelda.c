@@ -72,6 +72,7 @@ int main(int argc, char* argv[]) {
 
     if(prefilter == 1){
 		// preliminary filter
+    	nK = 21;
 	    printf("Step 1: Create Graph\n");
 	    printf("###################################################\n");
 		time(&stop);
@@ -89,6 +90,7 @@ int main(int argc, char* argv[]) {
 		printf("CHECKPOINT: Free Reads\n");
 		freeDB(reads1);
 		freeFiles(para);
+		nK = para->kSize;
     }
     else if(prefilter == 2){
     	// Hashing
