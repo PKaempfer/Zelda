@@ -93,7 +93,7 @@ void collapseEdges_strong(int i, int dest, int up,int* nodeList, int nodenum){
 
 		}
 		else{
-			printf("Else, no bnode update\n");
+//			printf("Else, no bnode update\n");
 			if(up) j += 2;
 			else j -= 2;
 			anode = redGraph->array[nodeList[j]].headread;
@@ -198,14 +198,7 @@ void reduceRedGraph_strong(){
 	static int  destNodeMaxNum = 100;
 	if(!destNodeList) destNodeList = (int*)malloc(sizeof(int*)*destNodeMaxNum*2);
 
-	int loopnum = 1;
-
 	for(i=1;i<=redGraph->V;i++){
-		if(loopnum % 1000){
-			printf("Loop: %i -> i=%i\n",loopnum,i);
-			loopnum++;
-		}
-
 		if(redGraph->array[i].len < 2*nK){	// Don't know if nK is a good limit -> think about (seems to be good)
 			lena = redGraph->array[i].len;
 			upedge = redGraph->array[i].head;

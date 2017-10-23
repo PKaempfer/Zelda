@@ -1296,7 +1296,7 @@ void tag_A_Contained(struct myovlList *ovlGraph, struct reads* reads){
 										abover = bendp - endp;
 										baover = bstp - stp;
 										if(abover <=0 || baover <= 0){
-											if(abover || baover) printf("C 1 -> ab: %i (%i - %i) -> ba: %i)\n",abover,bendp,endp,baover);
+//											if(abover || baover) printf("C 1 -> ab: %i (%i - %i) -> ba: %i)\n",abover,bendp,endp,baover);
 											setbRead2(rNid,nextrNode->read->ID,nextrNode->dir,ovlGraph,abover,baover,1);
 										}
 //										printf("CONTAINMENT: %i is in %i (ab: %i (%i - %i) -> ba: %i)\n",nextrNode->read->ID,rNode->read->ID,abover,bendp,endp,baover);
@@ -1339,20 +1339,22 @@ void tag_A_Contained(struct myovlList *ovlGraph, struct reads* reads){
 												if(startEndCon2(&bstp,&bendp,&bstk,&bendk,nextrNode,childReadIds, &nodepos) == 2){
 													abover = bendp - endp;
 													baover = bstp - stp;
-													if(abover <=0 || baover <= 0){
-														if(abover || baover){
-															printf("C 2 -> ab: %i (%i - %i) -> ba: %i)\n",abover,bendp,endp,baover);
-															decompressReadSt(reads[rNid].seq,readSeq,reads[rNid].len);
-															printf("ReadA: %s\n",readSeq);
-															decompressReadSt(reads[nextrNode->read->ID].seq,readSeq,reads[nextrNode->read->ID].len);
-															if(nextrNode->dir){
-																revReadSt(readSeq,revSeq);
-																printf("ReadB: %s\n",revSeq);
-															}
-															else printf("ReadB: %s\n",readSeq);
-														}
-//														setbRead2(rNid,nextrNode->read->ID,nextrNode->dir,ovlGraph,abover,baover,1);
-													}
+													// If Part not working currently. Overhangs seems to be false and the overlaps are definitely not contained !
+													// Works better (higher N50, less Mismatches) without C2 Containments
+//													if(abover <=0 || baover <= 0){
+//														if(abover || baover){
+//															printf("C 2 -> ab: %i (%i - %i) -> ba: %i)\n",abover,bendp,endp,baover);
+//															decompressReadSt(reads[rNid].seq,readSeq,reads[rNid].len);
+//															printf("ReadA: %s\n",readSeq);
+//															decompressReadSt(reads[nextrNode->read->ID].seq,readSeq,reads[nextrNode->read->ID].len);
+//															if(nextrNode->dir){
+//																revReadSt(readSeq,revSeq);
+//																printf("ReadB: %s\n",revSeq);
+//															}
+//															else printf("ReadB: %s\n",readSeq);
+//														}
+////														setbRead2(rNid,nextrNode->read->ID,nextrNode->dir,ovlGraph,abover,baover,1);
+//													}
 #ifdef CONTAIN_MASSAGE
 													if(verbose) printf("\t -> Further contained read: %i (node: %i) in %i (node: %i)\n", nextrNode->read->ID,rnNid,rNode->read->ID,i);
 #endif
