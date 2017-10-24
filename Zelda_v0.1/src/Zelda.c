@@ -72,7 +72,7 @@ int main(int argc, char* argv[]) {
 
     if(prefilter == 1){
 		// preliminary filter
-    	nK = 21;
+//    	nK = 13;
 	    printf("Step 1: Create Graph\n");
 	    printf("###################################################\n");
 		time(&stop);

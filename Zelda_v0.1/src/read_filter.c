@@ -20,6 +20,7 @@
  */
 void* mt_filter_reads_correction(void* filter_block){
 	char verbose = 0;
+	char verbose2 = 0;
 	if(verbose) printf("Checkpoint: Create Mapping Thread\n");
 	KmerBitBuffer kmercp;
 	KmerBitBuffer tempCor;
@@ -36,6 +37,7 @@ void* mt_filter_reads_correction(void* filter_block){
 	struct reads* reads = block.reads;
 	long i = block.start;
 	long end = block.end;
+//	if(block.pthr_id == 2) verbose = 1;
 
 	int cov_tot;
 	int cov_one;
@@ -66,10 +68,18 @@ void* mt_filter_reads_correction(void* filter_block){
 	char* readSeqOrg = (char*)malloc((maxReadLen+3)/4);
 	unsigned char* cArray = (unsigned char*)malloc(sizeof(unsigned char)*((maxReadLen-nK)+1));
 	char redo = 0;
+	char change_count = 0;
 
 	if(verbose) printf("MaxReadLen: %i\n",maxReadLen);
 
 	for(;i<=end;i++){
+		if(redo == 0) change_count = 0;
+		else change_count++;
+		if(change_count > 3){
+			redo = 0;
+			continue;
+		}
+		if(verbose2 && block.pthr_id == 2) printf("Correct Read %i\ (redo = %i)\n",i,redo);
 		if(verbose && (i-block.start)%100000==0) printf("Thread: %i: %li reads corrected\n",block.pthr_id,i-block.start);
 		len = reads[i].len;
 		if(len >= nK){
@@ -146,6 +156,7 @@ void* mt_filter_reads_correction(void* filter_block){
 				if(readPos && redo != -2){
 					// Case 1
 					if(pre_cov < 3 && cov > 10){
+						if(verbose2 && block.pthr_id == 2) printf("C1 -> ReadCorrection (Redo = %i)\n",redo);
 						if(verbose) printf("END-Error - Read %li \n",i);
 //						if(redo == 0) memcpy(readSeqOrg,reads[i].seq,(len+3)/4);
 						char found = 0;
@@ -179,11 +190,9 @@ void* mt_filter_reads_correction(void* filter_block){
 							if(verbose) printf("New read: %s\n",decomRead);
 							comRead = compressRead(decomRead);
 							memcpy(reads[i].seq,comRead,(len+3)/4);
+							if(verbose2 && block.pthr_id == 2) printf("read: %s\n",decomRead);
 							free(decomRead);
 							free(comRead);
-//							memcpy(reads[i].seq,compressRead(decomRead),(len+3)/4);
-//							if(verbose) printf("New read: %s\n",decomRead);
-//							free(decomRead);
 							redo = 1;
 							if(verbose) printf("Thread: %i with read: %i (len: %i nK: %i)\n",block.pthr_id,reads[i].ID, len, nK);
 							i--;
@@ -196,6 +205,7 @@ void* mt_filter_reads_correction(void* filter_block){
 					}
 					// Case 2
 					else if(cov < 3 && pre_cov > 10){
+						if(verbose2 && block.pthr_id == 2) printf("C2 -> ReadCorrection (Redo = %i)\n",redo);
 						if(verbose) printf("BEGIN-Error - Read %li (redo=%i) pos: %i\n",i,(int)redo,readPos+(nK-1));
 						char found = 0;
 						char oldj = tempCor & 3;
@@ -227,11 +237,9 @@ void* mt_filter_reads_correction(void* filter_block){
 							if(verbose) printf("New read: %s\n",decomRead);
 							comRead = compressRead(decomRead);
 							memcpy(reads[i].seq,comRead,(len+3)/4);
+							if(verbose2 && block.pthr_id == 2) printf("read: %s\n",decomRead);
 							free(decomRead);
 							free(comRead);
-//							memcpy(reads[i].seq,compressRead(decomRead),(len+3)/4);
-//							if(verbose) printf("read: %s\n",decomRead);
-//							free(decomRead);
 							redo = 1;
 							if(verbose) printf("Thread: %i with read: %i (len: %i nK: %i)\n",block.pthr_id,reads[i].ID, len, nK);
 							i--;
@@ -338,11 +346,11 @@ void* mt_filter_reads_correction(void* filter_block){
 //				free(reads[i].seq);
 //				reads[i].seq = NULL;
 //			}
-			if(redo==2 && verbose) printf("Read %li -> Corrected\n",i);
+			if(redo==2 && verbose2 && block.pthr_id == 2) printf("Read %li -> Corrected\n",i);
 			redo = 0;
 		}
 	}
-	if(verbose) printf("Thread %i finished correction\n",block.pthr_id);
+	if(verbose2) printf("Thread %i finished correction\n",block.pthr_id);
 	free(readSeqC);
 	free(cArray);
 	if(verbose) fclose(correctedR);
