@@ -79,7 +79,6 @@ void* mt_filter_reads_correction(void* filter_block){
 			redo = 0;
 			continue;
 		}
-		if(verbose2 && block.pthr_id == 2) printf("Correct Read %i\ (redo = %i)\n",i,redo);
 		if(verbose && (i-block.start)%100000==0) printf("Thread: %i: %li reads corrected\n",block.pthr_id,i-block.start);
 		len = reads[i].len;
 		if(len >= nK){
@@ -156,7 +155,7 @@ void* mt_filter_reads_correction(void* filter_block){
 				if(readPos && redo != -2){
 					// Case 1
 					if(pre_cov < 3 && cov > 10){
-						if(verbose2 && block.pthr_id == 2) printf("C1 -> ReadCorrection (Redo = %i)\n",redo);
+						if(verbose2) printf("C1 -> ReadCorrection (Redo = %i)\n",redo);
 						if(verbose) printf("END-Error - Read %li \n",i);
 //						if(redo == 0) memcpy(readSeqOrg,reads[i].seq,(len+3)/4);
 						char found = 0;
@@ -190,7 +189,7 @@ void* mt_filter_reads_correction(void* filter_block){
 							if(verbose) printf("New read: %s\n",decomRead);
 							comRead = compressRead(decomRead);
 							memcpy(reads[i].seq,comRead,(len+3)/4);
-							if(verbose2 && block.pthr_id == 2) printf("read: %s\n",decomRead);
+							if(verbose2) printf("read: %s\n",decomRead);
 							free(decomRead);
 							free(comRead);
 							redo = 1;
@@ -205,7 +204,7 @@ void* mt_filter_reads_correction(void* filter_block){
 					}
 					// Case 2
 					else if(cov < 3 && pre_cov > 10){
-						if(verbose2 && block.pthr_id == 2) printf("C2 -> ReadCorrection (Redo = %i)\n",redo);
+						if(verbose2) printf("C2 -> ReadCorrection (Redo = %i)\n",redo);
 						if(verbose) printf("BEGIN-Error - Read %li (redo=%i) pos: %i\n",i,(int)redo,readPos+(nK-1));
 						char found = 0;
 						char oldj = tempCor & 3;
@@ -237,7 +236,7 @@ void* mt_filter_reads_correction(void* filter_block){
 							if(verbose) printf("New read: %s\n",decomRead);
 							comRead = compressRead(decomRead);
 							memcpy(reads[i].seq,comRead,(len+3)/4);
-							if(verbose2 && block.pthr_id == 2) printf("read: %s\n",decomRead);
+							if(verbose2) printf("read: %s\n",decomRead);
 							free(decomRead);
 							free(comRead);
 							redo = 1;
@@ -346,7 +345,7 @@ void* mt_filter_reads_correction(void* filter_block){
 //				free(reads[i].seq);
 //				reads[i].seq = NULL;
 //			}
-			if(redo==2 && verbose2 && block.pthr_id == 2) printf("Read %li -> Corrected\n",i);
+			if(redo==2 && verbose2) printf("Read %li -> Corrected\n",i);
 			redo = 0;
 		}
 	}

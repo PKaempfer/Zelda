@@ -1739,12 +1739,12 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 			printf("Continue");
 			continue;
 		}
-		if(pogreads[i].start < 0){
-			printf("1 -> pogreads[%i].start = %i\n",i,pogreads[i].start);
-			printf("Continue");
-			continue;
-			pogreads[i].start = 0;
-		}
+//		if(pogreads[i].start < 0){
+//			printf("1 -> pogreads[%i].start = %i\n",i,pogreads[i].start);
+//			printf("Continue");
+//			continue;
+//			pogreads[i].start = 0;
+//		}
 		if(Letters[pogreads[i].start].counter==255){
 			j=i;
 			i++;
@@ -1759,12 +1759,12 @@ char POG_align(struct reads* reads, struct POGreadsSet* pogreadsSet, char heuris
 			printf("Continue");
 			continue;
 		}
-		if(pogreads[i].start < 0){
-			printf("2 -> pogreads[%i].start = %i\n",i,pogreads[i].start);
-			printf("Continue");
-			continue;
-			pogreads[i].start = 0;
-		}
+//		if(pogreads[i].start < 0){
+//			printf("2 -> pogreads[%i].start = %i\n",i,pogreads[i].start);
+//			printf("Continue");
+//			continue;
+//			pogreads[i].start = 0;
+//		}
 		readID = pogreads[i].ID;
 		readLen = reads[readID].len;
 		st_pos = pogreads[i].start;

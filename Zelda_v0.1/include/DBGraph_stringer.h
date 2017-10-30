@@ -140,7 +140,8 @@ void countRemainingNodes();
 
 struct myovlList* initOVLgraph(int);
 
-struct string_graph* initStringGraph(struct myovlList*, char*, char, struct reads*);
+//struct string_graph* initStringGraph(struct myovlList*, char*, char, struct reads*);
+struct string_graph* initStringGraph(struct myovlList*, char*, char);
 
 void printStringGraph(struct myovlList*, char*);
 
@@ -166,7 +167,8 @@ void upstreamTree(int i, struct partGraph *childReadIds);
 
 int endStart(int i,int *stp, int *endp, int *stk, int *endk, struct ReadNode *rnode, struct partGraph *childReadIds,int* reallen);
 
-void tag_A_Contained(struct myovlList *ovlGraph, struct reads* reads);
+//void tag_A_Contained(struct myovlList *ovlGraph, struct reads* reads);
+void tag_A_Contained(struct myovlList *ovlGraph);
 
 void freeMyOvlList(struct myovlList* G, struct string_graph* S);
 

@@ -32,6 +32,7 @@
 
 #define MIN_CONTIG_LEN 100
 #define MIN_SCAFF_LEN 100
+#define VCF_MIN_SCORE 100
 
 static char status_char[] = { 'W', 'C', 'S', 'P', 'J' };
 struct timespec ts_start;
@@ -1014,7 +1015,7 @@ void poa_reportVariant(struct POG* pog, char* vcfFile, char* ref){
 		var = pog->contig[i].var;
 		while(var){
 			qual = variant_qualaty(var->dp,var->ao);
-			if(qual>20){
+			if(qual>VCF_MIN_SCORE){
 				var->type = poa_makeCigar(cigar,var->refSeq,var->altSeq);
 				fprintf(vcf,"%s\t",pog->contig[i].name);
 				fprintf(vcf,"%i\t",var->pos);

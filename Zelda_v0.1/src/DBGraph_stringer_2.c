@@ -45,9 +45,9 @@ static char setaRead2(int rNid, int dir, struct myovlList *ovlGraph){
 }
 
 static void setOVL(int Nid, int overhang,int ID, int ovlflag,struct myovlList *ovlGraph,char side){
-	if(overhang > 100 - nK) {
-		printf("\t Overhang: %i (% - %i)\n",overhang,Nid,ID);
-	}
+//	if(overhang > 100 - nK) {
+//		printf("\t Overhang: %i (%i - %i)\n",overhang,Nid,ID);
+//	}
 	struct bread *newovl;
 	newovl = (struct bread*)malloc(sizeof(struct bread));
 	newovl->next = ovlGraph->read[Nid]->first;
@@ -1221,7 +1221,8 @@ inline static void catchNonSetReads(struct myovlList *ovlGraph){
 	}
 }
 
-void tag_A_Contained(struct myovlList *ovlGraph, struct reads* reads){
+//void tag_A_Contained(struct myovlList *ovlGraph, struct reads* reads){
+void tag_A_Contained(struct myovlList *ovlGraph){
 	char verbose = 0;
 
 	char* readSeq = (char*)malloc(maxReadLen+1);

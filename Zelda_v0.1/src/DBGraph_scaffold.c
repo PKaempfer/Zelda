@@ -1990,8 +1990,8 @@ void readTouring(struct myovlList* G, struct readFiles* files, struct reads* rea
 	// Test for the right orientation of both reads (fr, ff or rr, rf)
 	int r1side, r2side;
 // _____________________________________
-	int foundsum = 0;
-	int nfoundsum = 0;
+//	int foundsum = 0;
+//	int nfoundsum = 0;
 
 
 	for(i=0;i<files->libNum;i++){

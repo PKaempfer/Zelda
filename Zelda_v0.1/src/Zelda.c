@@ -30,6 +30,7 @@
 #include "CC.h"
 #include "read_filter.h"
 
+
 int main(int argc, char* argv[]) {
 
 	char scaffolding = 0;
@@ -215,7 +216,8 @@ int main(int argc, char* argv[]) {
 	printf("CHECKPOINT: Re-read the input Database\n");
 	struct reads* reads = readDB(para->readDB);
 	struct myovlList* G = initOVLgraph(numreads);
-	struct string_graph* S = initStringGraph(G,para->asemblyFolder,findotdump,reads);
+//	struct string_graph* S = initStringGraph(G,para->asemblyFolder,findotdump,reads);
+	struct string_graph* S = initStringGraph(G,para->asemblyFolder,findotdump);
 	time(&stop);
 	printf("Stringer: %0.2f\n",difftime (stop,start));
 	if(sleeptime){
@@ -307,3 +309,4 @@ int main(int argc, char* argv[]) {
 	finished(para);
 	free(Letters);
 }
+

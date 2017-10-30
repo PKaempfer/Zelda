@@ -1281,141 +1281,141 @@ void scaffold_printfreqs(struct reads* reads, struct myovlList* G){
 //    exit(1);
 }
 
-static inline void deleteJunctionEdge(int pathID, struct reads* reads, int circleID){
-	printf("CHECKPOINT: Delete junction edges to paths\n");
-	// delete leftside edge
-	char del = 0;
-	char deledge = 0;
-	if(paths[pathID].flag == 1) deledge = 1;
-	struct contigCircle* circle;
-	struct contigCircle* pcircle;
-	int jun = paths[pathID].leftJunction;
-	struct j_anno* j_anno = (struct j_anno*)reads[jun].annotation;
-	struct jPath* jPath = j_anno->inEdge;
-	struct jPath* pjPath = NULL;
-	while(jPath){
-		if(jPath->pathID == pathID){
-			if(deledge){
-				if(pjPath) pjPath->next = jPath->next;
-				else j_anno->inEdge = jPath->next;
-				free(jPath);
-			}
-			j_anno->inDegree--;
-			del = 1;
-			break;
-		}
-		pjPath = jPath;
-		jPath = jPath->next;
-	}
-	if(!del){
-		jPath = j_anno->outEdge;
-		pjPath = NULL;
-		while(jPath){
-			if(jPath->pathID == pathID){
-				if(deledge){
-					if(pjPath) pjPath->next = jPath->next;
-					else j_anno->outEdge = jPath->next;
-					free(jPath);
-				}
-				j_anno->outDegree--;
-				del = 1;
-				break;
-			}
-			pjPath = jPath;
-			jPath = jPath->next;
-		}
-	}
-	if(!del){
-		printf("Path of the junctions (%i) not found (InDegree: %i / Outdegree: %i)\n",jun,j_anno->inDegree,j_anno->outDegree);
-		exit(1);
-	}
-
-	printf("Junction: %i (in: %i, out: %i)\n",jun,j_anno->inDegree,j_anno->outDegree);
-
-	// rigth side
-	jun = paths[pathID].rightJunction;
-	j_anno = (struct j_anno*)reads[jun].annotation;
-	jPath = j_anno->outEdge;
-	pjPath = NULL;
-	del = 0;
-	while(jPath){
-		if(jPath->pathID == pathID){
-			if(deledge){
-				if(pjPath) pjPath->next = jPath->next;
-				else j_anno->outEdge = jPath->next;
-				free(jPath);
-			}
-			j_anno->outDegree--;
-			del = 1;
-			break;
-		}
-		pjPath = jPath;
-		jPath = jPath->next;
-	}
-	if(!del){
-		jPath = j_anno->inEdge;
-		pjPath = NULL;
-		while(jPath){
-			if(jPath->pathID == pathID){
-				if(deledge){
-					if(pjPath) pjPath->next = jPath->next;
-					else j_anno->inEdge = jPath->next;
-					free(jPath);
-				}
-				j_anno->inDegree--;
-				del = 1;
-				break;
-			}
-			pjPath = jPath;
-			jPath = jPath->next;
-		}
-	}
-	if(circleID>=0){
-		circle = j_anno->circle;
-		pcircle = NULL;
-		while(circle){
-			if(circle->ID == circleID && circle->pathID == pathID){
-				if(pcircle) pcircle->next  = circle->next;
-				else j_anno->circle = circle->next;
-				free(circle);
-				break;
-			}
-			pcircle = circle;
-			circle = circle->next;
-		}
-	}
-	if(circleID>=0) paths[pathID].flag--;
-	printf("Junction: %i (in: %i, out: %i)\n",jun,j_anno->inDegree,j_anno->outDegree);
-}
-
-// Check if the next path is outgoing or incomming
-static inline char nextpath_isOut(int junction, struct reads* reads, int pathID){
-
-	struct j_anno* j_anno = (struct j_anno*)reads[junction].annotation;
-	struct jPath* jPath;
-
-	char out = -1;
-
-	jPath = j_anno->inEdge;
-	while(jPath){
-		if(jPath->pathID == pathID){
-			out = 1;
-			break;
-		}
-		jPath = jPath->next;
-	}
-	jPath = j_anno->outEdge;
-	while(jPath){
-		if(jPath->pathID == pathID){
-			if(out == 1) out = 2;
-			else out = 0;
-			break;
-		}
-		jPath = jPath->next;
-	}
-
-	return 0;
-}
+//static inline void deleteJunctionEdge(int pathID, struct reads* reads, int circleID){
+//	printf("CHECKPOINT: Delete junction edges to paths\n");
+//	// delete leftside edge
+//	char del = 0;
+//	char deledge = 0;
+//	if(paths[pathID].flag == 1) deledge = 1;
+//	struct contigCircle* circle;
+//	struct contigCircle* pcircle;
+//	int jun = paths[pathID].leftJunction;
+//	struct j_anno* j_anno = (struct j_anno*)reads[jun].annotation;
+//	struct jPath* jPath = j_anno->inEdge;
+//	struct jPath* pjPath = NULL;
+//	while(jPath){
+//		if(jPath->pathID == pathID){
+//			if(deledge){
+//				if(pjPath) pjPath->next = jPath->next;
+//				else j_anno->inEdge = jPath->next;
+//				free(jPath);
+//			}
+//			j_anno->inDegree--;
+//			del = 1;
+//			break;
+//		}
+//		pjPath = jPath;
+//		jPath = jPath->next;
+//	}
+//	if(!del){
+//		jPath = j_anno->outEdge;
+//		pjPath = NULL;
+//		while(jPath){
+//			if(jPath->pathID == pathID){
+//				if(deledge){
+//					if(pjPath) pjPath->next = jPath->next;
+//					else j_anno->outEdge = jPath->next;
+//					free(jPath);
+//				}
+//				j_anno->outDegree--;
+//				del = 1;
+//				break;
+//			}
+//			pjPath = jPath;
+//			jPath = jPath->next;
+//		}
+//	}
+//	if(!del){
+//		printf("Path of the junctions (%i) not found (InDegree: %i / Outdegree: %i)\n",jun,j_anno->inDegree,j_anno->outDegree);
+//		exit(1);
+//	}
+//
+//	printf("Junction: %i (in: %i, out: %i)\n",jun,j_anno->inDegree,j_anno->outDegree);
+//
+//	// rigth side
+//	jun = paths[pathID].rightJunction;
+//	j_anno = (struct j_anno*)reads[jun].annotation;
+//	jPath = j_anno->outEdge;
+//	pjPath = NULL;
+//	del = 0;
+//	while(jPath){
+//		if(jPath->pathID == pathID){
+//			if(deledge){
+//				if(pjPath) pjPath->next = jPath->next;
+//				else j_anno->outEdge = jPath->next;
+//				free(jPath);
+//			}
+//			j_anno->outDegree--;
+//			del = 1;
+//			break;
+//		}
+//		pjPath = jPath;
+//		jPath = jPath->next;
+//	}
+//	if(!del){
+//		jPath = j_anno->inEdge;
+//		pjPath = NULL;
+//		while(jPath){
+//			if(jPath->pathID == pathID){
+//				if(deledge){
+//					if(pjPath) pjPath->next = jPath->next;
+//					else j_anno->inEdge = jPath->next;
+//					free(jPath);
+//				}
+//				j_anno->inDegree--;
+//				del = 1;
+//				break;
+//			}
+//			pjPath = jPath;
+//			jPath = jPath->next;
+//		}
+//	}
+//	if(circleID>=0){
+//		circle = j_anno->circle;
+//		pcircle = NULL;
+//		while(circle){
+//			if(circle->ID == circleID && circle->pathID == pathID){
+//				if(pcircle) pcircle->next  = circle->next;
+//				else j_anno->circle = circle->next;
+//				free(circle);
+//				break;
+//			}
+//			pcircle = circle;
+//			circle = circle->next;
+//		}
+//	}
+//	if(circleID>=0) paths[pathID].flag--;
+//	printf("Junction: %i (in: %i, out: %i)\n",jun,j_anno->inDegree,j_anno->outDegree);
+//}
+//
+//// Check if the next path is outgoing or incomming
+//static inline char nextpath_isOut(int junction, struct reads* reads, int pathID){
+//
+//	struct j_anno* j_anno = (struct j_anno*)reads[junction].annotation;
+//	struct jPath* jPath;
+//
+//	char out = -1;
+//
+//	jPath = j_anno->inEdge;
+//	while(jPath){
+//		if(jPath->pathID == pathID){
+//			out = 1;
+//			break;
+//		}
+//		jPath = jPath->next;
+//	}
+//	jPath = j_anno->outEdge;
+//	while(jPath){
+//		if(jPath->pathID == pathID){
+//			if(out == 1) out = 2;
+//			else out = 0;
+//			break;
+//		}
+//		jPath = jPath->next;
+//	}
+//
+//	return 0;
+//}
 
 static int setUniqueNeighbor(struct contigScaff* side, int elem, int currentPath, int currentJ, struct reads* reads, char leftside){
 	char verbose = 0;
