@@ -290,7 +290,7 @@ struct readFiles* readCMDmakeDB(int argc, char *argv[],int libnumTot){
 				printf("Missing SE Parameters\n");
 				return NULL;
 			}
-			printf("Found Single-End libraries\n");
+//			printf("Found Single-End libraries\n");
 			files[libnum].rightReads = NULL;
 			files[libnum].leftReads = (char*)malloc(sizeof(char)*100);
 			strcpy(files[libnum].leftReads,argv[i+1]);
