@@ -331,10 +331,10 @@ void* mt_filter_reads_correction(void* filter_block){
 					free(decomRead);
 				}
 				else{
-					if(verbose) printf("Read %li -> Deleted\n",i);
-					reads[i].len = 0;
-					free(reads[i].seq);
-					reads[i].seq = NULL;
+//					if(verbose) printf("Read %li -> Deleted\n",i);
+//					reads[i].len = 0;
+//					free(reads[i].seq);
+//					reads[i].seq = NULL;
 				}
 			}
 
