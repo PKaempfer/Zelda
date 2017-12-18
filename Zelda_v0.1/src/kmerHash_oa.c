@@ -5,8 +5,9 @@
  Version     : v0.1
  Copyright   : GPLv3 (general public license)
  Description : This Data structure represents a open addressable hash table
- 		 	   for concurrent, lock-free kmer hashing, exploiting the x86
-   			   architecture supported atomic CAS isntruction
+ 		 	   for concurrent, lock-free kmer hashing (Marçais and Kingsford,
+ 		 	   2011), exploiting the x86 architecture supported atomic CAS
+ 		 	   instruction
  ============================================================================
  */
 

@@ -1,8 +1,12 @@
 /*
- * read_filter.c
- *
- *  Created on: Feb 22, 2017
- *      Author: lkaempfpp
+ ============================================================================
+ Name        : read_filter.c
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Prefilter to correct erroneous reads based on coverage drops
+ 	 	 	   in the initial build hash table.
+ ============================================================================
  */
 
 #include <stdlib.h>
@@ -13,6 +17,9 @@
 #include "kmer.h"
 #include "kmerHash.h"
 #include "kmerHash_oa.h"
+
+
+
 
 /**
  * Multi threaded reads filter function. Set length of erroneous reads to zero.
