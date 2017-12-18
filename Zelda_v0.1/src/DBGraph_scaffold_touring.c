@@ -1,3 +1,13 @@
+/*
+ ============================================================================
+ Name        : Zelda.c
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Scaffold Touring Algorithms. Not in use yet.
+ ============================================================================
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
