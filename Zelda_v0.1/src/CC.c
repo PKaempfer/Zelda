@@ -293,31 +293,6 @@ char POG_appendbackbone(struct POGseq* contig, char* seq, int overhang){
 	return 1;
 }
 
-
-//for( i = 0, k = 1; i < NV-1; i++){
-//	.......
-//	......
-//	while(nblinks < m){ //  nblinks : no.of edges
-//		struct AdjListNode* temp = graph->array[i].head;
-//		printGraph(graph, &sum, temp);
-//		fprintf(ls,"\n AdjacentList of [%d] Head -> ",i);
-//		while(temp != NULL && temp->next != NULL){
-//			fprintf(ls,"%d->", temp->dest);
-//			temp = temp->next;
-//		}
-//		Calculation for Measured couplings A_ {ik}here:
-//		A1[i][k] = A_old[i][k] + learning rate *maxlikelihood;
-//	}
-//	fprintf(ed,"%d\n",...........);
-//}
-////I have collected the list of edges as follows in the output:
-//
-//AdjacentList of [0] Head -> 132->349->452->352->
-//AdjacentList of [1] Head -> 180->
-//AdjacentList of [2] Head ->
-
-
-
 struct POGreadsSet* OLC_backbone(struct POGseq* contig, struct reads* reads, struct myovlList* G, struct scaffold_set* aS, int scaffID, char minverbose){
     char verbose = 0;
     char verbose2 = 0;
@@ -1454,97 +1429,6 @@ static inline char POG_alignUpdateGraph(unsigned char* seq, struct pairAlign* al
 	if(print_Message && j!= 0) printf("j: %i\n",j);
 	return 1;
 }
-
-//static inline char POG_alignUpdateGraph2(unsigned char* seq, struct pairAlign* align, char print_Message, int len){
-//	// --> 6. BEGINN Connect to matrix origin
-//	// Connect to matrix origin
-//	char verbose = 1;
-//	int j = align->j;
-//	int i;
-//	struct Letter_T* current = align->current;
-//	int length = align->len;
-//	char* readseq = align->readSeq;
-//	char* refseq = align->refSeq;
-//	int k = j-1;
-//	if(print_Message) printf("Current Alignment Length: %i;  pos of the seq: %i\n",length,k);
-//
-//	if(print_Message){
-//		if(j>0) printf("Connect to matrix origin j (score: %i) (%c/%c): %i\n",current->ml[j],current->letter,seq[k],j);
-//	}
-//	while(j!=0){
-//		k = j-1;
-//		if(print_Message){
-//			if(j>0) printf("%li -> %i = %i + %i\n",current->ml - alMatrix[0],current->ml[j], alMatrix[0][j-1],SM1[codes[current->letter]][codes[seq[k]]]);
-//		}
-//		if(j>0 && current->ml[j] == alMatrix[0][j-1] + SM1[codes[current->letter]][codes[seq[k]]]){
-//			// Entry from Diagonal
-////			if(print_Message) printf("Origin Diagonal\n");
-//			readseq[length] = seq[k];
-//			refseq[length++] = current->letter;
-//			if(current->letter == seq[k]){
-//				current->counter++;
-//			}
-//			else{
-//				// make new letter
-//				// how to connect???
-//			}
-//			j--;
-//			for(;j>0;j--){
-//				k = j-1;
-//				readseq[length] = seq[k];
-//				refseq[length++] = '-';
-//				if(print_Message) printf("go left till origin is reached\n");
-//			}
-//			break;
-//		}
-//		else if(j>0 && current->ml[j] == current->ml[j-1] + GAP_PENALTY){
-//			// Entry from left -> Gap in ref -> Stay in current matrix line;
-//			if(print_Message) printf("Origin left\n");
-//			readseq[length] = seq[k];
-//			refseq[length++] = '-';
-//			j--;
-//			continue;
-//		}
-//		else if(current->ml[j] == alMatrix[0][j] + GAP_PENALTY){
-//			// Entry from above -> Gap in seq
-//			if(print_Message) printf("Origin top\n");
-//			readseq[length] = '-';
-//			refseq[length++] = current->letter;
-//			for(;j>0;j--){
-//				k = j-1;
-//				readseq[length] = seq[k];
-//				refseq[length++] = '-';
-//				if(print_Message) printf("go left till origin is reached\n");
-//			}
-//			break;
-//		}
-//		else{
-//			if(verbose){
-//				printf("%c (j: %i from %i)\n",seq[k],j,align->j);
-//				printf("-\t");
-//				for(i=0;i<=len;i++){
-//					printf(" %i",alMatrix[0][i]);
-//				}
-//				printf("\n");
-//				printf("%c\t",current->letter);
-//				for(i=0;i<=len;i++){
-//					printf(" %i",current->ml[i]);
-//				}
-//				printf("\n");
-////				printf("Number of ends: %i\n",end_num);
-////				printf("Depth: %i\n", depth);
-//				printf("Matrixline: %li\n",current->ml - alMatrix[0]);
-//				printf("Nothing is true: This Case should not happen\n");
-//				poa_showAlignment(readseq,refseq,length);
-//			}
-//			return 0;
-////			exit(1);
-//
-//		}
-//	}
-//	if(print_Message && j!= 0) printf("j: %i\n",j);
-//	return 1;
-//}
 
 char POG_readAlign(unsigned char* seq, int seqlen, char heuristic, uint32_t st_pos, uint32_t end_pos, int readID){
 	char verbose = 0;

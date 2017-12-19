@@ -447,28 +447,12 @@ static inline int poa_fillMatrix(int* new_numG, struct Letter_T** new_letters, u
 						// k is pos in seq, j-1, because j==0 is first gap position;
 						k = j-1;
 						// Smith-Waterman Scoring function: Best of itself, left, diagonal, top
-//						current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
 						if(rightbool%2==0){
 							current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
-
 						}
 						else{
-//							if(current->ml[j] <= left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]) current->ml[j] = left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]];
-//							else{
-//								printf("%i > %i (at i: %i ,j: %i)\n",current->ml[j],left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]],depth,j);
-//							}
-//							current->ml[j] = max_func(current->ml[j],(current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
 							current->ml[j] = max_func2((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
 						}
-//						current->ml[j] = _max((_max((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]))),(left->ml[j]+GAP_PENALTY));
-//						current->ml[j] = max_func2((current->ml[j-1]+GAP_PENALTY),(left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]),(left->ml[j]+GAP_PENALTY));
-//						if(current->ml[j] <= left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]) current->ml[j] = left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]];
-//						else{
-//							printf("%i > %i\n",current->ml[j],left->ml[j-1] + SM1[codes[current->letter]][codes[seq[k]]]);
-//						}
-//						if(current->ml[j] < current->ml[j-1]+GAP_PENALTY) current->ml[j] = current->ml[j-1]+GAP_PENALTY;
-//						if(current->ml[j] < left->ml[j]+GAP_PENALTY) current->ml[j] = left->ml[j]+GAP_PENALTY;
-//
 						if(current->ml[best_sc] < current->ml[j]) best_sc = j;
 					}
 					if(current->ml[current->score] < current->ml[best_sc]) current->score = best_sc;
@@ -534,45 +518,6 @@ static inline int poa_searchEndPoint(int line, char fullMatrix,int len){
 		return -1;
 	}
 
-//	if(best_Score < (len*SM1[0][0])*0.10){ //!backbone &&
-//		if(!backbone) printf("Alignment %i -> Best Score of Matrix below threshold for Containment -> Alignment denied go to next (best Score: %i/%i)  \n",insNum,best_Score,len*SM1[0][0]);
-//		else printf("Alignment %i -> Best Score of Matrix below threshold for PROPER -> Alignment denied go to next (best Score: %i/%i)  \n",insNum,best_Score,len*SM1[0][0]);
-////		poa_part_toDot("output/error.dot",contig);
-//		print_align = 1;
-//		if(!backbone){
-////			for(i=1;i<line;i++){
-////				alMatrix_Letter[i]->ml = NULL;
-////				alMatrix_Letter[i]->score = 0;
-////				alMatrix_Letter[i]->junction = 0;
-////				for(j=1;j<=len;j++){
-////					alMatrix[i][j] = j * GAP_PENALTY;
-////				}
-////			}
-//			return 0;
-//		}
-//		if(!print_align){
-////			for(i=1;i<line;i++){
-////				alMatrix_Letter[i]->ml = NULL;
-////				alMatrix_Letter[i]->score = 0;
-////				alMatrix_Letter[i]->junction = 0;
-////				for(j=1;j<=len;j++){
-////					alMatrix[i][j] = j * GAP_PENALTY;
-////				}
-////			}
-//			return 0;
-//		}
-//		else{
-//			printf("CHECKPOINT: Print Matrix (row: %i, col: %i,overhang: %i)\n",len,line,overhang);
-//			static int part = 0;
-////			poa_showMatrix(len,line,seq);
-//			char* dotFile = (char*)malloc(100);
-//			sprintf(dotFile,"part_%i.dot",part);
-//			printf("POA: %s\n",dotFile);
-//			printf("Sequence: %s\n",seq);
-//			poa_part_toDot(dotFile,contig);
-//			part++;
-//		}
-//	}
 	return best_Letter;
 }
 

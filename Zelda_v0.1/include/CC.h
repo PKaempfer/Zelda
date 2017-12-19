@@ -1,8 +1,13 @@
 /*
- * CC.h
- *
- *  Created on: Mar 9, 2017
- *      Author: lkaempfpp
+ ============================================================================
+ Name        : CC.h
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Consensus Caller utilizes a re-implementation of POA - Algorithms
+ 	 	 	   (Lee et al.,2002) for multiple sequence alignments to create a
+ 	 	 	   Layout
+ ============================================================================
  */
 
 #ifndef CC_H_

@@ -39,6 +39,7 @@ int main(int argc, char* argv[]) {
 	char dotdump = 0;
 	char sleeptime = 0;
 	char prefilteronly = 0;
+	char print_all_graphs = 0;
 	time_t start,stop;
 
 	struct para* para = readCMDline(argc, argv);
@@ -126,14 +127,7 @@ int main(int argc, char* argv[]) {
 	}
 	printf("\n");
 
-//	printf("Step 3: Free HashTable\n");
 	freeHashTable_oa();
-//	if(sleeptime){
-//		printf("Wait after Freeing HashTbale\n");
-//		sleep(sleeptime);
-//		printf("Continue\n");
-//	}
-//	printf("\n");
 
 	printf("Step 3: Error Correction\n");
 	printf("###################################################\n");
@@ -155,21 +149,20 @@ int main(int argc, char* argv[]) {
 	time(&start);
 	prepareGraph();
 	printf("CHECKPOINT: Reduce Graph (light)\n");
-//	printGraph();
+	if(print_all_graphs) printGraph();
 	travToRedOVL_v2();
 	freeGraph();
 	labelGraph();
-//	countRemainingNodes();
+	if(print_all_graphs) countRemainingNodes();
 	if(dotdump) printRedDot("output/redGraph.dot");
-//	printRedGraph();
-//	exit(1);
-//	printRedGraph();
+	if(print_all_graphs) printRedGraph();
+	if(print_all_graphs) printRedGraph();
 	reduceRedGraph();
-//	printRedDot("output/RedredGraph.dot");
-//	printRedGraph();
+	if(print_all_graphs) printRedDot("output/RedredGraph.dot");
+	if(print_all_graphs) printRedGraph();
 	verticalReduction();
-//	printRedGraph();
-//	printRedDot("output/redRedredGraph.dot");
+	if(print_all_graphs) printRedGraph();
+	if(print_all_graphs) printRedDot("output/redRedredGraph.dot");
 	do{
 		reduceRedGraph();
 	}while(verticalReduction());
@@ -178,7 +171,7 @@ int main(int argc, char* argv[]) {
 		sprintf(tempPath,"%s/Reduced_DBG.dot",para->asemblyFolder);
 		printRedDot(tempPath);
 	}
-//	printRedGraph();
+	if(print_all_graphs) printRedGraph();
 	countRemainingNodes();
 
 	printf("CHECKPOINT: Reduce Graph (strong)\n");
@@ -190,10 +183,10 @@ int main(int argc, char* argv[]) {
 		printf("Graph reduction\n");
 		reduceRedGraph_strong();
 	}while(verticalReduction());
-//	if(findotdump){
-//		sprintf(tempPath,"%s/Reduced_DBG_strong.dot",para->asemblyFolder);
-//		printRedDot(tempPath);
-//	}
+	if(print_all_graphs || findotdump){
+		sprintf(tempPath,"%s/Reduced_DBG_strong.dot",para->asemblyFolder);
+		printRedDot(tempPath);
+	}
 	time(&stop);
 	printf("Reducer Time: %0.2f\n",difftime (stop,start));
 	if(sleeptime){

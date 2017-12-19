@@ -1,8 +1,12 @@
 /*
- * read_filter.h
- *
- *  Created on: Feb 22, 2017
- *      Author: lkaempfpp
+ ============================================================================
+ Name        : read_filter.h
+ Author      : Kämpfer, Philipp
+ Version     : v0.1
+ Copyright   : GPLv3 (general public license)
+ Description : Prefilter to correct erroneous reads based on coverage drops
+ 	 	 	   in the initial build hash table.
+ ============================================================================
  */
 
 #ifndef READ_FILTER_H_
