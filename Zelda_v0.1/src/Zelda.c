@@ -219,8 +219,8 @@ int main(int argc, char* argv[]) {
 	printf("\n");
 
 	// Scaffolding
-	printf("Step 6: Scaffolding\n");
-	printf("###################################################\n");
+//	printf("Step 6: Scaffolding\n");
+//	printf("###################################################\n");
 	time(&start);
 	initScaff(G,reads);
 	readTouring(G,para->files,reads);

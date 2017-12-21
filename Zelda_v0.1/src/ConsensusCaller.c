@@ -1420,6 +1420,7 @@ int findLeftMostJunction(int i){
 
 
 struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
+	char scaff = 0;
 	char verbose = 0;
 	char verbose2 = 0;
     int gesLen = 0;													// Sum over all scaffold length
@@ -1445,7 +1446,8 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 	struct scaffEdge* scaffEdge;
 	int startJunction;
 
-	printf("\tScaffolds: %i\n",anzlen);
+	if(scaff) printf("\tScaffolds: %i\n",anzlen);
+	else  printf("\tContigs: %i\n",anzlen);
 	aS->numMinLen = anzlen;
 	aS->numbridge = aS->num;
 	if(verbose){
@@ -1545,9 +1547,16 @@ struct scaffold_set* scaffold_stats(struct scaffold_set* aS){
 
 
 	printf("\n");
-	printf("\tLargest Scaffold: \t\t%i bp\n",nStat[0]);
-	printf("\tNumber of Scaffolds (>=100bp): \t%i\n",anzlen);
-	printf("\tLength over all Scaffolds: \t%i\n",gesLen);
+	if(scaff){
+		printf("\tLargest Scaffold: \t\t%i bp\n",nStat[0]);
+		printf("\tNumber of Scaffolds (>=100bp): \t%i\n",anzlen);
+		printf("\tLength over all Scaffolds: \t%i\n",gesLen);
+	}
+	else{
+		printf("\tLargest Contig: \t\t%i bp\n",nStat[0]);
+		printf("\tNumber of Contigs (>=100bp): \t%i\n",anzlen);
+		printf("\tLength over all Contigs: \t%i\n",gesLen);
+	}
 	printf("\n");
 	for(i=0;i<anzlen;i++){
 		sum += nStat[i];
