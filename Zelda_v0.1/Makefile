@@ -1,6 +1,6 @@
 #SHELL=/bin/bash -i
-#CC = gcc  
-CC = clang-3.5
+CC = gcc  
+#CC = clang-3.5
 #CFLAGS = -Wall -Wextra -I../include -I./Jellyfish-2.2.4/include -I. -I../uthash/uthash-master/src -I/usr/local/include -mcpu=power8 -mcx16
 CFLAGS = -D_POSIX_C_SOURCE=199309L -std=c99 -I./include -I/usr/include  #-mcpu=power8 -mcx16 -D_POSIX_C_SOURCE=199309L 
 CFLAGS += -Wall -Wextra  -Wno-unused-result -Wno-strict-aliasing -Wno-sign-compare #-Wno-unused-but-set-variable
